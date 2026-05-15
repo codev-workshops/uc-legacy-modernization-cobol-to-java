@@ -139,6 +139,7 @@ CICSState* cics_get_state(void);
 
 /* Initialization and shutdown */
 void cics_init(const char *transid, const char *program);
+void cics_register_all_maps(void);
 void cics_shutdown(void);
 
 /* Terminal I/O */

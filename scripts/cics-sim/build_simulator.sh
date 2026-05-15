@@ -33,6 +33,7 @@ echo ""
 
 # Step 1: Process BMS maps
 echo "--- Step 1: Processing BMS Maps ---"
+rm -rf "$GEN_CPY_DIR"
 mkdir -p "$GEN_CPY_DIR"
 python3 "$SIM_DIR/bms2cpy.py" "$BMS_DIR" "$GEN_CPY_DIR" \
     --c-header "$RUNTIME_DIR/cics_maps_generated.c"

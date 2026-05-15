@@ -25,6 +25,12 @@ static int g_abend_handler_set = 0;
 static char g_abend_label[64] = {0};
 
 CICSState* cics_get_state(void) {
+    if (!g_initialized) {
+        const char *transid = getenv("CICS_SIM_TRANSID");
+        const char *program = getenv("CICS_SIM_PROGRAM");
+        cics_init(transid ? transid : "CDSM",
+                  program ? program : "UNKNOWN");
+    }
     return &g_state;
 }
 
@@ -53,6 +59,9 @@ void cics_init(const char *transid, const char *program) {
              t->tm_year - 100 + 100, t->tm_yday + 1);
     snprintf(g_state.eib.EIBTIME, 8, "0%02d%02d%02d",
              t->tm_hour, t->tm_min, t->tm_sec);
+
+    /* Register all BMS map definitions */
+    cics_register_all_maps();
 
     fprintf(stderr, "[CICS-SIM] Initialized: TRAN=%s PGM=%s TASK=%d\n",
             g_state.current_transid, g_state.current_program,

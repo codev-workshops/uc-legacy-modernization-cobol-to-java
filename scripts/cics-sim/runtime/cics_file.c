@@ -31,40 +31,52 @@ typedef struct {
 static FileHandle g_files[MAX_FILES];
 static int g_files_initialized = 0;
 
+/* Get the data directory from env or default */
+static const char* get_data_dir(void) {
+    const char *dir = getenv("CICS_SIM_DATA_DIR");
+    return dir ? dir : "build/data";
+}
+
 /* Map CardDemo logical file names to physical BDB file paths */
 static const char* get_file_path(const char *logical_name) {
     static char path[512];
     char name[MAX_FILE_NAME + 1] = {0};
     int i;
+    const char *data_dir = get_data_dir();
 
     /* Copy and trim */
     strncpy(name, logical_name, MAX_FILE_NAME);
     for (i = MAX_FILE_NAME - 1; i >= 0 && name[i] == ' '; i--)
         name[i] = '\0';
 
-    /* Map logical names to data files */
+    /* Map logical names to physical data files */
     if (strcmp(name, "ACCTDAT") == 0 || strcmp(name, "ACCTFILE") == 0)
-        snprintf(path, sizeof(path), "build/data/acctdata.dat");
+        snprintf(path, sizeof(path), "%s/ACCTDATA", data_dir);
     else if (strcmp(name, "CARDDAT") == 0 || strcmp(name, "CARDFILE") == 0)
-        snprintf(path, sizeof(path), "build/data/carddata.dat");
+        snprintf(path, sizeof(path), "%s/CARDDATA", data_dir);
     else if (strcmp(name, "CUSTDAT") == 0 || strcmp(name, "CUSTFILE") == 0)
-        snprintf(path, sizeof(path), "build/data/custdata.dat");
+        snprintf(path, sizeof(path), "%s/CUSTDATA", data_dir);
     else if (strcmp(name, "TRANSACT") == 0 || strcmp(name, "TRANFILE") == 0)
-        snprintf(path, sizeof(path), "build/data/dailytran.dat");
-    else if (strcmp(name, "CARDXREF") == 0 || strcmp(name, "CXREF") == 0)
-        snprintf(path, sizeof(path), "build/data/cardxref.dat");
+        snprintf(path, sizeof(path), "%s/TRANSACT", data_dir);
+    else if (strcmp(name, "CARDXREF") == 0 || strcmp(name, "CXREF") == 0 ||
+             strcmp(name, "CXACAIX") == 0)
+        snprintf(path, sizeof(path), "%s/CARDXREF", data_dir);
     else if (strcmp(name, "USRSEC") == 0 || strcmp(name, "USRSECF") == 0)
-        snprintf(path, sizeof(path), "build/data/usrsec.dat");
+        snprintf(path, sizeof(path), "%s/USRSEC", data_dir);
     else if (strcmp(name, "DISCGRP") == 0)
-        snprintf(path, sizeof(path), "build/data/discgrp.dat");
-    else if (strcmp(name, "TCATBAL") == 0)
-        snprintf(path, sizeof(path), "build/data/tcatbal.dat");
+        snprintf(path, sizeof(path), "%s/DISCGRP", data_dir);
+    else if (strcmp(name, "TCATBAL") == 0 || strcmp(name, "TCATBALF") == 0)
+        snprintf(path, sizeof(path), "%s/TCATBALF", data_dir);
     else if (strcmp(name, "TRANCATG") == 0 || strcmp(name, "TRNCAT") == 0)
-        snprintf(path, sizeof(path), "build/data/trancatg.dat");
+        snprintf(path, sizeof(path), "%s/TRANCATG", data_dir);
     else if (strcmp(name, "TRANTYPE") == 0 || strcmp(name, "TRNTYPE") == 0)
-        snprintf(path, sizeof(path), "build/data/trantype.dat");
+        snprintf(path, sizeof(path), "%s/TRANTYPE", data_dir);
+    else if (strcmp(name, "DALYTRAN") == 0)
+        snprintf(path, sizeof(path), "%s/DALYTRAN", data_dir);
+    else if (strcmp(name, "CCXREF") == 0)
+        snprintf(path, sizeof(path), "%s/CARDXREF", data_dir);
     else
-        snprintf(path, sizeof(path), "build/data/%s.dat", name);
+        snprintf(path, sizeof(path), "%s/%s", data_dir, name);
 
     return path;
 }

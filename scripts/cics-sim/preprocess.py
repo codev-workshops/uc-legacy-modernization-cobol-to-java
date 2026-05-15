@@ -32,21 +32,82 @@ class CICSPreprocessor:
         self.eib_injected = False
         self.ws_injection_needed = True
 
+    def _extract_linkage_commarea(self, source_lines):
+        """Pre-scan: extract DFHCOMMAREA from LINKAGE SECTION."""
+        commarea_lines = []
+        i = 0
+        in_linkage = False
+        while i < len(source_lines):
+            line = source_lines[i]
+            if self._is_linkage_section(line):
+                in_linkage = True
+                i += 1
+                continue
+            if in_linkage:
+                stripped = line[6:72] if len(line) > 6 else line
+                stripped_up = stripped.strip().upper()
+                if 'PROCEDURE DIVISION' in stripped_up:
+                    break
+                if stripped_up.startswith('01') and \
+                        'DFHCOMMAREA' in stripped_up:
+                    commarea_lines.append(line)
+                    i += 1
+                    while i < len(source_lines):
+                        nxt = source_lines[i]
+                        nxt_s = nxt[6:72] if len(nxt) > 6 else nxt
+                        nxt_up = nxt_s.strip().upper()
+                        if nxt_up.startswith('01 ') or \
+                           nxt_up.startswith('01\t') or \
+                           'SECTION' in nxt_up or \
+                           'PROCEDURE DIVISION' in nxt_up:
+                            break
+                        commarea_lines.append(nxt)
+                        i += 1
+                    continue
+            i += 1
+        return commarea_lines
+
     def preprocess(self, source_lines):
         """Process all lines, handling multi-line EXEC CICS blocks."""
+        # Pre-scan to extract DFHCOMMAREA from LINKAGE SECTION
+        commarea_lines = self._extract_linkage_commarea(source_lines)
+
         output = []
         i = 0
         in_exec_cics = False
         exec_cics_lines = []
+        in_linkage = False
 
         while i < len(source_lines):
             line = source_lines[i]
+
+            # Detect LINKAGE SECTION and comment it out
+            if self._is_linkage_section(line):
+                in_linkage = True
+                output.append(
+                    '      * CICS-SIM: LINKAGE SECTION removed'
+                    ' (standalone mode)\n')
+                i += 1
+                continue
+
+            if in_linkage:
+                stripped = line[6:72] if len(line) > 6 else line
+                stripped_up = stripped.strip().upper()
+                if 'PROCEDURE DIVISION' in stripped_up:
+                    in_linkage = False
+                    # Fall through to handle PROCEDURE DIVISION
+                else:
+                    # Comment out all LINKAGE items
+                    output.append(
+                        '      *' + line[7:] if len(line) > 7
+                        else '      *\n')
+                    i += 1
+                    continue
 
             # Check for start of EXEC CICS block
             if self._is_exec_cics_start(line):
                 in_exec_cics = True
                 exec_cics_lines = [line]
-                # Check if END-EXEC is on same line
                 if self._has_end_exec(line):
                     in_exec_cics = False
                     call_lines = self._transform_exec_cics(exec_cics_lines)
@@ -69,6 +130,19 @@ class CICSPreprocessor:
             if self._is_working_storage(line) and self.ws_injection_needed:
                 output.append(line)
                 output.extend(self._get_eib_definition())
+                # Inject DFHCOMMAREA as WORKING-STORAGE item
+                if commarea_lines:
+                    output.append(
+                        '      * CICS-SIM: DFHCOMMAREA moved from'
+                        ' LINKAGE to WORKING-STORAGE\n')
+                    for cl in commarea_lines:
+                        output.append(cl)
+                else:
+                    output.append(
+                        '       01  DFHCOMMAREA.\n')
+                    output.append(
+                        '         05  LK-COMMAREA'
+                        '     PIC X(32767).\n')
                 self.ws_injection_needed = False
                 i += 1
                 continue
@@ -124,31 +198,42 @@ class CICSPreprocessor:
         return bool(re.search(r'WORKING-STORAGE\s+SECTION', stripped,
                               re.IGNORECASE))
 
+    def _is_linkage_section(self, line):
+        """Check if this is the LINKAGE SECTION line."""
+        stripped = line[6:72] if len(line) > 6 else line
+        return bool(re.search(r'^\s*LINKAGE\s+SECTION', stripped,
+                              re.IGNORECASE))
+
     def _get_eib_definition(self):
-        """Return EIB COBOL data definition lines."""
+        """Return EIB COBOL data definition lines.
+
+        Uses COMP-5 (native binary) for all integer fields so that
+        the C runtime library can read/write them directly without
+        byte-order conversion (COMP uses big-endian on all platforms).
+        """
         return [
             '      *================================================================*\n',
             '      * CICS Simulator - Execute Interface Block (EIB)\n',
             '      *================================================================*\n',
             '       01  DFHEIBLK.\n',
             '         05  EIBAID                 PIC X(01) VALUE SPACES.\n',
-            '         05  EIBCALEN              PIC S9(04) COMP VALUE 0.\n',
+            '         05  EIBCALEN              PIC S9(04) COMP-5 VALUE 0.\n',
             '         05  EIBTRNID              PIC X(04) VALUE SPACES.\n',
             '         05  EIBRSRCE              PIC X(08) VALUE SPACES.\n',
-            '         05  EIBRESP               PIC S9(09) COMP VALUE 0.\n',
-            '         05  EIBRESP2              PIC S9(09) COMP VALUE 0.\n',
+            '         05  EIBRESP               PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  EIBRESP2              PIC S9(09) COMP-5 VALUE 0.\n',
             '         05  EIBDATE               PIC X(08) VALUE SPACES.\n',
             '         05  EIBTIME               PIC X(08) VALUE SPACES.\n',
-            '         05  EIBTASKN              PIC S9(09) COMP VALUE 0.\n',
+            '         05  EIBTASKN              PIC S9(09) COMP-5 VALUE 0.\n',
             '       01  CICS-SIM-WORK-AREAS.\n',
-            '         05  WS-CICS-RESP         PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-RESP2        PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-ERASE        PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-CURSOR       PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-FREEKB       PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-COMMLEN      PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-DATALEN      PIC S9(09) COMP VALUE 0.\n',
-            '         05  WS-CICS-KEYLEN       PIC S9(09) COMP VALUE 0.\n',
+            '         05  WS-CICS-RESP         PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-RESP2        PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-ERASE        PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-CURSOR       PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-FREEKB       PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-COMMLEN      PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-DATALEN      PIC S9(09) COMP-5 VALUE 0.\n',
+            '         05  WS-CICS-KEYLEN       PIC S9(09) COMP-5 VALUE 0.\n',
             '         05  WS-CICS-MAPSET       PIC X(08) VALUE SPACES.\n',
             '         05  WS-CICS-MAP          PIC X(08) VALUE SPACES.\n',
             '         05  WS-CICS-FILENAME     PIC X(08) VALUE SPACES.\n',
@@ -159,11 +244,11 @@ class CICSPreprocessor:
             '         05  WS-CICS-FIELD        PIC X(16) VALUE SPACES.\n',
             '         05  WS-CICS-ABSTIME      PIC X(16) VALUE SPACES.\n',
             '         05  WS-CICS-FMTOUT       PIC X(20) VALUE SPACES.\n',
-            '         05  WS-CICS-FMTLEN       PIC S9(09) COMP VALUE 0.\n',
+            '         05  WS-CICS-FMTLEN       PIC S9(09) COMP-5 VALUE 0.\n',
             '         05  WS-CICS-FORMAT       PIC X(16) VALUE SPACES.\n',
             '         05  WS-CICS-LABEL        PIC X(30) VALUE SPACES.\n',
             '         05  WS-CICS-ASSIGN-VAL   PIC X(08) VALUE SPACES.\n',
-            '         05  WS-CICS-ASSIGN-LEN   PIC S9(09) COMP VALUE 0.\n',
+            '         05  WS-CICS-ASSIGN-LEN   PIC S9(09) COMP-5 VALUE 0.\n',
             '\n',
         ]
 

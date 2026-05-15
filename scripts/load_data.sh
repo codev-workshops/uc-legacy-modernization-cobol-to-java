@@ -142,9 +142,8 @@ cp "$ASCII_DIR/dailytran.txt" "$DATA_DIR/DALYTRAN"
 echo "OK ($(wc -l < "$ASCII_DIR/dailytran.txt") records)"
 
 # USRSEC: user security file (from DUSRSECJ JCL)
-# The EBCDIC version exists but no ASCII equivalent — create from EBCDIC data
-# For now we skip this; it's only needed for online CICS login
-echo "  Skipping USRSEC (online CICS only)"
+# Record layout: SEC-USR-ID(8) + FNAME(20) + LNAME(20) + PWD(8) + TYPE(1) + FILLER(23) = 80 bytes
+load_file "USRSEC"    "usrsec.txt"     80  8
 
 echo ""
 echo "=== Data loading complete ==="

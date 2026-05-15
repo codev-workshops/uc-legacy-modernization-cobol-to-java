@@ -1,0 +1,5 @@
+ADMIN1  SYSTEM              ADMINISTRATOR       ADMIN1  A                       
+USER0001JOHN                DOE                 USER0001U                       
+USER0002JANE                SMITH               USER0002U                       
+USER0003BOB                 JOHNSON             USER0003U                       
+USER0004ALICE               WILLIAMS            USER0004U                       

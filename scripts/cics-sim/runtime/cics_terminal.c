@@ -96,6 +96,9 @@ void CICSSENDMAP(char *mapset, char *map, void *from_area,
                  int32_t erase, int32_t cursor_pos) {
     MapDef *md;
 
+    /* Ensure runtime is initialized (registers maps) */
+    cics_get_state();
+
     md = find_map(mapset, map);
 
     if (erase) {
