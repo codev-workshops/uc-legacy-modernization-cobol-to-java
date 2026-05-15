@@ -1,0 +1,550 @@
+/* Auto-generated map definitions for CICS simulator */
+/* Do not edit - regenerate with bms2cpy.py */
+
+#include "cics_runtime.h"
+
+void cics_register_all_maps(void) {
+  /* Map: CACTUPA in mapset COACTUP */
+  {
+    static MapField fields_CACTUPA[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"ACCTSID", 5, 38, 11, 0, "", "", 1},
+      {"ACSTTUS", 5, 70, 1, 0, "", "", 1},
+      {"OPNYEAR", 6, 17, 4, 0, "", "", 1},
+      {"OPNMON", 6, 24, 2, 0, "", "", 1},
+      {"OPNDAY", 6, 29, 2, 0, "", "", 1},
+      {"ACRDLIM", 6, 61, 15, 0, "", "", 1},
+      {"EXPYEAR", 7, 17, 4, 0, "", "", 1},
+      {"EXPMON", 7, 24, 2, 0, "", "", 1},
+      {"EXPDAY", 7, 29, 2, 0, "", "", 1},
+      {"ACSHLIM", 7, 61, 15, 0, "", "", 1},
+      {"RISYEAR", 8, 17, 4, 0, "", "", 1},
+      {"RISMON", 8, 24, 2, 0, "", "", 1},
+      {"RISDAY", 8, 29, 2, 0, "", "", 1},
+      {"ACURBAL", 8, 61, 15, 0, "", "", 1},
+      {"ACRCYCR", 9, 61, 15, 0, "", "", 1},
+      {"AADDGRP", 10, 23, 10, 0, "", "", 1},
+      {"ACRCYDB", 10, 61, 15, 0, "", "", 1},
+      {"ACSTNUM", 12, 23, 9, 0, "", "", 1},
+      {"ACTSSN1", 12, 55, 3, 0, "", "999", 1},
+      {"ACTSSN2", 12, 61, 2, 0, "", "99", 1},
+      {"ACTSSN3", 12, 66, 4, 0, "", "9999", 1},
+      {"DOBYEAR", 13, 23, 4, 0, "", "", 1},
+      {"DOBMON", 13, 30, 2, 0, "", "", 1},
+      {"DOBDAY", 13, 35, 2, 0, "", "", 1},
+      {"ACSTFCO", 13, 62, 3, 0, "", "", 1},
+      {"ACSFNAM", 15, 1, 25, 0, "", "", 1},
+      {"ACSMNAM", 15, 28, 25, 0, "", "", 1},
+      {"ACSLNAM", 15, 55, 25, 0, "", "", 1},
+      {"ACSADL1", 16, 10, 50, 0, "", "", 1},
+      {"ACSSTTE", 16, 73, 2, 0, "", "", 1},
+      {"ACSADL2", 17, 10, 50, 0, "", "", 1},
+      {"ACSZIPC", 17, 73, 5, 0, "", "", 1},
+      {"ACSCITY", 18, 10, 50, 0, "", "", 1},
+      {"ACSCTRY", 18, 73, 3, 0, "", "", 1},
+      {"ACSPH1A", 19, 10, 3, 0, "", "", 1},
+      {"ACSPH1B", 19, 14, 3, 0, "", "", 1},
+      {"ACSPH1C", 19, 18, 4, 0, "", "", 1},
+      {"ACSGOVT", 19, 58, 20, 0, "", "", 1},
+      {"ACSPH2A", 20, 10, 3, 0, "", "", 1},
+      {"ACSPH2B", 20, 14, 3, 0, "", "", 1},
+      {"ACSPH2C", 20, 18, 4, 0, "", "", 1},
+      {"ACSEFTC", 20, 41, 10, 0, "", "", 1},
+      {"ACSPFLG", 20, 78, 1, 0, "", "", 1},
+      {"INFOMSG", 22, 23, 45, 0, "NEUTRAL", "", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+      {"FKEYS", 24, 1, 21, 0, "YELLOW", "ENTER=Process F3=Exit", 0},
+      {"FKEY05", 24, 23, 7, 0, "YELLOW", "F5=Save", 0},
+      {"FKEY12", 24, 31, 10, 0, "YELLOW", "F12=Cancel", 0},
+    };
+    cics_register_map("COACTUP", "CACTUPA", 24, 80, fields_CACTUPA, 54);
+  }
+  /* Map: CACTVWA in mapset COACTVW */
+  {
+    static MapField fields_CACTVWA[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"ACCTSID", 5, 38, 11, 0, "GREEN", "", 1},
+      {"ACSTTUS", 5, 70, 1, 0, "", "", 0},
+      {"ADTOPEN", 6, 17, 10, 0, "", "", 1},
+      {"ACRDLIM", 6, 61, 15, 0, "", "", 1},
+      {"AEXPDT", 7, 17, 10, 0, "", "", 1},
+      {"ACSHLIM", 7, 61, 15, 0, "", "", 1},
+      {"AREISDT", 8, 17, 10, 0, "", "", 1},
+      {"ACURBAL", 8, 61, 15, 0, "", "", 1},
+      {"ACRCYCR", 9, 61, 15, 0, "", "", 1},
+      {"AADDGRP", 10, 23, 10, 0, "", "", 1},
+      {"ACRCYDB", 10, 61, 15, 0, "", "", 1},
+      {"ACSTNUM", 12, 23, 9, 0, "", "", 1},
+      {"ACSTSSN", 12, 54, 12, 0, "", "", 1},
+      {"ACSTDOB", 13, 23, 10, 0, "", "", 1},
+      {"ACSTFCO", 13, 61, 3, 0, "", "", 1},
+      {"ACSFNAM", 15, 1, 25, 0, "", "", 1},
+      {"ACSMNAM", 15, 28, 25, 0, "", "", 1},
+      {"ACSLNAM", 15, 55, 25, 0, "", "", 1},
+      {"ACSADL1", 16, 10, 50, 0, "", "", 1},
+      {"ACSSTTE", 16, 73, 2, 0, "", "", 1},
+      {"ACSADL2", 17, 10, 50, 0, "", "", 1},
+      {"ACSZIPC", 17, 73, 5, 0, "", "", 1},
+      {"ACSCITY", 18, 10, 50, 0, "", "", 1},
+      {"ACSCTRY", 18, 73, 3, 0, "", "", 1},
+      {"ACSPHN1", 19, 10, 13, 0, "", "", 1},
+      {"ACSGOVT", 19, 58, 20, 0, "", "", 1},
+      {"ACSPHN2", 20, 10, 13, 0, "", "", 1},
+      {"ACSEFTC", 20, 41, 10, 0, "", "", 1},
+      {"ACSPFLG", 20, 78, 1, 0, "", "", 1},
+      {"INFOMSG", 22, 23, 45, 0, "NEUTRAL", "", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COACTVW", "CACTVWA", 24, 80, fields_CACTVWA, 37);
+  }
+  /* Map: COADM1A in mapset COADM01 */
+  {
+    static MapField fields_COADM1A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"OPTN001", 6, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN002", 7, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN003", 8, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN004", 9, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN005", 10, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN006", 11, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN007", 12, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN008", 13, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN009", 14, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN010", 15, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN011", 16, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN012", 17, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTION", 20, 41, 2, 0, "", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COADM01", "COADM1A", 24, 80, fields_COADM1A, 20);
+  }
+  /* Map: COBIL0A in mapset COBIL00 */
+  {
+    static MapField fields_COBIL0A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"ACTIDIN", 6, 21, 11, 0, "GREEN", "", 1},
+      {"CURBAL", 11, 32, 14, 0, "BLUE", "", 0},
+      {"CONFIRM", 15, 60, 1, 0, "GREEN", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COBIL00", "COBIL0A", 24, 80, fields_COBIL0A, 10);
+  }
+  /* Map: CCRDLIA in mapset COCRDLI */
+  {
+    static MapField fields_CCRDLIA[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"PAGENO", 4, 76, 3, 0, "", "", 1},
+      {"ACCTSID", 6, 44, 11, 0, "GREEN", "", 1},
+      {"CARDSID", 7, 44, 16, 0, "GREEN", "", 1},
+      {"CRDSEL1", 11, 12, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO1", 11, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM1", 11, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS1", 11, 67, 1, 0, "DEFAULT", "", 0},
+      {"CRDSEL2", 12, 12, 1, 0, "DEFAULT", "", 0},
+      {"CRDSTP2", 12, 14, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO2", 12, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM2", 12, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS2", 12, 67, 1, 0, "DEFAULT", "", 0},
+      {"CRDSEL3", 13, 12, 1, 0, "DEFAULT", "", 0},
+      {"CRDSTP3", 13, 14, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO3", 13, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM3", 13, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS3", 13, 67, 1, 0, "DEFAULT", "", 0},
+      {"CRDSEL4", 14, 12, 1, 0, "DEFAULT", "", 0},
+      {"CRDSTP4", 14, 14, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO4", 14, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM4", 14, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS4", 14, 67, 1, 0, "DEFAULT", "", 0},
+      {"CRDSEL5", 15, 12, 1, 0, "DEFAULT", "", 0},
+      {"CRDSTP5", 15, 14, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO5", 15, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM5", 15, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS5", 15, 67, 1, 0, "DEFAULT", "", 0},
+      {"CRDSEL6", 16, 12, 1, 0, "DEFAULT", "", 0},
+      {"CRDSTP6", 16, 14, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO6", 16, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM6", 16, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS6", 16, 67, 1, 0, "DEFAULT", "", 0},
+      {"CRDSEL7", 17, 12, 1, 0, "DEFAULT", "", 0},
+      {"CRDSTP7", 17, 14, 1, 0, "DEFAULT", "", 0},
+      {"ACCTNO7", 17, 22, 11, 0, "DEFAULT", "", 0},
+      {"CRDNUM7", 17, 43, 16, 0, "DEFAULT", "", 0},
+      {"CRDSTS7", 17, 67, 1, 0, "DEFAULT", "", 0},
+      {"INFOMSG", 20, 19, 45, 0, "NEUTRAL", "", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COCRDLI", "CCRDLIA", 24, 80, fields_CCRDLIA, 45);
+  }
+  /* Map: CCRDSLA in mapset COCRDSL */
+  {
+    static MapField fields_CCRDSLA[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"ACCTSID", 7, 45, 11, 0, "DEFAULT", "", 1},
+      {"CARDSID", 8, 45, 16, 0, "DEFAULT", "", 1},
+      {"CRDNAME", 11, 25, 50, 0, "", "", 1},
+      {"CRDSTCD", 13, 25, 1, 0, "", "", 0},
+      {"EXPMON", 15, 25, 2, 0, "", "", 0},
+      {"EXPYEAR", 15, 30, 4, 0, "", "", 0},
+      {"INFOMSG", 20, 25, 40, 0, "NEUTRAL", "", 0},
+      {"ERRMSG", 23, 1, 80, 0, "RED", "", 0},
+      {"FKEYS", 24, 1, 75, 0, "YELLOW", "ENTER=Search Cards  F3=Exit", 0},
+    };
+    cics_register_map("COCRDSL", "CCRDSLA", 24, 80, fields_CCRDSLA, 15);
+  }
+  /* Map: CCRDUPA in mapset COCRDUP */
+  {
+    static MapField fields_CCRDUPA[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"ACCTSID", 7, 45, 11, 0, "DEFAULT", "", 0},
+      {"CARDSID", 8, 45, 16, 0, "DEFAULT", "", 1},
+      {"CRDNAME", 11, 25, 50, 0, "", "", 1},
+      {"CRDSTCD", 13, 25, 1, 0, "", "", 1},
+      {"EXPMON", 15, 25, 2, 0, "", "", 1},
+      {"EXPYEAR", 15, 30, 4, 0, "", "", 1},
+      {"EXPDAY", 15, 36, 2, 0, "", "", 0},
+      {"INFOMSG", 20, 25, 40, 0, "NEUTRAL", "", 0},
+      {"ERRMSG", 23, 1, 80, 0, "RED", "", 0},
+      {"FKEYS", 24, 1, 21, 0, "YELLOW", "ENTER=Process F3=Exit", 0},
+      {"FKEYSC", 24, 23, 18, 0, "YELLOW", "F5=Save F12=Cancel", 0},
+    };
+    cics_register_map("COCRDUP", "CCRDUPA", 24, 80, fields_CCRDUPA, 17);
+  }
+  /* Map: COMEN1A in mapset COMEN01 */
+  {
+    static MapField fields_COMEN1A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"OPTN001", 6, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN002", 7, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN003", 8, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN004", 9, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN005", 10, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN006", 11, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN007", 12, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN008", 13, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN009", 14, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN010", 15, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN011", 16, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTN012", 17, 20, 40, 0, "BLUE", " ", 0},
+      {"OPTION", 20, 41, 2, 0, "", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COMEN01", "COMEN1A", 24, 80, fields_COMEN1A, 20);
+  }
+  /* Map: CORPT0A in mapset CORPT00 */
+  {
+    static MapField fields_CORPT0A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"MONTHLY", 7, 10, 1, 0, "GREEN", " ", 1},
+      {"YEARLY", 9, 10, 1, 0, "GREEN", " ", 1},
+      {"CUSTOM", 11, 10, 1, 0, "GREEN", " ", 1},
+      {"SDTMM", 13, 29, 2, 0, "GREEN", "  ", 1},
+      {"SDTDD", 13, 34, 2, 0, "GREEN", "  ", 1},
+      {"SDTYYYY", 13, 39, 4, 0, "GREEN", "    ", 1},
+      {"EDTMM", 14, 29, 2, 0, "GREEN", "  ", 1},
+      {"EDTDD", 14, 34, 2, 0, "GREEN", "  ", 1},
+      {"EDTYYYY", 14, 39, 4, 0, "GREEN", "    ", 1},
+      {"CONFIRM", 19, 66, 1, 0, "GREEN", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("CORPT00", "CORPT0A", 24, 80, fields_CORPT0A, 17);
+  }
+  /* Map: COSGN0A in mapset COSGN00 */
+  {
+    static MapField fields_COSGN0A[] = {
+      {"TRNNAME", 1, 8, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 8, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 9, 0, "BLUE", "Ahh:mm:ss", 0},
+      {"APPLID", 3, 8, 8, 0, "BLUE", "", 0},
+      {"SYSID", 3, 71, 8, 0, "BLUE", "        ", 0},
+      {"USERID", 19, 43, 8, 0, "GREEN", "", 1},
+      {"PASSWD", 20, 43, 8, 0, "GREEN", "________", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COSGN00", "COSGN0A", 24, 80, fields_COSGN0A, 11);
+  }
+  /* Map: COTRN0A in mapset COTRN00 */
+  {
+    static MapField fields_COTRN0A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"PAGENUM", 4, 71, 8, 0, "BLUE", " ", 0},
+      {"TRNIDIN", 6, 21, 16, 0, "GREEN", "", 1},
+      {"SEL0001", 10, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID01", 10, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE01", 10, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC01", 10, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT001", 10, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0002", 11, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID02", 11, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE02", 11, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC02", 11, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT002", 11, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0003", 12, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID03", 12, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE03", 12, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC03", 12, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT003", 12, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0004", 13, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID04", 13, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE04", 13, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC04", 13, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT004", 13, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0005", 14, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID05", 14, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE05", 14, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC05", 14, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT005", 14, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0006", 15, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID06", 15, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE06", 15, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC06", 15, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT006", 15, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0007", 16, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID07", 16, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE07", 16, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC07", 16, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT007", 16, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0008", 17, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID08", 17, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE08", 17, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC08", 17, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT008", 17, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0009", 18, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID09", 18, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE09", 18, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC09", 18, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT009", 18, 67, 12, 0, "BLUE", " ", 0},
+      {"SEL0010", 19, 3, 1, 0, "GREEN", " ", 1},
+      {"TRNID10", 19, 8, 16, 0, "BLUE", " ", 0},
+      {"TDATE10", 19, 27, 8, 0, "BLUE", " ", 0},
+      {"TDESC10", 19, 38, 26, 0, "BLUE", " ", 0},
+      {"TAMT010", 19, 67, 12, 0, "BLUE", " ", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COTRN00", "COTRN0A", 24, 80, fields_COTRN0A, 59);
+  }
+  /* Map: COTRN1A in mapset COTRN01 */
+  {
+    static MapField fields_COTRN1A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"TRNIDIN", 6, 21, 16, 0, "GREEN", " ", 1},
+      {"TRNID", 10, 22, 16, 0, "BLUE", " ", 0},
+      {"CARDNUM", 10, 58, 16, 0, "BLUE", " ", 0},
+      {"TTYPCD", 12, 15, 2, 0, "BLUE", " ", 0},
+      {"TCATCD", 12, 36, 4, 0, "BLUE", " ", 0},
+      {"TRNSRC", 12, 54, 10, 0, "BLUE", " ", 0},
+      {"TDESC", 14, 19, 60, 0, "BLUE", " ", 0},
+      {"TRNAMT", 16, 14, 12, 0, "BLUE", " ", 0},
+      {"TORIGDT", 16, 42, 10, 0, "BLUE", " ", 0},
+      {"TPROCDT", 16, 68, 10, 0, "BLUE", " ", 0},
+      {"MID", 18, 19, 9, 0, "BLUE", " ", 0},
+      {"MNAME", 18, 48, 30, 0, "BLUE", " ", 0},
+      {"MCITY", 20, 21, 25, 0, "BLUE", " ", 0},
+      {"MZIP", 20, 67, 10, 0, "BLUE", " ", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COTRN01", "COTRN1A", 24, 80, fields_COTRN1A, 21);
+  }
+  /* Map: COTRN2A in mapset COTRN02 */
+  {
+    static MapField fields_COTRN2A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"ACTIDIN", 6, 21, 11, 0, "GREEN", " ", 1},
+      {"CARDNIN", 6, 55, 16, 0, "GREEN", "", 1},
+      {"TTYPCD", 10, 15, 2, 0, "GREEN", " ", 1},
+      {"TCATCD", 10, 36, 4, 0, "GREEN", " ", 1},
+      {"TRNSRC", 10, 54, 10, 0, "GREEN", " ", 1},
+      {"TDESC", 12, 19, 60, 0, "GREEN", " ", 1},
+      {"TRNAMT", 14, 14, 12, 0, "GREEN", " ", 1},
+      {"TORIGDT", 14, 42, 10, 0, "GREEN", " ", 1},
+      {"TPROCDT", 14, 68, 10, 0, "GREEN", " ", 1},
+      {"MID", 16, 19, 9, 0, "GREEN", " ", 1},
+      {"MNAME", 16, 48, 30, 0, "GREEN", " ", 1},
+      {"MCITY", 18, 21, 25, 0, "GREEN", " ", 1},
+      {"MZIP", 18, 67, 10, 0, "GREEN", " ", 1},
+      {"CONFIRM", 21, 63, 1, 0, "GREEN", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COTRN02", "COTRN2A", 24, 80, fields_COTRN2A, 21);
+  }
+  /* Map: COUSR0A in mapset COUSR00 */
+  {
+    static MapField fields_COUSR0A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"PAGENUM", 4, 71, 8, 0, "BLUE", " ", 0},
+      {"USRIDIN", 6, 21, 8, 0, "GREEN", "", 1},
+      {"SEL0001", 10, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID01", 10, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME01", 10, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME01", 10, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE01", 10, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0002", 11, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID02", 11, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME02", 11, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME02", 11, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE02", 11, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0003", 12, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID03", 12, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME03", 12, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME03", 12, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE03", 12, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0004", 13, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID04", 13, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME04", 13, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME04", 13, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE04", 13, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0005", 14, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID05", 14, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME05", 14, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME05", 14, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE05", 14, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0006", 15, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID06", 15, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME06", 15, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME06", 15, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE06", 15, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0007", 16, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID07", 16, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME07", 16, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME07", 16, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE07", 16, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0008", 17, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID08", 17, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME08", 17, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME08", 17, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE08", 17, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0009", 18, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID09", 18, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME09", 18, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME09", 18, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE09", 18, 73, 1, 0, "BLUE", " ", 0},
+      {"SEL0010", 19, 6, 1, 0, "GREEN", " ", 1},
+      {"USRID10", 19, 12, 8, 0, "BLUE", " ", 0},
+      {"FNAME10", 19, 24, 20, 0, "BLUE", " ", 0},
+      {"LNAME10", 19, 48, 20, 0, "BLUE", " ", 0},
+      {"UTYPE10", 19, 73, 1, 0, "BLUE", " ", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COUSR00", "COUSR0A", 24, 80, fields_COUSR0A, 59);
+  }
+  /* Map: COUSR1A in mapset COUSR01 */
+  {
+    static MapField fields_COUSR1A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"FNAME", 8, 18, 20, 0, "GREEN", "", 1},
+      {"LNAME", 8, 56, 20, 0, "GREEN", "", 1},
+      {"USERID", 11, 15, 8, 0, "GREEN", "", 1},
+      {"PASSWD", 11, 55, 8, 0, "GREEN", "", 1},
+      {"USRTYPE", 14, 17, 1, 0, "GREEN", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COUSR01", "COUSR1A", 24, 80, fields_COUSR1A, 12);
+  }
+  /* Map: COUSR2A in mapset COUSR02 */
+  {
+    static MapField fields_COUSR2A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"USRIDIN", 6, 21, 8, 0, "GREEN", "", 1},
+      {"FNAME", 11, 18, 20, 0, "GREEN", "", 1},
+      {"LNAME", 11, 56, 20, 0, "GREEN", "", 1},
+      {"PASSWD", 13, 16, 8, 0, "GREEN", "", 1},
+      {"USRTYPE", 15, 17, 1, 0, "GREEN", "", 1},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COUSR02", "COUSR2A", 24, 80, fields_COUSR2A, 12);
+  }
+  /* Map: COUSR3A in mapset COUSR03 */
+  {
+    static MapField fields_COUSR3A[] = {
+      {"TRNNAME", 1, 7, 4, 0, "BLUE", "", 0},
+      {"TITLE01", 1, 21, 40, 0, "YELLOW", "", 0},
+      {"CURDATE", 1, 71, 8, 0, "BLUE", "mm/dd/yy", 0},
+      {"PGMNAME", 2, 7, 8, 0, "BLUE", "", 0},
+      {"TITLE02", 2, 21, 40, 0, "YELLOW", "", 0},
+      {"CURTIME", 2, 71, 8, 0, "BLUE", "hh:mm:ss", 0},
+      {"USRIDIN", 6, 21, 8, 0, "GREEN", "", 1},
+      {"FNAME", 11, 18, 20, 0, "BLUE", "", 0},
+      {"LNAME", 13, 18, 20, 0, "BLUE", "", 0},
+      {"USRTYPE", 15, 17, 1, 0, "BLUE", "", 0},
+      {"ERRMSG", 23, 1, 78, 0, "RED", "", 0},
+    };
+    cics_register_map("COUSR03", "COUSR3A", 24, 80, fields_COUSR3A, 11);
+  }
+}
