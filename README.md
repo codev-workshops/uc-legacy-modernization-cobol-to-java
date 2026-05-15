@@ -12,6 +12,7 @@ CardDemo is a comprehensive mainframe application that simulates a credit card m
 - [Optional Features](#optional-features)
 - [Installation](#installation)
 - [Running Batch Jobs](#running-batch-jobs)
+- [Running Locally on Linux](#running-locally-on-linux)
 - [Application Details](#application-details)
   - [User Functions](#user-functions)
   - [Admin Functions](#admin-functions)
@@ -231,6 +232,69 @@ Execute the following JCLs in sequence to run the full batch process:
 | OPENFIL  | Makes files available to CICS                       |                 |
 | WAITSTEP | Defines a step to wait job for given time           |                 |
 | CBPAUP0J | Purge expired authorizations                        | IMS-DB2-MQ: Pending Authorizations |
+
+## Running Locally on Linux
+
+The batch programs can be compiled and run locally on Ubuntu/Debian using GnuCOBOL. The 17 online CICS programs require a commercial CICS emulator (UniKix or Micro Focus) and are not supported in this local setup.
+
+### Prerequisites
+
+- Ubuntu 20.04+ or Debian 11+
+- GnuCOBOL 3.2 with Berkeley DB indexed file support (build from source — the `gnucobol4` package disables indexed files)
+- Build dependencies: `build-essential libdb-dev libncurses5-dev libgmp-dev`
+
+### Quick Start
+
+```bash
+# 1. Build the z/OS replacement C stubs (MVSWAIT, COBDATFT, CEE3ABD, CEEDAYS)
+./scripts/linux-stubs/build_stubs.sh
+
+# 2. Compile all 12 batch programs
+./scripts/compile_all.sh
+
+# 3. Load ASCII data into BDB-backed VSAM indexed files
+./scripts/load_data.sh
+
+# 4. Run the full batch sequence
+./scripts/run_batch.sh
+
+# Or run a single batch job
+./scripts/run_batch.sh CBACT01C
+```
+
+### z/OS Assembler Stubs
+
+The following z/390 assembler routines are replaced by C shared objects for Linux:
+
+| Stub | Original | Purpose |
+|:-----|:---------|:--------|
+| `MVSWAIT.c` | `app/asm/MVSWAIT.asm` | Timer — accepts centiseconds, calls `usleep()` |
+| `COBDATFT.c` | `app/asm/COBDATFT.asm` | Date conversion — YYYYMMDD ↔ YYYY-MM-DD |
+| `CEE3ABD.c` | z/OS LE | Abnormal termination — prints abend code and exits |
+| `CEEDAYS.c` | z/OS LE | Date-to-Lilian date conversion |
+
+### Batch Programs
+
+| Program | Type | Description |
+|:--------|:-----|:------------|
+| CBACT01C | Executable | Read and display account data |
+| CBACT02C | Executable | Read and display card data |
+| CBACT03C | Executable | Read and display card cross-reference data |
+| CBCUS01C | Executable | Read and display customer data |
+| CBTRN01C | Executable | Validate daily transactions |
+| CBTRN02C | Executable | Post daily transactions |
+| CBTRN03C | Executable | Generate transaction report |
+| CBSTM03A | Executable | Statement processing |
+| COBSWAIT | Executable | Wait utility (calls MVSWAIT) |
+| CBACT04C | Module | Account processing subprogram |
+| CBSTM03B | Module | Statement subprogram |
+| CSUTLDTC | Module | Date utility subprogram |
+
+### Limitations
+
+- **CICS programs** (17 programs: `CO*.cbl`) require a commercial CICS transaction processing emulator and cannot run locally
+- **CBEXPORT/CBIMPORT** have a copybook record-key resolution issue and do not compile
+- **DB2/IMS/MQ features** are optional and require their respective subsystems
 
 ## Application Details
 
