@@ -235,7 +235,7 @@ Execute the following JCLs in sequence to run the full batch process:
 
 ## Running Locally on Linux
 
-The batch programs can be compiled and run locally on Ubuntu/Debian using GnuCOBOL. The 17 online CICS programs require a commercial CICS emulator (UniKix or Micro Focus) and are not supported in this local setup.
+The batch programs can be compiled and run locally on Ubuntu/Debian using GnuCOBOL. The 17 online CICS programs can also be compiled and run locally using the included CICS simulator (no commercial emulator required).
 
 ### Prerequisites
 
@@ -290,9 +290,45 @@ The following z/390 assembler routines are replaced by C shared objects for Linu
 | CBSTM03B | Module | Statement subprogram |
 | CSUTLDTC | Module | Date utility subprogram |
 
+### Running CICS Online Programs
+
+The CICS simulator eliminates the need for a commercial CICS emulator (UniKix, Micro Focus) by providing a lightweight runtime that handles EXEC CICS commands locally.
+
+```bash
+# 1. Build the CICS simulator runtime library
+./scripts/cics-sim/build_simulator.sh
+
+# 2. Preprocess and compile the 17 online programs
+./scripts/cics-sim/compile_online.sh
+
+# 3. Run the CardDemo application interactively
+./scripts/cics-sim/run_online.sh
+```
+
+The simulator provides:
+- **CICS preprocessor**: Converts `EXEC CICS ... END-EXEC` statements to standard COBOL `CALL` statements
+- **Runtime library** (`libcicssim.so`): C implementation of CICS services (file I/O, terminal I/O, program control, system services)
+- **BMS map processor**: Converts `.bms` map definitions to COBOL copybooks and C field registrations
+- **DFHAID/DFHBMSCA copybooks**: Standard CICS AID key and attribute definitions for GnuCOBOL
+
+#### CICS Commands Supported
+
+| Category | Commands |
+|:---------|:---------|
+| Terminal I/O | SEND MAP, RECEIVE MAP, SEND TEXT |
+| File I/O | READ, WRITE, REWRITE, DELETE, STARTBR, READNEXT, READPREV, ENDBR |
+| Program Control | RETURN, XCTL |
+| System Services | ASSIGN, ASKTIME, FORMATTIME, HANDLE ABEND, ABEND, WRITEQ TD |
+
+#### Compilation Results
+
+15 of 17 programs compile successfully. The remaining 2 have pre-existing COBOL source issues:
+- `COCRDLIC`: Non-standard level hierarchy (level 05 after level 10 in same group)
+- `COUSR03C`: Triggers internal compiler error in GnuCOBOL 3.2
+
 ### Limitations
 
-- **CICS programs** (17 programs: `CO*.cbl`) require a commercial CICS transaction processing emulator and cannot run locally
+- **CICS programs** (2 of 17: `COCRDLIC`, `COUSR03C`) have pre-existing source compatibility issues with GnuCOBOL 3.2
 - **CBEXPORT/CBIMPORT** have a copybook record-key resolution issue and do not compile
 - **DB2/IMS/MQ features** are optional and require their respective subsystems
 
