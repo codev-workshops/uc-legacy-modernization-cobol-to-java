@@ -23,6 +23,7 @@ CardDemo is a comprehensive mainframe application that simulates a credit card m
 - [Contributing](#contributing)
 - [License](#license)
 - [Project Status](#project-status)
+- [Data Privacy & PII Inventory](#data-privacy--pii-inventory)
 
 ## Description
 CardDemo is a mainframe application designed to test and showcase AWS and partner technology for mainframe migration and modernization use-cases. It provides a realistic environment for:
@@ -394,5 +395,18 @@ The CardDemo application has been enhanced with optional features that extend it
 
 These optional features make CardDemo an even more useful resource for customers looking to modernize their mainframe applications. With modules for DB2, MQ, IMS DB, JCL utilities, and more data formats now available, customers can leverage CardDemo to test a wider array of mainframe migration, refactoring, replatforming, and augmentation scenarios.
 
-Last updated: April 2025
+## Data Privacy & PII Inventory
+
+A comprehensive catalog of all Personally Identifiable Information (PII) fields across CardDemo copybooks is available at [`docs/pii-inventory.md`](./docs/pii-inventory.md). This document is critical for data privacy compliance (GDPR, PCI-DSS, CCPA) during modernization and covers:
+
+- Customer PII (SSN, government ID, names, addresses, phone numbers, date of birth)
+- Payment Card Industry data (PAN, CVV, cardholder name, expiry dates)
+- Account identifiers and session state (COMMAREA)
+- Authentication/credential data (including cleartext password compliance violation)
+- Data export/migration aggregated PII risks
+- Merchant data
+- Program-level READ/WRITE mapping for each PII field
+- Recommended handling for modernization (tokenization, encryption, vault storage)
+
+Last updated: May 2026
 
