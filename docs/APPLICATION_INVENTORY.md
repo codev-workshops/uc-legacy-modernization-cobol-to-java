@@ -22,11 +22,12 @@ The CardDemo application is a mainframe-based credit card management system runn
 | 8 | CBSTM03A.CBL | CBSTM03A | Print account statements from transaction data — master control program | **Write:** STMTFILE, HTMLFILE **Calls:** CBSTM03B | COSTM01, CUSTREC, CVACT01Y, CVACT03Y |
 | 9 | CBSTM03B.CBL | CBSTM03B | Statement file processing sub-program — reads transaction, xref, customer, and account files for statement generation | **Read:** TRNXFILE, XREFFILE, CUSTFILE, ACCTFILE | (none — receives data via USING clause) |
 | 10 | CBTRN01C.cbl | CBTRN01C | Post records from daily transaction file — initial validation and cross-reference lookup | **Read:** DALYTRAN (SEQ), CUSTFILE, XREFFILE, CARDFILE, ACCTFILE **Write:** TRANFILE | CVTRA06Y, CVCUS01Y, CVACT03Y, CVACT02Y, CVACT01Y, CVTRA05Y |
+
+> **Note:** `CBTRN01C` performs initial validation and cross-reference lookup only (no balance updates, no reject handling). It is not referenced in the documented nightly batch pipeline (`POSTTRAN.jcl` uses `CBTRN02C`). It may represent an earlier/simpler version of the posting logic or an alternate flow for pre-validation without posting.
 | 11 | CBTRN02C.cbl | CBTRN02C | Post records from daily transaction file — full posting with reject handling, category balance updates, and account balance updates | **Read:** DALYTRAN (SEQ), XREFFILE, ACCTFILE, TCATBALF **Write:** TRANFILE, DALYREJS, TCATBALF **Rewrite:** ACCTFILE, TCATBALF | CVTRA06Y, CVTRA05Y, CVACT03Y, CVACT01Y, CVTRA01Y |
 | 12 | CBTRN03C.cbl | CBTRN03C | Print transaction detail report — formatted report with type/category descriptions | **Read:** TRANFILE (SEQ), CARDXREF, TRANTYPE, TRANCATG, DATEPARM **Write:** TRANREPT (report file) | CVTRA05Y, CVACT03Y, CVTRA03Y, CVTRA04Y, CVTRA07Y |
-| 13 | CBSTM03A.CBL | CBSTM03A | Statement generation (master) | **Write:** STMTFILE, HTMLFILE | COSTM01, CUSTREC, CVACT01Y, CVACT03Y |
-| 14 | COBSWAIT.cbl | COBSWAIT | Utility program to wait (parameter in centiseconds) | **Calls:** MVSWAIT | (none) |
-| 15 | CSUTLDTC.cbl | CSUTLDTC | Date utility — convert and validate dates using LE CEEDAYS | **Calls:** CEEDAYS | (none) |
+| 13 | COBSWAIT.cbl | COBSWAIT | Utility program to wait (parameter in centiseconds) | **Calls:** MVSWAIT | (none) |
+| 14 | CSUTLDTC.cbl | CSUTLDTC | Date utility — convert and validate dates using LE CEEDAYS | **Calls:** CEEDAYS | (none) |
 
 ### 1.2 Online (CICS) Programs
 
@@ -183,14 +184,33 @@ Event-driven account processing via IBM MQ.
 
 | Category | Count |
 |----------|-------|
-| Core Batch Programs | 15 |
+| Core Batch Programs | 14 |
 | Core Online Programs | 17 |
 | Authorization Sub-App Programs | 8 |
 | Transaction Type DB2 Programs | 3 |
 | VSAM-MQ Sub-App Programs | 2 |
-| **Total COBOL Programs** | **45** |
+| **Total COBOL Programs** | **44** |
 | Core JCL Jobs | 36 |
 | Sub-Application JCL Jobs | 8 |
 | **Total JCL Jobs** | **44** |
 | VSAM Datasets Managed | 9+ |
 | BMS Maps | 18 |
+
+---
+
+## 6. Supporting Directories
+
+| Directory | Contents | Relevance |
+|-----------|----------|-----------|
+| `app/asm/` | Assembler source (e.g., COBDATFT date formatter) | Called by CBACT01C |
+| `app/bms/` | BMS map source for CICS screens | 17 maps for core app |
+| `app/catlg/` | Catalog definitions | Environment config |
+| `app/cpy-bms/` | BMS-generated copybooks (screen field definitions) | Auto-generated; referenced by online programs |
+| `app/csd/` | CICS System Definition files | CICS resource setup |
+| `app/ctl/` | Control cards | JCL SYSIN data |
+| `app/data/` | Seed/test data files loaded via IDCAMS REPRO | Test fixtures for migration |
+| `app/maclib/` | Macro libraries | Assembler macros |
+| `app/proc/` | JCL PROCs (reusable procedures) | Shared JCL steps |
+| `app/scheduler/` | Job scheduling definitions | Batch job dependencies |
+
+> **Note:** Sub-application BMS maps reside within their respective sub-app directories (e.g., `app/app-authorization-ims-db2-mq/bms/`) — not in `app/bms/`.
