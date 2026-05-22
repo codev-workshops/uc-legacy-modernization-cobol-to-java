@@ -1,0 +1,28 @@
+{
+  "source_file": "acctdata.txt",
+  "copybook": "CVACT01Y.cpy",
+  "record_length": 300,
+  "record_count": 1,
+  "records": [
+    {
+      "ACCT-ID": "00000000001",
+      "ACCT-ID_numeric": 1,
+      "ACCT-ACTIVE-STATUS": "Y",
+      "ACCT-CURR-BAL": "00000001940{",
+      "ACCT-CURR-BAL_decimal": 19.4,
+      "ACCT-CREDIT-LIMIT": "00000020200{",
+      "ACCT-CREDIT-LIMIT_decimal": 202.0,
+      "ACCT-CASH-CREDIT-LIMIT": "00000010200{",
+      "ACCT-CASH-CREDIT-LIMIT_decimal": 102.0,
+      "ACCT-OPEN-DATE": "2014-11-20",
+      "ACCT-EXPIRAION-DATE": "2025-05-20",
+      "ACCT-REISSUE-DATE": "2025-05-20",
+      "ACCT-CURR-CYC-CREDIT": "00000000000{",
+      "ACCT-CURR-CYC-CREDIT_decimal": 0.0,
+      "ACCT-CURR-CYC-DEBIT": "00000000000{",
+      "ACCT-CURR-CYC-DEBIT_decimal": 0.0,
+      "ACCT-ADDR-ZIP": "          ",
+      "ACCT-GROUP-ID": "A000000000"
+    }
+  ]
+}

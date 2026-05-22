@@ -1,0 +1,26 @@
+{
+  "source_file": "dailytran.txt",
+  "copybook": "CVTRA06Y.cpy",
+  "record_length": 350,
+  "record_count": 1,
+  "records": [
+    {
+      "DALYTRAN-ID": "0000000000000001",
+      "DALYTRAN-TYPE-CD": "01",
+      "DALYTRAN-CAT-CD": "0001",
+      "DALYTRAN-CAT-CD_numeric": 1,
+      "DALYTRAN-SOURCE": "POS       ",
+      "DALYTRAN-DESC": "Coffee purchase                                                                                     ",
+      "DALYTRAN-AMT": "0000005000{",
+      "DALYTRAN-AMT_decimal": 50.0,
+      "DALYTRAN-MERCHANT-ID": "000000001",
+      "DALYTRAN-MERCHANT-ID_numeric": 1,
+      "DALYTRAN-MERCHANT-NAME": "Starbucks                                         ",
+      "DALYTRAN-MERCHANT-CITY": "New York                                          ",
+      "DALYTRAN-MERCHANT-ZIP": "10001     ",
+      "DALYTRAN-CARD-NUM": "0500024453765740",
+      "DALYTRAN-ORIG-TS": "2024-01-15-10.30.00.000000",
+      "DALYTRAN-PROC-TS": "                          "
+    }
+  ]
+}
