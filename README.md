@@ -354,6 +354,26 @@ Admin users can perform the following functions:
 
 For questions, issues, or improvement requests, please raise an issue in the repository with detailed information about your concern. The maintainers will respond according to availability.
 
+## Modernization Planning
+
+The `docs/` directory contains detailed modernization planning artifacts for migrating CardDemo from COBOL/CICS/VSAM to Java microservices:
+
+| Document | Purpose |
+|----------|---------|
+| [Modernization Blueprint](./docs/MODERNIZATION_BLUEPRINT.md) | Evaluates Strangler, Replatform, Refactor, and Rewrite strategies for each functional area with recommendations |
+| [Domain Decomposition](./docs/DOMAIN_DECOMPOSITION.md) | Identifies bounded contexts via copybook sharing, JCL grouping, and data file analysis; maps to candidate microservices |
+| [Cutover Plan](./docs/CUTOVER_PLAN.md) | Sequences migration into 4 phases with programs, data stores, integration bridges, rollback plans, and acceptance criteria |
+| [Risk Register](./docs/RISK_REGISTER.md) | Top 10 migration risks with likelihood, impact, mitigation strategies, and early warning indicators |
+
+Supporting analysis documents:
+
+| Document | Purpose |
+|----------|---------|
+| [Application Inventory](./docs/APPLICATION_INVENTORY.md) | Catalog of all 44 COBOL programs, 44 JCL jobs, and supporting artifacts |
+| [Dependency Map](./docs/DEPENDENCY_MAP.md) | Inter-program calls, dataset lineage, batch pipeline flows, and copybook matrix |
+| [Data Dictionary](./docs/DATA_DICTIONARY.md) | Field-level documentation of all copybook record layouts |
+| [Hotspot Report](./docs/HOTSPOT_REPORT.md) | Top 10 most complex programs ranked by LOC, copybooks, I/O, nesting, and dependencies |
+
 ## Roadmap
 
 The following features are planned for upcoming releases:
