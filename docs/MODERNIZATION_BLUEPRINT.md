@@ -13,6 +13,23 @@ This blueprint evaluates four modernization strategies for each major functional
 | **Refactor** | Restructure COBOL for maintainability — modularize monolithic paragraphs, extract shared logic, improve naming — without changing language | Codebase must remain COBOL for regulatory or staffing reasons, but quality is a bottleneck |
 | **Rewrite** | Translate to a modern language (Java/Kotlin) with equivalent business logic, backed by modern data stores (RDBMS, messaging) | Long-term maintainability, talent availability, and ecosystem integration outweigh short-term migration cost |
 
+## Data Ownership Quick Reference
+
+| Data Entity | Legacy Store | Owner Service | Shared With (via API) | Risk |
+|-------------|-------------|---------------|----------------------|------|
+| Account | ACCTFILE | Account Service | Transaction, Interest, Authorization, Statement | High (most shared file) |
+| Card | CARDFILE | Card Service | Account, Transaction | Medium |
+| Customer | CUSTFILE | Account Service | Card, Statement | Medium |
+| Cross-Reference | XREFFILE | Card Service | Transaction, Interest, Statement, Account | High (10 programs read it) |
+| Transaction | TRANSACT | Transaction Service | Interest, Statement, Reporting | Medium |
+| Category Balance | TCATBALF | Transaction Service | Interest Calc | Medium (bounded share) |
+| User Security | USRSEC | Auth Service | None | Low (fully isolated) |
+| Disclosure Groups | DISCGRP | Reference Data Service | Interest Calc | Low (fully isolated) |
+| Pending Auths | IMS DB | Authorization Service | None | Low (isolated sub-app) |
+| Fraud Flags | DB2 AUTHFRDS | Authorization Service | None | Low (isolated sub-app) |
+
+See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#2-bounded-contexts) for full bounded context definitions and [DEPENDENCY_MAP.md](DEPENDENCY_MAP.md) for file-level access details.
+
 ---
 
 ## 1. Transaction Processing (Batch Posting Pipeline)
@@ -52,6 +69,32 @@ DALYTRAN (input), TRANFILE/TRANSACT, TCATBALF, ACCTFILE, XREFFILE, DALYREJS, TRA
 - At 731 LOC with 5 copybooks, CBTRN02C is among the smaller programs — manageable rewrite scope.
 - Reject handling (DALYREJS) translates to Spring Batch skip/retry policies.
 
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-3 (Transaction Processing) — Hotspot Score: 44/100 (CBTRN02C). See [HOTSPOT_REPORT.md](HOTSPOT_REPORT.md) and [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-3-transaction-processing).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-01](RISK_REGISTER.md#risk-01-financial-calculation-discrepancy) | Financial Calculation Discrepancy | 20 | Mandate `BigDecimal` with `RoundingMode.DOWN` to match COBOL truncation semantics |
+| [RISK-03](RISK_REGISTER.md#risk-03-onlinebatch-transaction-asymmetry-regression) | Online/Batch Asymmetry | 15 | COTRN02C doesn't update balances but CBTRN02C does; new service unifies this |
+| [RISK-04](RISK_REGISTER.md#risk-04-dalytran-external-feed-source-unknown) | DALYTRAN Source Unknown | 15 | Need file-to-Kafka adapter until upstream publishes directly |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| ACCTFILE | Read (validate account) / Write (update balances) | Account Service | Call `PUT /accounts/{id}/balance` |
+| XREFFILE | Read (card→account resolution) | Card Service | Call `GET /cards/xref?cardNum={num}` |
+| TCATBALF | Read/Write (category balances) | Transaction Service itself | Shared with Interest Calc via `GET /transactions/category-balances` |
+
+**Copybook Cluster:** Cluster B — CVTRA01Y (CatBal), CVTRA05Y (Trans), CVTRA06Y (DailyTrans) + Cluster A partial — CVACT01Y (Account), CVACT03Y (Xref). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Integration Bridges Required:**
+- DALYTRAN Feed Adapter — file watcher → Kafka producer; decommission when upstream publishes directly to Kafka
+- Batch Cycle Orchestrator — replaces JCL CLOSEFIL→POSTTRAN→INTCALC→TRANREPT→OPENFIL. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-2a-transaction-posting-weeks-1722).
+
+**Parallel-Run Gate:** 30 consecutive days of 100% financial reconciliation (compare TRANSACT records, TCATBALF balances, ACCTFILE balances, DALYREJS rejects). See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-2a-transaction-posting-weeks-1722).
+
 ---
 
 ## 2. Interest Calculation Engine
@@ -83,6 +126,31 @@ TCATBALF (category balances), DISCGRP (interest rates), XREFFILE, ACCTFILE, TRAN
 - A rewrite allows comprehensive unit testing of interest math, which is currently untestable in the COBOL batch environment.
 - Financial regulators benefit from auditable, traceable Java code over COBOL paragraphs.
 - CBACT04C reads TCATBALF and DISCGRP, rewrites ACCTFILE, writes to TRANSACT — all can become database operations.
+
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-4 (Interest Calculation) — Hotspot Score: not in top 10 (but [RISK-01](RISK_REGISTER.md#risk-01-financial-calculation-discrepancy) affected). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-4-interest-calculation).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-01](RISK_REGISTER.md#risk-01-financial-calculation-discrepancy) | Financial Calculation Discrepancy | 20 | Truncation vs. banker's rounding — mandate `BigDecimal` with `RoundingMode.DOWN` |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| TCATBALF | Read | Transaction Service | Call `GET /transactions/category-balances` |
+| ACCTFILE | Read/Write | Account Service | Call `GET/PUT /accounts/{id}` |
+| XREFFILE | Read | Card Service | Call `GET /cards/xref` |
+| DISCGRP | Read | Reference Data Service | Fully isolated to this context |
+| TRANSACT | Write (interest charges) | Transaction Service | Call `POST /transactions` to write interest charges |
+
+**Copybook Cluster:** Cluster B — CVTRA01Y (CatBal), CVTRA02Y (DiscGrp). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Integration Bridges Required:**
+- None unique (uses Transaction Service API once available)
+
+**Parallel-Run Gate:** 2 full billing cycles with per-account interest matching to the cent. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-2b-interest-calculation-weeks-2126).
 
 ---
 
@@ -118,6 +186,34 @@ ACCTFILE, CARDFILE (via AIX), CUSTFILE, XREFFILE, TRANSACT
 - COACTUPC's embedded CSLKPCDY validation (1,318 lines of area codes, state codes, ZIP prefixes) should be extracted to a Validation Reference Service early — this is reusable across all services.
 - COBIL00C (bill payment) is a strong early candidate because it has a clear transactional boundary: read balance → debit → write transaction.
 
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-1 (Account Management) — Hotspot Score: 95/100 (COACTUPC — highest in estate). See [HOTSPOT_REPORT.md](HOTSPOT_REPORT.md#rank-1-coactupccbl-account-update--score-95) and [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-1-account-management).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-02](RISK_REGISTER.md#risk-02-cslkpcdy-validation-rule-extraction-failure) | CSLKPCDY Validation Extraction | 16 | 1,318 lines of 88-level conditions for phone area codes, state codes, ZIP prefixes; extraction must preserve 100% behavioral equivalence |
+| [RISK-06](RISK_REGISTER.md#risk-06-cobol-talent-shortage-during-migration) | COBOL Talent Shortage | 12 | COACTUPC at 4,236 LOC is the hardest program to validate without COBOL expertise |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| ACCTFILE | Read/Write | Account Service itself | — |
+| CARDFILE | Read via AIX | Card Service | Call `GET /cards/by-account/{id}` |
+| CUSTFILE | Read/Write | Account Service itself | — |
+| XREFFILE | Read | Card Service | Call `GET /cards/xref` |
+| TRANSACT | Write (bill payment) | Transaction Service | Call `POST /transactions` |
+
+**Copybook Cluster:** Cluster A — CVACT01Y (Account), CVACT03Y (Xref), CVCUS01Y (Customer) + Cluster D — CSUSR01Y (security checks) + CSLKPCDY (1,318 lines of embedded lookup data). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Key Extraction Task:** Parse CSLKPCDY programmatically — extract all 88-level conditions into JSON/database. Build Validation Reference Service with `POST /validate/phone`, `POST /validate/address`. Test with 10,000 synthetic customer records. See [RISK_REGISTER.md](RISK_REGISTER.md#risk-02-cslkpcdy-validation-rule-extraction-failure).
+
+**Integration Bridges Required:**
+- VSAM Sync Bridge (Account) — sync PostgreSQL `accounts` → ACCTFILE for remaining COBOL programs; decommission when all COBOL programs retired
+
+**Parallel-Run Gate:** 4 weeks; all COACTUPC validation rules must pass for all area codes, state codes, and ZIP prefixes. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-2c-account--card-management-weeks-2532).
+
 ---
 
 ## 4. Credit Card Management (Online CICS)
@@ -150,6 +246,30 @@ CARDFILE (KSDS + AIX), ACCTFILE, CUSTFILE, XREFFILE
 - COCRDLIC and COCRDUPC are the 4th and 5th most complex programs; they benefit from the Strangler approach's incremental risk reduction.
 - Card data has a clear entity boundary (CARDFILE + XREFFILE) that maps to a Card Service domain.
 - The AIX (Alternate Index) on CARDFILE — allowing lookup by account ID — translates to a simple secondary index in a relational database.
+
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-2 (Card Management) — Hotspot Score: 62/100 (COCRDUPC), 61/100 (COCRDLIC). See [HOTSPOT_REPORT.md](HOTSPOT_REPORT.md#rank-4-cocrdupcbl-credit-card-update--score-62) and [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-2-card-management).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| — | XREFFILE Coupling | — | XREFFILE is the most shared file (10 programs); Card Service must provide reliable lookup API before other services can migrate |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| CARDFILE | Read/Write | Card Service itself | — |
+| ACCTFILE | Read | Account Service | Call `GET /accounts/{id}` |
+| CUSTFILE | Read | Account Service | Call `GET /accounts/{id}/customer` |
+| XREFFILE | Read/Write | Card Service itself | — |
+
+**Copybook Cluster:** Cluster A partial — CVACT02Y (Card), CVCUS01Y (Customer). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Integration Bridges Required:**
+- VSAM Sync Bridge (Card/Xref) — sync PostgreSQL `cards`/`card_xref` → CARDFILE/XREFFILE; decommission when all COBOL programs retired
+
+**Note:** AIX (Alternate Index) on CARDFILE translates to a secondary index in PostgreSQL.
 
 ---
 
@@ -185,6 +305,26 @@ TRANSACT (KSDS + AIX), ACCTFILE, XREFFILE, TRANTYPE, TRANCATG
 - COTRN02C (add) has a known asymmetry: it writes to TRANSACT but does NOT update TCATBALF or account balances (unlike batch CBTRN02C). The rewrite is an opportunity to unify online and batch posting logic.
 - CORPT00C (report submission) is a thin shell that writes to a CICS TD queue — translates to a message publish in the new architecture.
 - CBTRN03C (reporting) is a straightforward read-format-write pattern → modern reporting framework (JasperReports, PDF generation).
+
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-3 (sub-boundary: Inquiry + Reporting). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-3-transaction-processing).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-03](RISK_REGISTER.md#risk-03-onlinebatch-transaction-asymmetry-regression) | Online/Batch Asymmetry | 15 | The asymmetry resolution means COTRN02C's replacement WILL update balances unlike the legacy version; feature flag `SYNC_BALANCE_UPDATE` recommended |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| TRANSACT | Read | Transaction Service itself | — |
+| ACCTFILE | Read | Account Service | Call `GET /accounts/{id}` |
+| XREFFILE | Read | Card Service | Call `GET /cards/xref` |
+| TRANTYPE/TRANCATG | Read | Reference Data Service | Call `GET /reference-data/transaction-types` |
+
+**Integration Bridges Required:**
+- Transaction Read Bridge — ETL copies VSAM TRANSACT → PostgreSQL after each batch cycle; decommission when Transaction Service owns writes (Phase 2A). See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-1-core-services--low-risk-weeks-716).
 
 ---
 
@@ -222,6 +362,28 @@ TRNXFILE (sorted transactions), XREFFILE, CUSTFILE, ACCTFILE → STMTFILE (text)
 - Modern PDF libraries (iText, Apache PDFBox) and HTML template engines (Thymeleaf) replace hundreds of lines of COBOL formatting logic.
 - Statement generation has no real-time dependency — it can be migrated independently with parallel-run validation.
 
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-7 (Statement Generation) — Hotspot Score: 50/100 (CBSTM03A — highest I/O count: 120 ops). See [HOTSPOT_REPORT.md](HOTSPOT_REPORT.md#rank-8-cbstm03acbl-statement-generation--score-50) and [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-7-statement-generation).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| — | Low Migration Risk | — | Pure read-only ETL; never modifies source data |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| TRNXFILE | Read (sorted transactions) | Transaction Service | Call `GET /transactions?accountId={id}&period={period}` |
+| XREFFILE | Read | Card Service | Call `GET /cards/xref` |
+| CUSTFILE | Read | Account Service | Call `GET /accounts/{id}/customer` |
+| ACCTFILE | Read | Account Service | Call `GET /accounts/{id}` |
+
+**Integration Bridges Required:**
+- Statement Output Adapter — convert PDF/HTML to S3; decommission when legacy consumers updated. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-3-supporting-services-weeks-3342).
+
+**Parallel-Run Gate:** 1 billing cycle; character-by-character comparison of generated statements for 50 sample accounts. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#acceptance-criteria-for-phase-4).
+
 ---
 
 ## 7. User Security & Authentication
@@ -257,6 +419,27 @@ USRSEC (KSDS) — 80-byte records with cleartext passwords
 - Modern IAM (JWT tokens, bcrypt hashing, role-based access) replaces COSGN00C's CICS-session authentication.
 - The admin CRUD screens (COUSR00C–03C) are simple list/add/update/delete — standard Spring MVC REST controllers.
 - This should be one of the first services built because every other service depends on authentication.
+
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-5 (User Security) — Hotspot Score: not in top 10 (programs are 300–600 LOC, simple CRUD). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-5-user-security--authentication).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-10](RISK_REGISTER.md#risk-10-cleartext-password-exposure-during-migration) | Cleartext Password Exposure | 10 | USRSEC stores passwords as PIC X(08) in cleartext; must hash on extraction, never store cleartext in PostgreSQL, force password reset on first login |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| USRSEC | Read/Write | Auth Service | **Fully isolated** — zero overlap with other contexts |
+
+**Copybook Cluster:** Cluster D — CSUSR01Y. See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Integration Bridges Required:**
+- USRSEC Dual-Write Bridge — sync PostgreSQL `users` → USRSEC nightly so COBOL sign-on still works; decommission when COSGN00C retired (Phase 2). See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-1-core-services--low-risk-weeks-716).
+
+**Note:** Cleanest bounded context. Auth Service should be built first because every other service depends on authentication.
 
 ---
 
@@ -298,6 +481,34 @@ IMS DB (hierarchical), DB2 (AUTHFRDS fraud table), MQ (request/reply/error queue
 - Fraud detection (AUTHFRDS DB2 table) becomes a query against the same relational database.
 - The purge batch job (CBPAUP0C) becomes a scheduled task or database TTL policy.
 
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** BC-6 (Card Authorization) — Hotspot Score: 51/100 (COPAUA0C), 52/100 (COPAUS0C). See [HOTSPOT_REPORT.md](HOTSPOT_REPORT.md#rank-6-copaus0ccbl-authorization-summary--score-52) and [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#bc-6-card-authorization).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-05](RISK_REGISTER.md#risk-05-ims-to-relational-data-migration-fidelity) | IMS Data Migration Fidelity | 12 | Hierarchical relationships implicit in physical storage |
+| [RISK-07](RISK_REGISTER.md#risk-07-authorization-latency-sla-breach) | Authorization Latency SLA | 12 | Must complete within 2–5 seconds; new architecture adds network hops; P99 target <200ms |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| ACCTFILE | Read | Account Service | Call `GET /accounts/{id}` — consider caching/read replicas for latency |
+| XREFFILE | Read | Card Service | Call `GET /cards/xref` |
+| IMS DB | Read/Write | Authorization Service itself | Migrate to PostgreSQL `authorizations` table |
+| DB2 AUTHFRDS | Read/Write | Authorization Service itself | Migrate to `fraud_flags` table |
+
+**Copybook Cluster:** Cluster E — CIPAUDTY, CIPAUSMY, MQ copybooks (completely isolated from core app). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Integration Bridges Required:**
+- IMS Data Migration (one-time extraction via PAUDBUNL)
+- MQ-to-Kafka Bridge — route existing MQ messages to Kafka during transition; decommission when all MQ producers switch to Kafka. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-3-supporting-services-weeks-3342).
+
+**Latency Mitigation:** Co-locate with Account/Card read replicas; cache fraud flags in Redis; circuit breaker pattern for dependent service calls. See [RISK_REGISTER.md](RISK_REGISTER.md#risk-07-authorization-latency-sla-breach).
+
+**Parallel-Run Gate:** 2 weeks; compare authorize/decline decisions for 1,000 test transactions. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#acceptance-criteria-for-phase-4).
+
 ---
 
 ## 9. Transaction Type Management (DB2 Sub-Application)
@@ -331,6 +542,27 @@ DB2 tables (transaction type reference data)
 - Optimistic locking in COTRTUPC maps to JPA's `@Version` annotation.
 - The DB2 tables can be migrated to PostgreSQL with minimal schema changes.
 - At 2,098 and 1,702 LOC respectively, these are the 2nd and 3rd most complex programs — but the complexity is in CICS screen handling, not business logic. The actual SQL operations are simple CRUD.
+
+### Risk Profile & Data Dependencies
+
+**Bounded Context:** Cross-cutting Reference Data — Hotspot Score: 72/100 (COTRTLIC), 68/100 (COTRTUPC). See [HOTSPOT_REPORT.md](HOTSPOT_REPORT.md#rank-2-cotrtliccbl-transaction-type-list--db2--score-72) and [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Risk Factors:**
+| Risk ID | Risk | Score | Key Concern |
+|---------|------|-------|-------------|
+| [RISK-06](RISK_REGISTER.md#risk-06-cobol-talent-shortage-during-migration) | COBOL Talent Shortage | 12 | These are 2nd and 3rd most complex programs by LOC, but complexity is in CICS screen handling, not business logic |
+
+**Shared Data Dependencies:**
+| File/Store | Access | Owner Service | Resolution |
+|------------|--------|---------------|------------|
+| DB2 tables | Read/Write | Reference Data Service | Fully isolated via Cluster F copybooks CSDB2RPY, CSDB2RWY |
+
+**Copybook Cluster:** Cluster F — CSDB2RPY, CSDB2RWY (completely isolated from VSAM programs). See [DOMAIN_DECOMPOSITION.md](DOMAIN_DECOMPOSITION.md#11-copybook-sharing-clusters).
+
+**Integration Bridges Required:**
+- Reference Data Sync — export PostgreSQL reference data to VSAM nightly for COBOL reporting programs (CBTRN03C); decommission when CBTRN03C retired. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md#phase-1-core-services--low-risk-weeks-716).
+
+**Note:** Existing DB2 queries map directly to JPA repositories; optimistic locking → `@Version`; cursor paging → Spring Data `Pageable`.
 
 ---
 
@@ -429,6 +661,34 @@ MQ queues (input/output/error), VSAM files
 - File reader/printer utilities (CBACT01C–03C, CBCUS01C) are diagnostic tools — replaced by SQL queries or admin dashboards.
 - CSUTLDTC (date utility) is replaced by `java.time` APIs.
 - COBSWAIT is replaced by `Thread.sleep()` or scheduled executors.
+
+---
+
+## Risk-Adjusted Migration Sequence
+
+This section consolidates the risk-driven sequencing rationale across all phases. See [CUTOVER_PLAN.md](CUTOVER_PLAN.md) for detailed timelines, acceptance criteria, and rollback procedures. See [RISK_REGISTER.md](RISK_REGISTER.md) for full risk descriptions and mitigation strategies.
+
+### Phase 0 (Foundation) — Mitigate: RISK-08, RISK-04, RISK-06
+- Validate EBCDIC/COMP-3 conversion ([RISK-08](RISK_REGISTER.md#risk-08-data-migration--ebcdiccompcomp-3-conversion-errors))
+- Identify DALYTRAN feed source ([RISK-04](RISK_REGISTER.md#risk-04-dalytran-external-feed-source-unknown))
+- Knowledge capture sprint with COBOL developers ([RISK-06](RISK_REGISTER.md#risk-06-cobol-talent-shortage-during-migration))
+
+### Phase 1 (Low-Risk Services) — Mitigate: RISK-10
+- Auth Service first ([RISK-10](RISK_REGISTER.md#risk-10-cleartext-password-exposure-during-migration): hash passwords, never store cleartext)
+- Reference Data, Transaction Inquiry, Reporting (low risk, build team velocity)
+
+### Phase 2 (Financial Core) — Mitigate: RISK-01, RISK-02, RISK-03
+- Transaction Posting: [RISK-01](RISK_REGISTER.md#risk-01-financial-calculation-discrepancy) (BigDecimal + RoundingMode.DOWN), [RISK-03](RISK_REGISTER.md#risk-03-onlinebatch-transaction-asymmetry-regression) (unify online/batch), [RISK-04](RISK_REGISTER.md#risk-04-dalytran-external-feed-source-unknown) (DALYTRAN adapter)
+- Interest Calculation: [RISK-01](RISK_REGISTER.md#risk-01-financial-calculation-discrepancy) (parallel-run 2 billing cycles)
+- Account/Card: [RISK-02](RISK_REGISTER.md#risk-02-cslkpcdy-validation-rule-extraction-failure) (CSLKPCDY extraction to Validation Reference Service)
+
+### Phase 3 (Supporting Services) — Mitigate: RISK-05, RISK-07
+- Authorization: [RISK-05](RISK_REGISTER.md#risk-05-ims-to-relational-data-migration-fidelity) (IMS migration), [RISK-07](RISK_REGISTER.md#risk-07-authorization-latency-sla-breach) (latency — cache, read replicas, circuit breakers)
+- Statement Generation + MQ Events (low risk)
+
+### Phase 4 (Decommission) — Mitigate: RISK-09
+- Remove all integration bridges ([RISK-09](RISK_REGISTER.md#risk-09-integration-bridge-accumulation))
+- Retire CICS, VSAM, IMS, MQ infrastructure
 
 ---
 
