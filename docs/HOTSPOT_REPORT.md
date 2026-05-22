@@ -44,7 +44,7 @@ This report ranks the top 10 most complex programs in the CardDemo COBOL estate 
 | Metric | Value | Notes |
 |--------|-------|-------|
 | LOC | 4,236 | Largest program in the estate by far |
-| Copybooks | 56 | References almost every copybook including CSLKPCDY (1,318 lines of lookup data) |
+| Copybooks | 56 | Includes: 15 application copybooks from `app/cpy/`, ~17 BMS-generated copybooks from `app/cpy-bms/`, plus IBM-supplied copybooks (DFHAID, DFHBMSCA, etc.). The APPLICATION_INVENTORY lists only application copybooks. References almost every copybook including CSLKPCDY (1,318 lines of lookup data) |
 | I/O Ops | 19 | CICS READ, REWRITE on account + customer + card files |
 | Max Nesting | 4 | Complex validation logic with nested IF/EVALUATE |
 | Dependencies | Called by COMEN01C; calls no sub-programs but reads 3 VSAM files + validates against lookup tables |

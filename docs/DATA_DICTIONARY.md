@@ -4,6 +4,11 @@
 
 This document catalogs all data structures defined in the CardDemo copybook library (`app/cpy/` and sub-application `cpy/` directories). Fields are grouped by business entity with PIC clauses, data types, inferred business meaning, and validation rules.
 
+> **Note on BMS-generated copybooks:** Screen field definitions generated from BMS
+> maps (residing in `app/cpy-bms/`) are not documented here as they are auto-generated.
+> Sub-application copybooks reside in their respective directories
+> (e.g., `app/app-authorization-ims-db2-mq/cpy/`).
+
 ---
 
 ## 1. Account Entity
@@ -399,6 +404,93 @@ Defines 6 admin menu options:
 |-------|-------|---------|
 | CCDA-MSG-THANK-YOU | 'Thank you for using CardDemo application...' | Exit message |
 | CCDA-MSG-INVALID-KEY | 'Invalid key pressed. Please see below...' | Key validation error |
+
+### Source: `CSMSG02Y.cpy` — Abend / Error Messages
+
+| Level | Field Name | PIC Clause | Data Type | Business Meaning | Validation Rules |
+|-------|-----------|------------|-----------|-----------------|------------------|
+| 01 | ABEND-DATA | — | Group | Work areas for abend routine | — |
+| 05 | ABEND-CODE | PIC X(4) | Alpha | Abend error code | Spaces default |
+| 05 | ABEND-CULPRIT | PIC X(8) | Alpha | Program that caused the abend | Spaces default |
+| 05 | ABEND-REASON | PIC X(50) | Alpha | Abend reason description | Spaces default |
+| 05 | ABEND-MSG | PIC X(72) | Alpha | Formatted abend message | Spaces default |
+
+Used by: COACTVWC, COACTUPC, COCRDSLC, COCRDUPC, COPAUS0C, COPAUS1C.
+
+### Source: `CSSTRPFY.cpy` — Store PFKey (Procedure Division Fragment)
+
+Procedure-division copybook (not a data definition). Maps EIBAID values to CCARD-AID-* flags via EVALUATE block. Translates 3270 terminal key presses (ENTER, CLEAR, PA1, PA2, PF1–PF24) into the application's navigation model.
+
+Used by: COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC.
+
+### Source: `CSSETATY.cpy` — Set Screen Attributes (Procedure Division Fragment)
+
+Procedure-division copybook template for setting BMS field color to red and inserting an asterisk (`*`) when a field fails validation. Uses parameterized variable names (TESTVAR1, SCRNVAR2, MAPNAME3) that are substituted at compile time.
+
+Used by: COACTUPC.
+
+### Source: `CSUTLDWY.cpy` — Date Utility Working Storage
+
+| Level | Field Name | PIC Clause | Data Type | Business Meaning | Validation Rules |
+|-------|-----------|------------|-----------|-----------------|------------------|
+| 10 | WS-EDIT-DATE-CCYYMMDD | — | Group | Editable date in CCYYMMDD format | — |
+| 25 | WS-EDIT-DATE-CC | PIC X(2) | Alpha | Century (19 or 20) | 88: THIS-CENTURY=20, LAST-CENTURY=19 |
+| 25 | WS-EDIT-DATE-YY | PIC X(2) | Alpha | Year within century | — |
+| 20 | WS-EDIT-DATE-MM | PIC X(2) | Alpha | Month | 88: WS-VALID-MONTH VALUES 1–12 |
+| 20 | WS-EDIT-DATE-DD | PIC X(2) | Alpha | Day | 88: WS-VALID-DAY VALUES 1–31 |
+| 10 | WS-EDIT-DATE-CCYYMMDD-N | PIC 9(8) | Numeric | Numeric REDEFINES of date | — |
+| 10 | WS-EDIT-DATE-BINARY | PIC S9(9) BINARY | Binary | Binary date for LE calls | — |
+| 10 | WS-CURRENT-DATE | — | Group | Current system date | — |
+| 10 | WS-EDIT-DATE-FLGS | — | Group | Validation flags | 88: IS-VALID=LOW-VALUES, IS-INVALID='000' |
+| 10 | WS-DATE-FORMAT | PIC X(08) | Alpha | Date mask | Default 'YYYYMMDD' |
+| 10 | WS-DATE-VALIDATION-RESULT | — | Group | LE CEEDAYS return area | Severity + message + test date |
+
+Used by: COACTUPC (date field validation).
+
+### Source: `CUSTREC.cpy` — Statement Customer Record (RECLN 500)
+
+| Level | Field Name | PIC Clause | Data Type | Business Meaning | Validation Rules |
+|-------|-----------|------------|-----------|-----------------|------------------|
+| 01 | CUSTOMER-RECORD | — | Group | Customer data for statement generation | Fixed 500-byte record |
+| 05 | CUST-ID | PIC 9(09) | Numeric | Customer identifier | 9-digit numeric |
+| 05 | CUST-FIRST-NAME | PIC X(25) | Alpha | Customer first name | — |
+| 05 | CUST-MIDDLE-NAME | PIC X(25) | Alpha | Customer middle name | — |
+| 05 | CUST-LAST-NAME | PIC X(25) | Alpha | Customer last name | — |
+| 05 | CUST-ADDR-LINE-1 | PIC X(50) | Alpha | Street address line 1 | — |
+| 05 | CUST-ADDR-LINE-2 | PIC X(50) | Alpha | Street address line 2 | — |
+| 05 | CUST-ADDR-LINE-3 | PIC X(50) | Alpha | Street address line 3 | — |
+| 05 | CUST-ADDR-STATE-CD | PIC X(02) | Alpha | US state code | — |
+| 05 | CUST-ADDR-COUNTRY-CD | PIC X(03) | Alpha | ISO country code | — |
+| 05 | CUST-ADDR-ZIP | PIC X(10) | Alpha | ZIP/postal code | — |
+| 05 | CUST-PHONE-NUM-1 | PIC X(15) | Alpha | Primary phone | — |
+| 05 | CUST-PHONE-NUM-2 | PIC X(15) | Alpha | Secondary phone | — |
+| 05 | CUST-SSN | PIC 9(09) | Numeric | Social Security Number | Sensitive PII |
+| 05 | CUST-GOVT-ISSUED-ID | PIC X(20) | Alpha | Government-issued ID | — |
+| 05 | CUST-DOB-YYYYMMDD | PIC X(10) | Alpha-date | Date of birth | Format YYYYMMDD |
+| 05 | CUST-EFT-ACCOUNT-ID | PIC X(10) | Alpha | EFT/ACH bank account ID | — |
+| 05 | CUST-PRI-CARD-HOLDER-IND | PIC X(01) | Alpha | Primary cardholder indicator | — |
+| 05 | CUST-FICO-CREDIT-SCORE | PIC 9(03) | Numeric | FICO credit score | — |
+| 05 | FILLER | PIC X(168) | Alpha | Reserved space | Padding to 500 bytes |
+
+Used by: CBSTM03A (statement generation). Structurally identical to CVCUS01Y but with slightly different field naming (CUST-DOB-YYYYMMDD vs CUST-DOB-YYYY-MM-DD).
+
+### Source: `CSUTLDPY.cpy` — Date Utility Procedure Division
+
+Procedure-division copybook containing reusable date validation paragraphs (EDIT-DATE-CCYYMMDD, EDIT-YEAR-CCYY, EDIT-MONTH, EDIT-DAY, EDIT-DATE-OF-BIRTH). Companion to CSUTLDWY working-storage copybook. Despite being present in `app/cpy/`, no program currently references this copybook — likely dead code.
+
+### Source: `UNUSED1Y.cpy` — Unused Data Structure
+
+| Level | Field Name | PIC Clause | Data Type | Business Meaning | Validation Rules |
+|-------|-----------|------------|-----------|-----------------|------------------|
+| 01 | UNUSED-DATA | — | Group | Explicitly unused record | Dead artifact |
+| 05 | UNUSED-ID | PIC X(08) | Alpha | Unused ID field | — |
+| 05 | UNUSED-FNAME | PIC X(20) | Alpha | Unused first name | — |
+| 05 | UNUSED-LNAME | PIC X(20) | Alpha | Unused last name | — |
+| 05 | UNUSED-PWD | PIC X(08) | Alpha | Unused password | — |
+| 05 | UNUSED-TYPE | PIC X(01) | Alpha | Unused type flag | — |
+| 05 | UNUSED-FILLER | PIC X(23) | Alpha | Reserved space | — |
+
+Structurally identical to CSUSR01Y (User Security Record). No program references this copybook — candidate for deletion.
 
 ### Source: `CVCRD01Y.cpy` — Credit Card Work Areas
 

@@ -258,6 +258,29 @@ TRANBKP.jcl
 └─ STEP10:  IDCAMS DELETE (clear transaction master for new cycle)
 ```
 
+> **Timing:** TRANBKP.jcl runs AFTER statement generation (CREASTMT.JCL) and AFTER
+> the reporting pipeline (TRANREPT.jcl), typically at cycle-end (monthly or billing
+> period close). It MUST NOT run before statements are produced, as it deletes the
+> transaction master. The sequence is:
+> 1. Daily cycles run for the billing period
+> 2. Statement generation (CREASTMT.JCL)
+> 3. Transaction backup (TRANBKP.jcl) — archives and clears for next period
+
+### 3.6 Transaction Consolidation Pipeline
+
+COMBTRAN.jcl combines intra-day transaction segments into the master transaction file.
+Typical execution: after POSTTRAN.jcl and before TRANREPT.jcl (when daily transactions
+arrive in multiple batches).
+
+```
+COMBTRAN.jcl
+├─ STEP05R: SORT (sort daily segments by transaction ID)
+└─ STEP10:  IDCAMS REPRO (merge sorted output into TRANSACT master)
+```
+
+> **Open Question:** Confirm whether COMBTRAN runs between POSTTRAN and INTCALC,
+> or only when multi-batch daily feeds are received.
+
 ---
 
 ## 4. Copybook Dependency Matrix
@@ -285,6 +308,69 @@ Shows which programs depend on which copybooks (core `app/cpy/` only):
 | DFHBMSCA (BMS attrs) | All online programs |
 | CSLKPCDY (Lookups) | COACTUPC |
 | CVEXPORT (Export) | CBEXPORT, CBIMPORT |
+| CSMSG02Y (Messages-2) | COACTVWC, COACTUPC, COCRDSLC, COCRDUPC, COPAUS0C, COPAUS1C |
+| CSSTRPFY (String Format) | COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC |
+| CVCRD01Y (Card Navigation) | COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC, COPAUS0C |
+| CSUTLDWY (Date Utility WS) | COACTUPC |
+| CSSETATY (Screen Attributes) | COACTUPC |
+| CUSTREC (Statement Customer) | CBSTM03A |
+| CSUTLDPY (Date Utility — unused) | (No program references found — likely dead code) |
+| UNUSED1Y (Explicitly unused) | (No program references — dead artifact, candidate for deletion) |
+
+---
+
+### 5.1 Known Processing Asymmetries
+
+#### Online Transaction Add (COTRN02C) vs Batch Posting (CBTRN02C)
+
+The online program `COTRN02C` writes directly to `TRANSACT` via CICS WRITE but does
+NOT update:
+- `TCATBALF` (transaction category balances)
+- `ACCT-CURR-BAL` in ACCTFILE
+
+In contrast, batch `CBTRN02C` updates all three (TRANSACT, TCATBALF, ACCTFILE).
+
+**Impact:** Online-added transactions are not reflected in interest calculations
+(`CBACT04C` reads `TCATBALF`) until a subsequent batch cycle processes them. This
+means interest for online-added transactions may be delayed by one cycle.
+
+**Migration consideration:** The modernized Transaction Service must decide whether
+to update balances synchronously (like batch) or maintain the async pattern.
+
+### 5.2 Authorization Fraud Detection Flow (app-authorization-ims-db2-mq)
+
+The fraud detection and flagging data flow:
+
+1. `COPAUA0C` (Authorization Decision) checks fraud flags during authorization.
+   - If card or merchant is flagged, declines with reason `5100` (card fraud) or `5200` (merchant fraud)
+   - Source of fraud flags: DB2 table `AUTHFRDS`
+
+2. `COPAUS2C` (Mark Fraud) — online CICS program that allows operators to flag
+   an authorization as fraudulent. Writes/updates `AUTHFRDS` DB2 table.
+
+3. Fraud data lineage:
+   - Detection: External fraud system or operator marks via COPAUS2C → AUTHFRDS (DB2)
+   - Enforcement: COPAUA0C reads AUTHFRDS during auth decision → decline if flagged
+
+> **Open Question:** Confirm whether COPAUA0C reads AUTHFRDS directly during every
+> authorization decision, or whether fraud flags are cached/pre-loaded. The current
+> source code shows fraud reason codes but the DB2 SELECT for fraud checking needs
+> to be verified in the full COPAUA0C source.
+
+### 5.3 Authorization-to-Settlement Handoff
+
+The `DALYTRAN` file (input to CBTRN02C) is marked as "(External feed)" in the
+dataset mapping. The mechanism by which approved authorizations (stored in IMS DB
+by COPAUA0C) become settled transactions in DALYTRAN is NOT documented in this
+codebase.
+
+Possible scenarios:
+1. An external clearing house/payment network produces DALYTRAN
+2. A separate extraction job reads IMS auth records and creates DALYTRAN
+3. DALYTRAN comes from a completely external acquiring system
+
+> **Action Required:** The migration team must determine the DALYTRAN source to
+> design the equivalent event/messaging bridge in the modernized system.
 
 ---
 
