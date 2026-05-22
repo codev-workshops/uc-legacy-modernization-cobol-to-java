@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "source_file": "trantype.txt",
+    "copybook": "CVTRA03Y.cpy",
+    "record_length": 60,
+    "field_count": 3,
+    "record_count": 7,
+    "sha256": "4901bfe7ec3cf3ebc2991aec0b78ee4d9cd1cc062f637d7ccefb693c54688f47"
+  },
+  "fields": [
+    {
+      "name": "TRAN-TYPE",
+      "pic": "X(02)",
+      "pic_type": "alpha",
+      "start": 0,
+      "length": 2,
+      "decimal_places": 0,
+      "description": "Transaction type code"
+    },
+    {
+      "name": "TRAN-TYPE-DESC",
+      "pic": "X(50)",
+      "pic_type": "alpha",
+      "start": 2,
+      "length": 50,
+      "decimal_places": 0,
+      "description": "Transaction type description"
+    },
+    {
+      "name": "FILLER",
+      "pic": "X(08)",
+      "pic_type": "alpha",
+      "start": 52,
+      "length": 8,
+      "decimal_places": 0,
+      "description": "Reserved / unused space"
+    }
+  ],
+  "records": [
+    {
+      "TRAN-TYPE": "01",
+      "TRAN-TYPE-DESC": "Purchase",
+      "FILLER": "00000000"
+    },
+    {
+      "TRAN-TYPE": "02",
+      "TRAN-TYPE-DESC": "Payment",
+      "FILLER": "00000000"
+    },
+    {
+      "TRAN-TYPE": "03",
+      "TRAN-TYPE-DESC": "Credit",
+      "FILLER": "00000000"
+    },
+    {
+      "TRAN-TYPE": "04",
+      "TRAN-TYPE-DESC": "Authorization",
+      "FILLER": "00000000"
+    },
+    {
+      "TRAN-TYPE": "05",
+      "TRAN-TYPE-DESC": "Refund",
+      "FILLER": "00000000"
+    },
+    {
+      "TRAN-TYPE": "06",
+      "TRAN-TYPE-DESC": "Reversal",
+      "FILLER": "00000000"
+    },
+    {
+      "TRAN-TYPE": "07",
+      "TRAN-TYPE-DESC": "Adjustment",
+      "FILLER": "00000000"
+    }
+  ],
+  "control_totals": {}
+}
