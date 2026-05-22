@@ -22,6 +22,7 @@ CardDemo is a comprehensive mainframe application that simulates a credit card m
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
+- [Migration Test Harness](#migration-test-harness)
 - [Project Status](#project-status)
 
 ## Description
@@ -402,6 +403,40 @@ Feel free to raise issues, create code, and submit merge requests for enhancemen
 ## License
 
 This project is intended to be a community resource and is released under the Apache 2.0 license.
+
+## Migration Test Harness
+
+A Python-based test harness is provided for validating the COBOL-to-Java
+migration. See [TEST_STRATEGY.md](TEST_STRATEGY.md) for the full testing
+approach and [RECONCILIATION_CHECKS.md](RECONCILIATION_CHECKS.md) for
+per-job reconciliation rules.
+
+### Quick Start
+
+```bash
+# Generate golden-file JSON from the ASCII sample data
+python test-harness/cobol_parser.py \
+    --input-dir app/data/ASCII --output-dir golden-files
+
+# Run all reconciliation checks against the golden files
+python test-harness/reconciliation.py --data-dir golden-files
+
+# Compare two output directories (golden vs Java output)
+python test-harness/field_comparator.py \
+    --expected golden-files --actual output/java
+```
+
+### Directory Layout
+
+| Path | Description |
+|------|-------------|
+| `test-harness/cobol_parser.py` | Parses fixed-width COBOL data files into JSON using PIC clause definitions |
+| `test-harness/field_comparator.py` | Field-by-field diff with numeric tolerance and position reporting |
+| `test-harness/reconciliation.py` | Record counts, numeric sums, FK integrity, checksums, PK uniqueness |
+| `golden-files/*.json` | Canonical JSON representations of each ASCII data file |
+| `golden-files/*.sha256` | SHA-256 checksums for regression detection |
+| `TEST_STRATEGY.md` | Testing approach: golden-file, differential, batch reconciliation, contract tests |
+| `RECONCILIATION_CHECKS.md` | Per-JCL-job: inputs, outputs, checks, and business rules |
 
 ## Project Status
 
