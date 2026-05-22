@@ -1,0 +1,19 @@
+{
+  "description": "VBRC-FILE from CBACT01C — variable-length records, two types differentiated by WS-RECD-LEN",
+  "rec1": {
+    "recordLength": 12,
+    "fields": [
+      { "name": "VB1-ACCT-ID",             "offset": 0,  "length": 11, "type": "DISPLAY_NUMERIC", "scale": 0, "dateField": false, "occurrences": 1 },
+      { "name": "VB1-ACCT-ACTIVE-STATUS",  "offset": 11, "length": 1,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 }
+    ]
+  },
+  "rec2": {
+    "recordLength": 39,
+    "fields": [
+      { "name": "VB2-ACCT-ID",             "offset": 0,  "length": 11, "type": "DISPLAY_NUMERIC", "scale": 0, "dateField": false, "occurrences": 1 },
+      { "name": "VB2-ACCT-CURR-BAL",       "offset": 11, "length": 12, "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+      { "name": "VB2-ACCT-CREDIT-LIMIT",   "offset": 23, "length": 12, "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+      { "name": "VB2-ACCT-REISSUE-YYYY",   "offset": 35, "length": 4,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 }
+    ]
+  }
+}
