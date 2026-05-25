@@ -438,6 +438,47 @@ python test-harness/field_comparator.py \
 | `TEST_STRATEGY.md` | Testing approach: golden-file, differential, batch reconciliation, contract tests |
 | `RECONCILIATION_CHECKS.md` | Per-JCL-job: inputs, outputs, checks, and business rules |
 
+## Java Modernization — CBACT01C
+
+The `cbact01c-java/` directory contains a Java 17+ rewrite of the COBOL batch program `CBACT01C` (Account File Processor). This demonstrates a modernization pattern for converting mainframe batch COBOL programs to modern Java.
+
+### Structure
+
+```
+cbact01c-java/
+├── pom.xml                          # Maven build (Java 17, JUnit 5)
+├── src/main/java/com/carddemo/batch/
+│   ├── Cbact01cApplication.java     # CLI entry point
+│   ├── model/
+│   │   ├── AccountRecord.java       # CVACT01Y copybook → Java record
+│   │   ├── OutputAccountRecord.java # OUT-ACCT-REC equivalent
+│   │   ├── ArrayRecord.java         # ARR-ARRAY-REC equivalent
+│   │   └── VariableLengthRecord.java# VBRC sealed interface
+│   ├── service/
+│   │   └── AccountFileProcessor.java# Core batch processing logic
+│   └── util/
+│       └── DateFormatter.java       # COBDATFT assembler replacement
+└── src/test/
+    ├── java/com/carddemo/batch/     # 39 JUnit 5 tests
+    └── resources/                   # Sample data + golden files
+```
+
+### Running
+
+```bash
+cd cbact01c-java
+mvn clean package
+java -jar target/cbact01c-java-1.0.0-SNAPSHOT.jar \
+    ../app/data/ASCII/acctdata.txt output.dat array.dat vbrc.dat
+```
+
+### Testing
+
+```bash
+cd cbact01c-java
+mvn test
+```
+
 ## Project Status
 
 The CardDemo application has been enhanced with optional features that extend its functionality:
@@ -446,8 +487,9 @@ The CardDemo application has been enhanced with optional features that extend it
 - Account Extractions using MQ and VSAM
 - Additional JCL Utilities
 - Enhanced Data and Copybook Features
+- **Java 17+ Modernization of CBACT01C** (Account File Processor batch program)
 
 These optional features make CardDemo an even more useful resource for customers looking to modernize their mainframe applications. With modules for DB2, MQ, IMS DB, JCL utilities, and more data formats now available, customers can leverage CardDemo to test a wider array of mainframe migration, refactoring, replatforming, and augmentation scenarios.
 
-Last updated: April 2025
+Last updated: May 2025
 
