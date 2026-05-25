@@ -22,6 +22,7 @@ CardDemo is a comprehensive mainframe application that simulates a credit card m
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
+- [Migration Test Harness](#migration-test-harness)
 - [Project Status](#project-status)
 
 ## Description
@@ -354,6 +355,26 @@ Admin users can perform the following functions:
 
 For questions, issues, or improvement requests, please raise an issue in the repository with detailed information about your concern. The maintainers will respond according to availability.
 
+## Modernization Planning
+
+The `docs/` directory contains detailed modernization planning artifacts for migrating CardDemo from COBOL/CICS/VSAM to Java microservices:
+
+| Document | Purpose |
+|----------|---------|
+| [Modernization Blueprint](./docs/MODERNIZATION_BLUEPRINT.md) | Evaluates Strangler, Replatform, Refactor, and Rewrite strategies for each functional area with recommendations |
+| [Domain Decomposition](./docs/DOMAIN_DECOMPOSITION.md) | Identifies bounded contexts via copybook sharing, JCL grouping, and data file analysis; maps to candidate microservices |
+| [Cutover Plan](./docs/CUTOVER_PLAN.md) | Sequences migration into 4 phases with programs, data stores, integration bridges, rollback plans, and acceptance criteria |
+| [Risk Register](./docs/RISK_REGISTER.md) | Top 10 migration risks with likelihood, impact, mitigation strategies, and early warning indicators |
+
+Supporting analysis documents:
+
+| Document | Purpose |
+|----------|---------|
+| [Application Inventory](./docs/APPLICATION_INVENTORY.md) | Catalog of all 44 COBOL programs, 44 JCL jobs, and supporting artifacts |
+| [Dependency Map](./docs/DEPENDENCY_MAP.md) | Inter-program calls, dataset lineage, batch pipeline flows, and copybook matrix |
+| [Data Dictionary](./docs/DATA_DICTIONARY.md) | Field-level documentation of all copybook record layouts |
+| [Hotspot Report](./docs/HOTSPOT_REPORT.md) | Top 10 most complex programs ranked by LOC, copybooks, I/O, nesting, and dependencies |
+
 ## Roadmap
 
 The following features are planned for upcoming releases:
@@ -383,27 +404,39 @@ Feel free to raise issues, create code, and submit merge requests for enhancemen
 
 This project is intended to be a community resource and is released under the Apache 2.0 license.
 
-## COBOL-to-Java Test Harness
+## Migration Test Harness
 
-The `test-harness/` directory contains a Java test harness for validating the Java rewrite of COBOL batch programs against known-good COBOL output. It compares output files field by field using record layouts derived directly from the COBOL copybooks and FD sections.
+A Python-based test harness is provided for validating the COBOL-to-Java
+migration. See [TEST_STRATEGY.md](TEST_STRATEGY.md) for the full testing
+approach and [RECONCILIATION_CHECKS.md](RECONCILIATION_CHECKS.md) for
+per-job reconciliation rules.
 
-**Key features:**
-- Hand-rolled ASCII zoned decimal (sign overpunch) and COMP-3 (packed decimal) codecs
-- Type-aware field comparison with configurable numeric tolerance
-- CBACT01C edge case handling (zero debit substitution, date truncation, array slot population)
-- CBTRN02C/CBACT04C business rule validation (record counts, balance integrity, credit limits, expiration)
-- Detailed comparison reports with per-field MATCH/MISMATCH/SKIPPED status
-- JSON layout definitions for external tooling
+### Quick Start
 
-**Quick start:**
 ```bash
-cd test-harness
-mvn test                    # Run 64 unit tests
-mvn exec:java -Dexec.mainClass=com.carddemo.harness.Main \
-    -Dexec.args="--cobol-dir=<path> --java-dir=<path>"
+# Generate golden-file JSON from the ASCII sample data
+python test-harness/cobol_parser.py \
+    --input-dir app/data/ASCII --output-dir golden-files
+
+# Run all reconciliation checks against the golden files
+python test-harness/reconciliation.py --data-dir golden-files
+
+# Compare two output directories (golden vs Java output)
+python test-harness/field_comparator.py \
+    --expected golden-files --actual output/java
 ```
 
-See [`test-harness/README.md`](test-harness/README.md) for full documentation.
+### Directory Layout
+
+| Path | Description |
+|------|-------------|
+| `test-harness/cobol_parser.py` | Parses fixed-width COBOL data files into JSON using PIC clause definitions |
+| `test-harness/field_comparator.py` | Field-by-field diff with numeric tolerance and position reporting |
+| `test-harness/reconciliation.py` | Record counts, numeric sums, FK integrity, checksums, PK uniqueness |
+| `golden-files/*.json` | Canonical JSON representations of each ASCII data file |
+| `golden-files/*.sha256` | SHA-256 checksums for regression detection |
+| `TEST_STRATEGY.md` | Testing approach: golden-file, differential, batch reconciliation, contract tests |
+| `RECONCILIATION_CHECKS.md` | Per-JCL-job: inputs, outputs, checks, and business rules |
 
 ## Project Status
 
