@@ -1,0 +1,15 @@
+[
+  { "name": "ACCT-ID",                "offset": 0,   "length": 11,  "type": "DISPLAY_NUMERIC", "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-ACTIVE-STATUS",     "offset": 11,  "length": 1,   "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-CURR-BAL",          "offset": 12,  "length": 12,  "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-CREDIT-LIMIT",      "offset": 24,  "length": 12,  "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-CASH-CREDIT-LIMIT", "offset": 36,  "length": 12,  "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-OPEN-DATE",         "offset": 48,  "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-EXPIRAION-DATE",    "offset": 58,  "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-REISSUE-DATE",      "offset": 68,  "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": true,  "occurrences": 1 },
+  { "name": "ACCT-CURR-CYC-CREDIT",   "offset": 78,  "length": 12,  "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-CURR-CYC-DEBIT",    "offset": 90,  "length": 12,  "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-ADDR-ZIP",          "offset": 102, "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "ACCT-GROUP-ID",          "offset": 112, "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "FILLER",                 "offset": 122, "length": 178, "type": "FILLER",           "scale": 0, "dateField": false, "occurrences": 1 }
+]

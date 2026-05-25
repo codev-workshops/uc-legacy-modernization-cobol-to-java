@@ -383,6 +383,28 @@ Feel free to raise issues, create code, and submit merge requests for enhancemen
 
 This project is intended to be a community resource and is released under the Apache 2.0 license.
 
+## COBOL-to-Java Test Harness
+
+The `test-harness/` directory contains a Java test harness for validating the Java rewrite of COBOL batch programs against known-good COBOL output. It compares output files field by field using record layouts derived directly from the COBOL copybooks and FD sections.
+
+**Key features:**
+- Hand-rolled ASCII zoned decimal (sign overpunch) and COMP-3 (packed decimal) codecs
+- Type-aware field comparison with configurable numeric tolerance
+- CBACT01C edge case handling (zero debit substitution, date truncation, array slot population)
+- CBTRN02C/CBACT04C business rule validation (record counts, balance integrity, credit limits, expiration)
+- Detailed comparison reports with per-field MATCH/MISMATCH/SKIPPED status
+- JSON layout definitions for external tooling
+
+**Quick start:**
+```bash
+cd test-harness
+mvn test                    # Run 64 unit tests
+mvn exec:java -Dexec.mainClass=com.carddemo.harness.Main \
+    -Dexec.args="--cobol-dir=<path> --java-dir=<path>"
+```
+
+See [`test-harness/README.md`](test-harness/README.md) for full documentation.
+
 ## Project Status
 
 The CardDemo application has been enhanced with optional features that extend its functionality:

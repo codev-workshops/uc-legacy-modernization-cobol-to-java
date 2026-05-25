@@ -1,0 +1,16 @@
+[
+  { "name": "TRAN-ID",             "offset": 0,   "length": 16,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-TYPE-CD",        "offset": 16,  "length": 2,   "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-CAT-CD",         "offset": 18,  "length": 4,   "type": "DISPLAY_NUMERIC", "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-SOURCE",         "offset": 22,  "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-DESC",           "offset": 32,  "length": 100, "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-AMT",            "offset": 132, "length": 11,  "type": "DISPLAY_SIGNED",  "scale": 2, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-MERCHANT-ID",    "offset": 143, "length": 9,   "type": "DISPLAY_NUMERIC", "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-MERCHANT-NAME",  "offset": 152, "length": 50,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-MERCHANT-CITY",  "offset": 202, "length": 50,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-MERCHANT-ZIP",   "offset": 252, "length": 10,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-CARD-NUM",       "offset": 262, "length": 16,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-ORIG-TS",        "offset": 278, "length": 26,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "TRAN-PROC-TS",        "offset": 304, "length": 26,  "type": "ALPHANUMERIC",    "scale": 0, "dateField": false, "occurrences": 1 },
+  { "name": "FILLER",              "offset": 330, "length": 20,  "type": "FILLER",           "scale": 0, "dateField": false, "occurrences": 1 }
+]
