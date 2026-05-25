@@ -1,0 +1,16 @@
+spring:
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+  datasource:
+    url: jdbc:h2:mem:batchdb
+    driver-class-name: org.h2.Driver
+
+app:
+  files:
+    dalytran: ${DALYTRAN_FILE:dailytran.txt}
+    xreffile: ${XREF_FILE:cardxref.txt}
+    acctfile: ${ACCT_FILE:acctdata.txt}
+  chunk-size: 10
