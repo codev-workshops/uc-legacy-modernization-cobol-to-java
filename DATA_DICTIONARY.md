@@ -83,7 +83,7 @@ Record: `CUSTOMER-RECORD`
 
 ### 2.2 CUSTREC.cpy — Customer Record (alternate copy)
 
-Identical structure to CVCUS01Y.cpy. Used in CBSTM03A for statement generation. Field `CUST-DOB-YYYYMMDD` uses a slightly different name format from `CUST-DOB-YYYY-MM-DD` in CVCUS01Y.
+Identical structure to CVCUS01Y.cpy. Used only in CBSTM03A for statement generation. Field `CUST-DOB-YYYYMMDD` uses a slightly different name format from `CUST-DOB-YYYY-MM-DD` in CVCUS01Y. **Recommendation:** Consolidate with CVCUS01Y during modernization to eliminate this duplication.
 
 ---
 
@@ -160,6 +160,8 @@ Record: `TRAN-RECORD`
 Record: `DALYTRAN-RECORD`
 
 Same structure as CVTRA05Y with `DALYTRAN-` prefix. Used for daily transaction input files before posting to the master TRANSACT file.
+
+> **Integration note:** DALYTRAN.PS is the critical integration seam between the real-time authorization pipeline (MQ/IMS) and the nightly batch posting pipeline (VSAM). Its origin — how authorized transactions flow from IMS into this file — is outside the application boundary (external acquiring network feed). This undocumented bridge is important for modernization planning.
 
 | Field Name | PIC Clause | Data Type | Length | Business Meaning | Validation / Notes |
 |------------|-----------|-----------|--------|-----------------|-------------------|
@@ -247,6 +249,8 @@ Working structure for statement printing (used by CBSTM03A).
 
 ## 5. Authorization Entity (IMS)
 
+> The IMS segments defined in CIPAUSMY and CIPAUDTY correspond to physical database DBPAUTP0 (see `app/app-authorization-ims-db2-mq/ims/DBPAUTP0.dbd`). Root segment = PAUTSUM0 (keyed by ACCT-ID), child segment = PAUTDTL1 (keyed by PA-AUTH-DATE-9C + PA-AUTH-TIME-9C). Index database is DBPAUTX0.
+
 ### 5.1 CIPAUSMY.cpy — Pending Authorization Summary (IMS Root Segment)
 
 | Field Name | PIC Clause | Data Type | Length | Business Meaning | Validation / Notes |
@@ -297,6 +301,8 @@ Working structure for statement printing (used by CBSTM03A).
 | PA-AUTH-FRAUD | PIC X(01) | Alphanumeric | 1 | Fraud flag | 88: F=Fraud Confirmed, R=Fraud Removed |
 | PA-FRAUD-RPT-DATE | PIC X(08) | Alphanumeric | 8 | Fraud report date | Format: YYYYMMDD |
 | FILLER | PIC X(17) | Filler | 17 | Reserved | |
+
+> **Note:** COPAUS2C (fraud marking) has no associated BMS map. It is invoked programmatically from COPAUS1C via XCTL, not as a standalone CICS transaction. It uses CIPAUDTY for the IMS detail segment and performs a DB2 INSERT into CARDDEMO.AUTHFRDS.
 
 ### 5.3 CCPAURQY.cpy — Authorization MQ Request
 
@@ -366,7 +372,7 @@ Record: `SEC-USER-DATA`
 
 ### 6.2 UNUSED1Y.cpy — Unused Security Record
 
-Identical structure to CSUSR01Y with `UNUSED-` prefix. Appears to be a deprecated or placeholder copy.
+Identical structure to CSUSR01Y with `UNUSED-` prefix. **Dead code candidate:** No program references this copybook. Recommend removal during modernization.
 
 ---
 
@@ -541,3 +547,75 @@ PCBs for sequential GSAM file access during database unload/load operations.
 | FUNC-REPL | 'REPL' | Replace |
 | FUNC-ISRT | 'ISRT' | Insert |
 | FUNC-DLET | 'DLET' | Delete |
+
+---
+
+## 11. DB2 Table Definitions
+
+### 11.1 CARDDEMO.AUTHFRDS — Authorization Fraud Detail
+
+Source: `app/app-authorization-ims-db2-mq/ddl/AUTHFRDS.ddl`
+
+| Column | DB2 Type | Business Meaning |
+|--------|----------|------------------|
+| CARD_NUM | CHAR(16) NOT NULL | Card number (PK part 1) |
+| AUTH_TS | TIMESTAMP NOT NULL | Authorization timestamp (PK part 2) |
+| AUTH_TYPE | CHAR(4) | Authorization type code |
+| CARD_EXPIRY_DATE | CHAR(4) | Card expiry (YYMM) |
+| MESSAGE_TYPE | CHAR(6) | ISO 8583 message type |
+| MESSAGE_SOURCE | CHAR(6) | Message source system |
+| AUTH_ID_CODE | CHAR(6) | Authorization ID returned to merchant |
+| AUTH_RESP_CODE | CHAR(2) | Response code ('00' = approved) |
+| AUTH_RESP_REASON | CHAR(4) | Detailed decline reason |
+| PROCESSING_CODE | CHAR(6) | ISO 8583 processing code |
+| TRANSACTION_AMT | DECIMAL(12,2) | Requested transaction amount |
+| APPROVED_AMT | DECIMAL(12,2) | Approved amount (may differ from requested) |
+| MERCHANT_CATAGORY_CODE | CHAR(4) | Merchant category code (MCC) |
+| ACQR_COUNTRY_CODE | CHAR(3) | Acquirer country code |
+| POS_ENTRY_MODE | SMALLINT | Point of sale entry mode |
+| MERCHANT_ID | CHAR(15) | Merchant identifier |
+| MERCHANT_NAME | VARCHAR(22) | Merchant name |
+| MERCHANT_CITY | CHAR(13) | Merchant city |
+| MERCHANT_STATE | CHAR(02) | Merchant state |
+| MERCHANT_ZIP | CHAR(09) | Merchant ZIP code |
+| TRANSACTION_ID | CHAR(15) | Transaction ID |
+| MATCH_STATUS | CHAR(1) | Match status (P/D/E/M) |
+| AUTH_FRAUD | CHAR(1) | Fraud flag (F=Fraud Confirmed, R=Removed) |
+| FRAUD_RPT_DATE | DATE | Fraud report date |
+| ACCT_ID | DECIMAL(11) | Account identifier |
+| CUST_ID | DECIMAL(9) | Customer identifier |
+
+**Primary Key:** (CARD_NUM, AUTH_TS)
+
+**Index:** `CARDDEMO.XAUTHFRD` — UNIQUE on (CARD_NUM ASC, AUTH_TS DESC) — Source: `XAUTHFRD.ddl`
+
+**DCL Grants:** `AUTHFRDS.dcl` contains DCLGEN-generated COBOL host variable declarations (record `DCLAUTHFRDS`) mapping DB2 columns to COBOL PIC clauses with COMP-3 for decimal fields.
+
+### 11.2 CARDDEMO.TRANSACTION_TYPE — Transaction Type Master
+
+Source: `app/app-transaction-type-db2/ddl/TRNTYPE.ddl`
+
+| Column | DB2 Type | Business Meaning |
+|--------|----------|------------------|
+| TR_TYPE | CHAR(2) NOT NULL | Transaction type code (PK) |
+| TR_DESCRIPTION | VARCHAR(50) NOT NULL | Type description (e.g. 'Purchase', 'Cash Advance') |
+
+**Primary Key:** (TR_TYPE)
+
+**Index:** `CARDDEMO.XTRAN_TYPE` — UNIQUE on (TR_TYPE ASC) — Source: `XTRNTYPE.ddl`
+
+### 11.3 CARDDEMO.TRANSACTION_TYPE_CATEGORY — Transaction Type Category
+
+Source: `app/app-transaction-type-db2/ddl/TRNTYCAT.ddl`
+
+| Column | DB2 Type | Business Meaning |
+|--------|----------|------------------|
+| TRC_TYPE_CODE | CHAR(2) NOT NULL | Transaction type code (PK part 1, FK to TRANSACTION_TYPE) |
+| TRC_TYPE_CATEGORY | CHAR(4) NOT NULL | Category code (PK part 2) |
+| TRC_CAT_DATA | VARCHAR(50) NOT NULL | Category description (e.g. 'Retail Purchase', 'Restaurant') |
+
+**Primary Key:** (TRC_TYPE_CODE, TRC_TYPE_CATEGORY)
+
+**Foreign Key:** TRC_TYPE_CODE REFERENCES CARDDEMO.TRANSACTION_TYPE (TR_TYPE) ON DELETE RESTRICT
+
+**Index:** `CARDDEMO.X_TRAN_TYPE_CATG` — UNIQUE on (TRC_TYPE_CODE ASC, TRC_TYPE_CATEGORY ASC) — Source: `XTRNTYCAT.ddl`

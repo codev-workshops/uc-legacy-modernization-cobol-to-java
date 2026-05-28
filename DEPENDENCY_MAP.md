@@ -36,6 +36,8 @@ CORPT00C ──CALL──► CSUTLDTC   (date validation utility, 2 calls)
 COTRN02C ──CALL──► CSUTLDTC   (date validation utility, 2 calls)
 ```
 
+> **Note:** COBDATFT and MVSWAIT are assembler programs in `app/asm/` with macro definitions in `app/maclib/` (COCDATFT.mac, ASMWAIT.mac). These require manual rewriting during modernization — no COBOL-to-Java conversion tool handles assembler.
+
 ### 1.2 CICS XCTL Transfers (Online Program Navigation)
 
 ```
@@ -78,6 +80,8 @@ COCRDUPC ──XCTL──► CDEMO-TO-PROGRAM  (return to caller)
 
 COTRTLIC ──XCTL──► (dynamic)         (return or navigate)
 COTRTUPC ──XCTL──► (dynamic)         (return or navigate)
+
+COPAUS1C ──XCTL──► COPAUS2C   (mark authorization as fraud)
 ```
 
 ### 1.3 MQ Interactions (COPAUA0C)
@@ -180,7 +184,9 @@ CODATE01 ──MQCLOSE─►  All queues
 
 | Dataset | Programs That Read | Programs That Write | JCL Jobs |
 |---------|-------------------|--------------------|--------------------|
-| AWS.M2.CARDDEMO.DALYTRAN.PS | CBTRN01C, CBTRN02C | *(external feed)* | POSTTRAN.jcl |
+| AWS.M2.CARDDEMO.DALYTRAN.PS | CBTRN01C*, CBTRN02C | *(external feed)* | POSTTRAN.jcl |
+
+> *CBTRN01C appears superseded — only CBTRN02C is referenced by POSTTRAN.jcl.
 | AWS.M2.CARDDEMO.ACCTDATA.PS | — | — | ACCTFILE.jcl (REPRO source) |
 | AWS.M2.CARDDEMO.CARDDATA.PS | — | — | CARDFILE.jcl (REPRO source) |
 | AWS.M2.CARDDEMO.CUSTDATA.PS | — | — | CUSTFILE.jcl (REPRO source) |
@@ -360,6 +366,13 @@ CODATE01 ──MQCLOSE─►  All queues
  │                            │ Reads/Writes: IMS auth DB          │
  │                            └──MQ──► External System (reply)     │
  │                                                                 │
+ │  ┌─────────────────────────────────────────────────────────────┐ │
+ │  │  ⚠ Integration Seam:                                       │ │
+ │  │  COPAUA0C → IMS DB → [unknown extraction] → DALYTRAN.PS    │ │
+ │  │  The mechanism that moves authorized transactions from IMS  │ │
+ │  │  to the DALYTRAN.PS daily feed is external to this codebase.│ │
+ │  └─────────────────────────────────────────────────────────────┘ │
+ │                                                                 │
  │  Online (CICS screens):                                         │
  │  ──────────────────────                                         │
  │  COPAUS0C ─► Auth summary browse (IMS + BMS)                    │
@@ -439,3 +452,71 @@ CODATE01 ──MQCLOSE─►  All queues
 | COMEN02Y | COMEN01C |
 | COADM02Y | COADM01C |
 | IMSFUNCS | DBUNLDGS, PAUDBLOD, PAUDBUNL |
+
+---
+
+## 5.1 Shared JCL Procedures
+
+| Procedure | Location | Used By |
+|-----------|----------|---------|
+| REPROC.prc | `app/proc/` | TRANBKP.jcl, TRANREPT.jcl, PRTCATBL.jcl |
+| TRANREPT.prc | `app/proc/` | TRANREPT.jcl |
+
+---
+
+## 6. Scheduler Job Dependency Graph
+
+CA-7 trigger chains extracted from `app/scheduler/CardDemo.ca7`.
+
+### 6.1 Daily Batch Pipeline Chain
+
+```
+CLOSEFIL (SCHID=030)
+    └──► CBPAUP0J (purge expired IMS auths)
+            └──► POSTTRAN (PGM=CBTRN02C: post daily transactions)
+                    └──► WAITSTEP (delay)
+                            └──► OPENFIL (reopen CICS files)
+```
+
+### 6.2 Statement Generation Chain
+
+```
+CLOSEFIL (SCHID=030)
+    └──► CREASTMT (sort + prep statement data)
+            └──► TXT2PDF1 (convert text → PDF)
+                    └──► WAITSTEP
+                            └──► OPENFIL
+```
+
+### 6.3 Data Setup Chain
+
+```
+CLOSEFIL (SCHID=030)
+    └──► TRANTYPE (load transaction types)
+            └──► WAITSTEP
+                    ├──► CLOSEFIL1 (SCHID=031)
+                    │       └──► TRANCATG → WAITSTEP → CLOSEFIL
+                    │               └──► READACCT → READCARD → READCUST → READXREF → WAITSTEP → OPENFIL
+                    └──► CLOSEFIL2 (SCHID=032)
+                            └──► TCATBALF → WAITSTEP → CLOSEFIL → ...
+```
+
+### 6.4 Category Balance Report Chain
+
+```
+CLOSEFIL (SCHID=031)
+    └──► PRTCATBL (print category balances)
+```
+
+**Control-M equivalent:** `app/scheduler/CardDemo.controlm` contains the same scheduling definitions in Control-M format.
+
+---
+
+## 7. CSD Resource Cross-Reference
+
+| CSD File | Location | Purpose |
+|----------|----------|---------|
+| CARDDEMO.CSD | `app/csd/` | Base application CICS resource definitions — transaction IDs, program definitions, file definitions for all main-application CICS programs |
+| CRDDEMO2.csd | `app/app-authorization-ims-db2-mq/csd/` | Authorization module CICS resources — additional transaction/program/file definitions for COPAUA0C, COPAUS0C, COPAUS1C, COPAUS2C |
+
+> **Note:** A full CSD→program→file mapping should be validated to ensure all CICS resources defined in the CSD files have corresponding programs in the codebase and that no programs are missing CSD entries.

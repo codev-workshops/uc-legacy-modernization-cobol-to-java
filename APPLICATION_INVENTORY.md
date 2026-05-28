@@ -16,10 +16,20 @@
 | 8 | CBSTM03A.CBL | Print account statements from transaction data in plain text and HTML formats | Batch | **Write:** STMTFILE (seq), HTMLFILE (seq) · **Read** (via CBSTM03B): TRNXFILE, XREFFILE, CUSTFILE, ACCTFILE | COSTM01, CVACT03Y, CUSTREC, CVACT01Y |
 | 9 | CBSTM03B.CBL | Subroutine for CBSTM03A — file I/O handler for transaction report data | Batch (Sub) | **Read:** TRNXFILE (VSAM KSDS), XREFFILE (VSAM KSDS), CUSTFILE (VSAM KSDS), ACCTFILE (VSAM KSDS) | *(none — inline FDs)* |
 | 10 | CBTRN01C.cbl | Post records from daily transaction file — validates and writes to transaction master | Batch | **Read:** DALYTRAN (seq), CUSTFILE (VSAM), XREFFILE (VSAM), CARDFILE (VSAM), ACCTFILE (VSAM) · **Write:** TRANFILE (VSAM KSDS) | CVTRA06Y, CVCUS01Y, CVACT03Y, CVACT02Y, CVACT01Y, CVTRA05Y |
+
+> **Note:** CBTRN01C appears to be superseded by CBTRN02C. Only CBTRN02C is referenced in POSTTRAN.jcl and the daily batch pipeline. CBTRN01C may be dead code — confirm before investing modernization effort.
+
 | 11 | CBTRN02C.cbl | Post records from daily transaction file — enhanced version with reject file, account updates, and category balance updates | Batch | **Read:** DALYTRAN (seq), XREFFILE (VSAM), ACCTFILE (VSAM) · **Write:** TRANFILE (VSAM), DALYREJS (seq), TCATBALF (VSAM) | CVTRA06Y, CVTRA05Y, CVACT03Y, CVACT01Y, CVTRA01Y |
 | 12 | CBTRN03C.cbl | Print transaction detail report with type/category lookups and date filtering | Batch | **Read:** TRANFILE (seq), CARDXREF (VSAM KSDS), TRANTYPE (VSAM KSDS), TRANCATG (VSAM KSDS), DATEPARM (seq) · **Write:** TRANREPT (seq) | CVTRA05Y, CVACT03Y, CVTRA03Y, CVTRA04Y, CVTRA07Y |
 | 13 | COBSWAIT.cbl | Utility program to wait (parameter in centiseconds) | Batch (Util) | *(none)* | *(none)* |
 | 14 | CSUTLDTC.cbl | Date validation utility — converts and validates dates using CEEDAYS | Batch (Util) | *(none)* | *(none)* |
+
+### 1.3 Assembler Programs
+
+| # | Filename | Purpose | Classification | Location | Macro |
+|---|----------|---------|----------------|----------|-------|
+| A1 | COBDATFT.asm | Date format conversion utility (called by CBACT01C) | Assembler Utility | `app/asm/` | COCDATFT.mac (`app/maclib/`) |
+| A2 | MVSWAIT.asm | Timer/wait routine (called by COBSWAIT) | Assembler Utility | `app/asm/` | ASMWAIT.mac (`app/maclib/`) |
 
 ### 1.2 Online (CICS) Programs
 
@@ -59,6 +69,47 @@
 | 37 | DBUNLDGS.CBL | Unload IMS database to GSAM files (root and child segments) | Batch (IMS) | **IMS DB:** DL/I GN, GNP · **Write:** PASFILOP (GSAM), PADFILOP (GSAM) | IMSFUNCS, CIPAUSMY, CIPAUDTY, PAUTBPCB, PASFLPCB, PADFLPCB |
 | 38 | PAUDBLOD.CBL | Load IMS database from flat files | Batch (IMS) | **Read:** INFILE1, INFILE2 (seq) · **IMS DB:** DL/I ISRT, GU | IMSFUNCS, CIPAUSMY, CIPAUDTY, PAUTBPCB |
 | 39 | PAUDBUNL.CBL | Unload IMS database to flat files (root and child segments) | Batch (IMS) | **IMS DB:** DL/I GN, GNP · **Write:** OPFILE1, OPFILE2 (seq) | IMSFUNCS, CIPAUSMY, CIPAUDTY, PAUTBPCB |
+
+### 2.4 IMS Database Definitions
+
+Files in `app/app-authorization-ims-db2-mq/ims/`:
+
+| File | Type | Purpose |
+|------|------|---------|
+| DBPAUTP0.dbd | DBD | Primary authorization HIDAM database |
+| DBPAUTX0.dbd | DBD | Authorization index database |
+| PADFLDBD.DBD | DBD | GSAM output for detail segments |
+| PASFLDBD.DBD | DBD | GSAM output for summary segments |
+| PSBPAUTB.psb | PSB | Batch authorization PSB |
+| PSBPAUTL.psb | PSB | Load authorization PSB |
+| PAUTBUNL.PSB | PSB | Unload authorization PSB |
+| DLIGSAMP.PSB | PSB | GSAM sample PSB |
+
+### 2.5 DB2 Schema Definitions
+
+**Authorization module** (`app/app-authorization-ims-db2-mq/`):
+
+| File | Location | Purpose |
+|------|----------|---------|
+| AUTHFRDS.ddl | `ddl/` | CREATE TABLE for CARDDEMO.AUTHFRDS (fraud/authorization detail) |
+| XAUTHFRD.ddl | `ddl/` | CREATE UNIQUE INDEX on AUTHFRDS (CARD_NUM ASC, AUTH_TS DESC) |
+| AUTHFRDS.dcl | `dcl/` | DCLGEN — COBOL host variable declarations for AUTHFRDS |
+
+**Transaction Type module** (`app/app-transaction-type-db2/`):
+
+| File | Location | Purpose |
+|------|----------|---------|
+| TRNTYPE.ddl | `ddl/` | CREATE TABLE for CARDDEMO.TRANSACTION_TYPE |
+| TRNTYCAT.ddl | `ddl/` | CREATE TABLE for CARDDEMO.TRANSACTION_TYPE_CATEGORY (FK to TRANSACTION_TYPE) |
+| XTRNTYPE.ddl | `ddl/` | CREATE UNIQUE INDEX on TRANSACTION_TYPE (TR_TYPE ASC) |
+| XTRNTYCAT.ddl | `ddl/` | CREATE UNIQUE INDEX on TRANSACTION_TYPE_CATEGORY (TRC_TYPE_CODE ASC, TRC_TYPE_CATEGORY ASC) |
+
+### 2.6 CSD Resource Definitions
+
+| File | Location | Purpose |
+|------|----------|---------|
+| CARDDEMO.CSD | `app/csd/` | Base application CICS resource definitions (transactions, programs, files) |
+| CRDDEMO2.csd | `app/app-authorization-ims-db2-mq/csd/` | Authorization module CICS resources |
 
 ### 2.2 Transaction Type DB2 Module (`app/app-transaction-type-db2/`)
 
@@ -157,9 +208,118 @@
 | 45 | MNTTRDB2.jcl | Maintain transaction type DB2 data (batch add/update/delete) | STEP1 (IKJEFT01: run COBTUPDT) |
 | 46 | TRANEXTR.jcl | Extract and backup transaction type data | STEP10 (IEBGENER: backup TRANTYPE), STEP20 (IEBGENER: backup TRANCATG), STEP30 (IEFBR14: delete originals) |
 
+### 3.6 Shared JCL Procedures
+
+Files in `app/proc/`:
+
+| Procedure | Purpose | Used By |
+|-----------|---------|---------|
+| REPROC.prc | Reusable IDCAMS REPRO procedure | TRANBKP.jcl, TRANREPT.jcl, PRTCATBL.jcl |
+| TRANREPT.prc | Transaction report procedure | TRANREPT.jcl |
+
 ---
 
-## 4. Summary Statistics
+## 5. Scheduler Definitions
+
+Files in `app/scheduler/`:
+
+| File | Purpose |
+|------|---------|
+| CardDemo.ca7 | CA-7 scheduling definitions — defines trigger chains for the daily batch pipeline |
+| CardDemo.controlm | Control-M equivalent definitions |
+
+**Key CA-7 trigger chains:**
+
+```
+Chain 1 (Daily Batch):
+  CLOSEFIL → CBPAUP0J → POSTTRAN → WAITSTEP → OPENFIL
+
+Chain 2 (Statement Generation):
+  CLOSEFIL → CREASTMT → TXT2PDF1 → WAITSTEP → OPENFIL
+
+Chain 3 (Category Balance Report):
+  CLOSEFIL → PRTCATBL → ...
+
+Chain 4 (Data Setup):
+  CLOSEFIL → TRANTYPE → WAITSTEP → CLOSEFIL1/CLOSEFIL2
+  CLOSEFIL1 → TRANCATG → WAITSTEP → CLOSEFIL → READACCT → READCARD → READCUST → READXREF → WAITSTEP → OPENFIL
+  CLOSEFIL2 → TCATBALF → WAITSTEP → CLOSEFIL → ...
+```
+
+---
+
+## 6. Sample Data Files
+
+EBCDIC-encoded sample datasets in `app/data/EBCDIC/`:
+
+| File | Description |
+|------|-----------|
+| AWS.M2.CARDDEMO.ACCDATA.PS | Account data (variant) |
+| AWS.M2.CARDDEMO.ACCTDATA.PS | Account data (primary) |
+| AWS.M2.CARDDEMO.CARDDATA.PS | Card data |
+| AWS.M2.CARDDEMO.CARDXREF.PS | Card cross-reference data |
+| AWS.M2.CARDDEMO.CUSTDATA.PS | Customer data |
+| AWS.M2.CARDDEMO.DALYTRAN.PS | Daily transaction feed |
+| AWS.M2.CARDDEMO.DISCGRP.PS | Discount group data |
+| AWS.M2.CARDDEMO.TCATBALF.PS | Transaction category balance data |
+| AWS.M2.CARDDEMO.TRANCATG.PS | Transaction category data |
+| AWS.M2.CARDDEMO.TRANTYPE.PS | Transaction type data |
+| AWS.M2.CARDDEMO.USRSEC.PS | User security data |
+
+> **Note:** AWS.M2.CARDDEMO.ACCDATA.PS appears to be a stale/misspelled variant of ACCTDATA.PS — no JCL or program references ACCDATA.
+
+> **Note:** No sample data exists for IMS authorization database segments, DB2 tables (AUTHFRDS, TR_TYPE, TR_CAT), or MQ messages.
+
+---
+
+## 7. Test Harness
+
+A Java-based test harness exists in `test-harness/`:
+
+- **64 unit tests** that validate Java rewrites against known-good COBOL output
+- Field-by-field comparison using record layouts from COBOL copybooks and FD sections
+- **Coverage:** CBACT01C (edge cases: zero debit substitution, date truncation, array slots), CBTRN02C/CBACT04C (business rules: record counts, balance integrity, credit limits, expiration)
+- Hand-rolled ASCII zoned decimal and COMP-3 codecs
+- See `test-harness/README.md` for details
+
+---
+
+## 8. Scope Boundaries
+
+Planned but unimplemented features (from README.md roadmap):
+
+- **DB2 Rewards** — stored procedures, functions, dynamic SQL
+- **IMS DC** — Data Communications (IMS online transaction processing)
+- **FTP/SFTP integration** — file transfer automation
+- **Web Service connectivity** — external service interfaces
+
+---
+
+## 9. Summary Statistics
+
+| Metric | Count |
+|--------|-------|
+| Total programs | 46 (44 COBOL + 2 Assembler) |
+| COBOL batch programs | 19 |
+| COBOL online (CICS) programs | 17 |
+| COBOL online (CICS/IMS) programs | 4 |
+| COBOL online (CICS/MQ) programs | 2 |
+| COBOL online (CICS/DB2) programs | 2 |
+| COBOL utility/subroutine programs | 3 |
+| Assembler programs | 2 |
+| IMS definitions (DBD/PSB) | 8 |
+| DB2 schema files (DDL/DCL) | 7 |
+| CSD definitions | 2 |
+| JCL jobs (main) | 38 |
+| JCL jobs (sub-applications) | 8 |
+| Total JCL jobs | 46 |
+| JCL procedures | 2 |
+| Scheduler definitions | 2 |
+| Copybooks — business/utility (`app/cpy/`) | 30 |
+| Copybooks — BMS-generated (`cpy-bms/`) | 21 (17 base + 2 auth + 2 DB2) |
+| Copybooks — sub-application | 13 |
+| BMS maps | 21 (17 base + 2 auth + 2 DB2) |
+| Sample data files (EBCDIC) | 11 |
 
 | Metric | Count |
 |--------|-------|

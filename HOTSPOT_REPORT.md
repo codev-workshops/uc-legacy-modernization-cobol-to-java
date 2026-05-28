@@ -124,7 +124,7 @@ Each program is scored across five dimensions. The composite score is a weighted
 - **52 IF statements**, **10 EVALUATE blocks**
 - Complex authorization rules including credit limit checks, card status, fraud detection
 
-**Modernization risk:** VERY HIGH — Most architecturally complex program. Involves MQ messaging, IMS database, and CICS. Requires understanding of all three middleware stacks.
+**Modernization risk:** VERY HIGH — Most architecturally complex program. Involves MQ messaging, IMS database, and CICS. Requires understanding of all three middleware stacks. IMS DBD/PSB definitions in `app/app-authorization-ims-db2-mq/ims/` (DBPAUTP0.dbd, PSBPAUTB.psb, etc.) must be analyzed to plan the hierarchical-to-relational schema migration before this program can be modernized.
 
 ---
 
@@ -304,7 +304,7 @@ Each program is scored across five dimensions. The composite score is a weighted
 | Priority | Program | Rationale |
 |----------|---------|-----------|
 | 14 | **COTRTLIC / COTRTUPC** | DB2-dependent. Requires DB2-to-RDBMS SQL migration and cursor management replacement. |
-| 15 | **CBTRN01C / CBTRN02C** | Daily transaction posting. Core batch pipeline. Requires careful testing of balance calculations and reject handling. |
+| 15 | **CBTRN01C / CBTRN02C** | Daily transaction posting. Core batch pipeline. Requires careful testing of balance calculations and reject handling. CBTRN01C may be dead code (not referenced by any JCL). Confirm before investing modernization effort. Focus on CBTRN02C which is the active version used by POSTTRAN.jcl. |
 | 16 | **CBACT04C** | Interest calculator. Complex financial logic with multi-file random access. Requires precise numeric accuracy validation. |
 | 17 | **COPAUA0C** | Authorization decision. **Most architecturally complex** — MQ + IMS + CICS. Requires message queue replacement (e.g. Kafka/RabbitMQ), IMS-to-RDBMS migration, and real-time decision logic extraction. |
 | 18 | **COPAUS0C / COPAUS1C / COPAUS2C** | Authorization screens + fraud marking. Dependent on IMS database and DB2 fraud table. |
@@ -323,6 +323,16 @@ Each program is scored across five dimensions. The composite score is a weighted
 
 ## 5. Key Risks and Observations
 
+### Non-COBOL Program Dependencies
+
+Two assembler programs (COBDATFT in `app/asm/COBDATFT.asm`, MVSWAIT in `app/asm/MVSWAIT.asm`) are called from COBOL programs. No automated COBOL-to-Java tool handles assembler. These require manual reimplementation:
+- **COBDATFT:** Replace with `java.time.format.DateTimeFormatter`
+- **MVSWAIT:** Replace with `Thread.sleep()` or `ScheduledExecutorService`
+
+### Integration Boundary Risks
+
+The DALYTRAN.PS file is the undocumented bridge between real-time authorization (MQ/IMS) and nightly batch posting (VSAM). The mechanism that populates this file from authorized transactions is external to the codebase. During modernization, this integration seam must be explicitly designed — likely replacing the flat file bridge with an event-driven or API-based pattern.
+
 ### Data Integrity Risks
 - **Decimal precision:** COBOL PIC S9(10)V99 has exact 2-decimal arithmetic. Java `BigDecimal` must be used — never `double`/`float`.
 - **Packed decimal (COMP-3):** Used extensively in IMS segments and export records. Requires custom byte-level conversion during data migration.
@@ -337,3 +347,15 @@ Each program is scored across five dimensions. The composite score is a weighted
 - **CBACT04C (interest calculator):** Create comprehensive test cases with known-good results before modernizing. Financial calculations must produce identical output.
 - **CBTRN02C (transaction posting):** Build golden-file tests — process a known daily transaction file and compare outputs field-by-field.
 - **CBEXPORT/CBIMPORT:** Use round-trip testing — export then import should produce identical data.
+- **Sub-application test data gap:** The `app/data/EBCDIC/` directory contains 11 sample files for the base application only. No sample data exists for IMS authorization segments, DB2 tables (AUTHFRDS, TR_TYPE, TR_CAT), or MQ messages. Test data for these sub-applications must be created from scratch.
+
+---
+
+## 6. Existing Test Assets
+
+A Java test harness exists in `test-harness/` with 64 unit tests that validate Java rewrites against known-good COBOL output:
+
+- Field-by-field comparison using record layouts from COBOL copybooks and FD sections
+- **Covers:** CBACT01C (edge cases: zero debit substitution, date truncation, array slots), CBTRN02C/CBACT04C (business rules: record counts, balance integrity, credit limits, expiration)
+- Hand-rolled ASCII zoned decimal and COMP-3 codecs
+- Should be leveraged as the golden-file validation framework during modernization
