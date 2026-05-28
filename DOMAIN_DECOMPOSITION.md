@@ -1,522 +1,323 @@
 # CardDemo Domain Decomposition
 
-This document captures the bounded context analysis for the CardDemo COBOL application, identifying 9 domains (7 core + 2 extension modules) with their program inventories, owned data stores, cross-domain data dependencies, and BMS artifacts.
+## Overview
+
+This document identifies bounded contexts within the CardDemo application by analyzing program-to-copybook relationships, JCL job groupings, data-file sharing patterns, and CICS transaction definitions. Each bounded context maps to a candidate microservice or module, with extraction seams rated by difficulty.
 
 ---
 
-## 1. Authentication & Session Management
+## Methodology
 
-### Description
+Bounded contexts are identified by three convergent analyses:
 
-Handles user sign-on, main menu navigation, and admin menu dispatch. Acts as the entry point for all CICS sessions and manages session state via the COMMAREA.
-
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COSGN00C | CICS | `app/cbl/COSGN00C.cbl` | CC00 | Signon Screen |
-| COMEN01C | CICS | `app/cbl/COMEN01C.cbl` | CM00 | Main Menu |
-| COADM01C | CICS | `app/cbl/COADM01C.cbl` | CA00 | Admin Menu |
-
-### Owned Data Stores
-
-| VSAM File | Copybook | Description |
-|:----------|:---------|:------------|
-| USRSEC | CSUSR01Y | User security credentials (read for authentication) |
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| COSGN00C | USRSEC | R | Validate user credentials at sign-on |
-
-### BMS Maps & Copybooks
-
-- **Maps:** COSGN00, COMEN01, COADM01
-- **BMS Copybooks:** COSGN00.bms, COMEN01.bms, COADM01.bms
-- **Data Copybooks:** COMEN02Y (menu options)
+1. **Copybook sharing** — Programs that COPY the same data-structure definitions operate on the same domain entities.
+2. **JCL job groupings** — Control-M folders and JCL step sequences reveal batch workflow boundaries.
+3. **Data-file sharing** — VSAM datasets accessed by multiple programs indicate coupling; isolated datasets suggest natural boundaries.
 
 ---
 
-## 2. Account Management
+## Data File Access Matrix
 
-### Description
-
-Provides online account viewing and updating, plus batch programs for account-related processing (customer data build, interest calculation, and account file refreshes).
-
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COACTVWC | CICS | `app/cbl/COACTVWC.cbl` | CAVW | Account View |
-| COACTUPC | CICS | `app/cbl/COACTUPC.cbl` | CAUP | Account Update |
-| CBACT01C | Batch | `app/cbl/CBACT01C.cbl` | -- | Account file processing |
-| CBACT02C | Batch | `app/cbl/CBACT02C.cbl` | -- | Account file processing |
-| CBACT03C | Batch | `app/cbl/CBACT03C.cbl` | -- | Account file processing |
-| CBACT04C | Batch | `app/cbl/CBACT04C.cbl` | -- | Interest calculation (INTCALC job) |
-
-### Owned Data Stores
-
-| VSAM File | Copybook | Description |
-|:----------|:---------|:------------|
-| ACCTDAT | CVACT01Y | Account master (300-byte records) |
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| COACTVWC | CARDAIX | R | Look up cards for account display |
-| COACTVWC | CCXREF | R | Cross-reference card to account |
-| COACTVWC | CUSTDAT | R | Display customer name on account view |
-| COACTUPC | CUSTDAT | R+W | Read and update customer data alongside account |
-| COACTUPC | CARDAIX | R | Card listing for the account |
-| COACTUPC | CCXREF | R | Cross-reference lookup |
-| CBACT04C | TRANSACT | R | Read transactions for interest calculation |
-| CBACT04C | TCATBALF | R+W | Read/update category balances |
-| CBACT04C | DISCGRP | R | Read disclosure group rates |
-| CBACT04C | TRANCATG | R | Read transaction categories |
-
-### BMS Maps & Copybooks
-
-- **Maps:** COACTVW, COACTUP
-- **BMS Copybooks:** COACTVW.bms, COACTUP.bms
-- **Data Copybooks:** CVACT01Y, CVACT02Y, CVACT03Y
+| VSAM Dataset | Key | Online Programs | Batch Programs | Shared? |
+|-------------|-----|----------------|----------------|---------|
+| **ACCTDAT** | Account ID (11) | COACTVWC, COACTUPC, COBIL00C, COTRN02C | CBACT01C, CBACT04C, CBTRN01C, CBTRN02C, CBEXPORT, CBIMPORT, CBSTM03B | **Yes — heavily** |
+| **CARDDAT** | Card Number (16) | COCRDLIC, COCRDSLC, COCRDUPC, COACTVWC | CBACT02C, CBEXPORT, CBIMPORT | **Yes** |
+| **CARDAIX** | Alt Index (Account) | COCRDLIC | — | No |
+| **CCXREF** | Card-to-Account | COACTVWC, COACTUPC, COBIL00C, COTRN02C | CBACT03C, CBACT04C, CBTRN01C, CBTRN02C, CBEXPORT, CBIMPORT, CBSTM03B | **Yes — heavily** |
+| **CXACAIX** | Alt Index (Account) | COACTUPC | — | No |
+| **CUSTDAT** | Customer ID (9) | COACTVWC, COCRDSLC, COCRDUPC | CBCUS01C, CBEXPORT, CBIMPORT, CBSTM03B | **Yes** |
+| **TRANSACT** | Transaction ID | COTRN00C, COTRN01C, COTRN02C, COBIL00C | CBTRN01C, CBTRN02C, CBTRN03C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03B | **Yes — heavily** |
+| **USRSEC** | User ID | COSGN00C, COUSR00C-03C | — | **Isolated** |
+| **DALYTRAN** | — | — | CBTRN01C, CBTRN02C | Batch-only |
+| **DALYREJS** | — | — | CBTRN02C | Batch-only |
+| **TCATBALF** | Category Key | — | CBACT04C, CBTRN02C | Batch-only |
+| **DISCGRP** | Group Key | — | CBACT04C | Batch-only |
+| **TRANTYPE** | Type Code | — | CBTRN03C | Batch-only (+ DB2 extension) |
+| **TRANCATG** | Category Code | — | CBTRN03C | Batch-only (+ DB2 extension) |
 
 ---
 
-## 3. Credit Card Management
+## Copybook-to-Program Affinity Map
 
-### Description
-
-Manages the credit card lifecycle: listing, searching, viewing details, and updating card records. Owns the card data files and the card-to-account cross-reference.
-
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COCRDLIC | CICS | `app/cbl/COCRDLIC.cbl` | CCLI | Credit Card List |
-| COCRDSLC | CICS | `app/cbl/COCRDSLC.cbl` | CCDL | Credit Card View/Search |
-| COCRDUPC | CICS | `app/cbl/COCRDUPC.cbl` | CCUP | Credit Card Update |
-
-### Owned Data Stores
-
-| VSAM File | Copybook | Description |
-|:----------|:---------|:------------|
-| CARDDAT | CVACT02Y | Credit card master (150-byte records) |
-| CARDAIX | CVACT02Y | Card-by-account alternate index path |
-| CCXREF | CVACT03Y | Card-to-account cross-reference |
-| CXACAIX | CVACT03Y | Cross-ref by account alternate index |
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| COCRDLIC | ACCTDAT | R | Display account info alongside card list |
-| COCRDSLC | ACCTDAT | R | Show account details for selected card |
-| COCRDUPC | ACCTDAT | R | Validate account for card update |
-| COCRDUPC | CUSTDAT | R | Validate customer for card update |
-
-### BMS Maps & Copybooks
-
-- **Maps:** COCRDLI, COCRDSL, COCRDUP
-- **BMS Copybooks:** COCRDLI.bms, COCRDSL.bms, COCRDUP.bms
-- **Data Copybooks:** CVACT02Y, CVACT03Y, CVCRD01Y
+| Copybook | Domain Entity | Programs Using It |
+|----------|--------------|-------------------|
+| **CVACT01Y** | Account Record | COACTVWC, COACTUPC, COBIL00C, COTRN02C, CBACT01C, CBACT04C, CBTRN01C, CBTRN02C, CBEXPORT, CBIMPORT, CBSTM03A |
+| **CVACT02Y** | Card Record | COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC, CBACT02C, CBEXPORT, CBIMPORT |
+| **CVACT03Y** | Cross-Reference | COACTVWC, COACTUPC, COBIL00C, COTRN02C, CBACT03C, CBACT04C, CBTRN01C, CBTRN02C, CBTRN03C, CBEXPORT, CBIMPORT, CBSTM03B |
+| **CVCUS01Y** | Customer Record | COACTVWC, COCRDSLC, COCRDUPC, CBCUS01C, CBTRN01C, CBEXPORT, CBIMPORT |
+| **CVTRA05Y** | Transaction Record | COTRN00C, COTRN01C, COTRN02C, COBIL00C, CORPT00C, CBACT04C, CBTRN01C, CBTRN02C, CBTRN03C, CBEXPORT, CBIMPORT |
+| **CVTRA06Y** | Daily Transaction | CBTRN01C, CBTRN02C |
+| **CVTRA01Y** | Category Balance | CBACT04C, CBTRN02C |
+| **CVCRD01Y** | Card Detail (UI) | COACTUPC, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC |
+| **CSUSR01Y** | User Security | COSGN00C, COUSR00C, COUSR01C, COUSR02C, COUSR03C, COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC |
+| **COCOM01Y** | COMMAREA | All online CICS programs |
+| **CVEXPORT** | Export Record | CBEXPORT, CBIMPORT |
 
 ---
 
-## 4. Transaction Processing
+## Bounded Contexts
 
-### Description
+### BC-1: Identity & Access Management
 
-The largest domain, handling online transaction listing/viewing/adding, bill payment, batch transaction posting, statement generation, and reporting. This is the first strangler fig extraction candidate.
+**Scope:** Authentication, authorization, and user lifecycle.
 
-### Program Inventory
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | COSGN00C, COUSR00C, COUSR01C, COUSR02C, COUSR03C |
+| **Copybooks** | CSUSR01Y, COCOM01Y, COTTL01Y, CSDAT01Y, CSMSG01Y |
+| **Data stores** | USRSEC (exclusive) |
+| **CICS Transactions** | CC00, CU00, CU01, CU02, CU03 |
+| **Candidate service** | **Identity Service** (Spring Security + user store) |
 
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COTRN00C | CICS | `app/cbl/COTRN00C.cbl` | CT00 | Transaction List |
-| COTRN01C | CICS | `app/cbl/COTRN01C.cbl` | CT01 | Transaction View |
-| COTRN02C | CICS | `app/cbl/COTRN02C.cbl` | CT02 | Transaction Add |
-| CORPT00C | CICS | `app/cbl/CORPT00C.cbl` | CR00 | Transaction Reports |
-| COBIL00C | CICS | `app/cbl/COBIL00C.cbl` | CB00 | Bill Payment |
-| CBTRN01C | Batch | `app/cbl/CBTRN01C.cbl` | -- | Transaction file processing |
-| CBTRN02C | Batch | `app/cbl/CBTRN02C.cbl` | -- | Daily transaction posting (POSTTRAN) |
-| CBTRN03C | Batch | `app/cbl/CBTRN03C.cbl` | -- | Transaction report generation (TRANREPT) |
-| CBSTM03A | Batch | `app/cbl/CBSTM03A.CBL` | -- | Statement generation (CREASTMT) |
-| CBSTM03B | Batch | `app/cbl/CBSTM03B.CBL` | -- | Statement generation sub-program |
+**Isolation analysis:** USRSEC is accessed only by sign-on and user-admin programs. CSUSR01Y is also included by some account/card programs purely for display of the logged-in user name — this is a read-only, presentation-layer dependency that can be replaced with a JWT claim.
 
-### Owned Data Stores
-
-| VSAM File | Copybook | Description |
-|:----------|:---------|:------------|
-| TRANSACT | CVTRA05Y | Online transaction log |
-| DALYTRAN | CVTRA06Y | Daily transaction feed |
-| DALYREJS | CVTRA06Y | Daily rejected transactions |
-| TCATBALF | CVTRA01Y | Transaction category balance |
-| DISCGRP | CVTRA02Y | Disclosure groups |
-| TRANTYPE | CVTRA03Y | Transaction types |
-| TRANCATG | CVTRA04Y | Transaction categories |
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| COTRN00C | CCXREF | R | Map card numbers to accounts for transaction list |
-| COTRN01C | CCXREF | R | Card-to-account lookup for transaction view |
-| COTRN02C | CCXREF | R | Validate card number before adding transaction |
-| COTRN02C | CARDDAT | R | Verify card is active |
-| COBIL00C | ACCTDAT | R+W | Read account, update balance after payment |
-| COBIL00C | CCXREF | R | Card-to-account resolution |
-| CBTRN02C (batch) | ACCTDAT | R+W | Update account balances during posting |
-| CBTRN02C (batch) | CCXREF | R | Card-to-account resolution |
-| CBSTM03A | ACCTDAT | R | Account data for statement header |
-| CBSTM03A | CUSTDAT | R | Customer data for statement address |
-| CBTRN03C | CCXREF | R | Card-to-account resolution for report |
-
-### BMS Maps & Copybooks
-
-- **Maps:** COTRN00, COTRN01, COTRN02, CORPT00, COBIL00
-- **BMS Copybooks:** COTRN00.bms, COTRN01.bms, COTRN02.bms, CORPT00.bms, COBIL00.bms
-- **Data Copybooks:** CVTRA01Y-CVTRA07Y, COSTM01
+**Extraction seam:** COMMAREA `CDEMO-USER-ID` and `CDEMO-USER-TYPE` fields. Post-migration, these become JWT claims passed as HTTP headers.
 
 ---
 
-## 5. User Security Administration
+### BC-2: Account & Card Domain
 
-### Description
+**Scope:** Account lifecycle, card management, and the cross-reference linking them.
 
-Manages user accounts for CardDemo: listing, adding, updating, and deleting user credentials. Admin-only access.
+| Attribute | Value |
+|-----------|-------|
+| **Programs (online)** | COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC |
+| **Programs (batch)** | CBACT01C, CBACT02C, CBACT03C, CBCUS01C |
+| **Copybooks** | CVACT01Y, CVACT02Y, CVACT03Y, CVCUS01Y, CVCRD01Y, CSLKPCDY |
+| **Data stores** | ACCTDAT, CARDDAT, CARDAIX, CCXREF, CXACAIX, CUSTDAT |
+| **CICS Transactions** | CAVW, CAUP, CCLI, CCDL, CCUP |
+| **Candidate service** | **Account Service** (REST API + PostgreSQL) |
 
-### Program Inventory
+**Isolation analysis:** This is the largest and most coupled context. ACCTDAT, CARDDAT, and CCXREF are shared with Transaction Processing and Batch Posting. The customer entity (CUSTDAT/CVCUS01Y) is used here and in transaction/statement programs. Customer data could be its own context but the tight key relationship (Account → Card → Customer via CCXREF) makes separation premature.
 
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COUSR00C | CICS | `app/cbl/COUSR00C.cbl` | CU00 | List Users |
-| COUSR01C | CICS | `app/cbl/COUSR01C.cbl` | CU01 | Add User |
-| COUSR02C | CICS | `app/cbl/COUSR02C.cbl` | CU02 | Update User |
-| COUSR03C | CICS | `app/cbl/COUSR03C.cbl` | CU03 | Delete User |
-
-### Owned Data Stores
-
-| VSAM File | Copybook | Description |
-|:----------|:---------|:------------|
-| USRSEC | CSUSR01Y | User security records |
-
-### Cross-Domain Data Dependencies
-
-None -- User Security is self-contained with no foreign file access.
-
-### BMS Maps & Copybooks
-
-- **Maps:** COUSR00, COUSR01, COUSR02, COUSR03
-- **BMS Copybooks:** COUSR00.bms, COUSR01.bms, COUSR02.bms, COUSR03.bms
+**Why merged (Account + Card + Customer):**
+- CCXREF creates a 3-way join between Card Number → Account ID → Customer ID.
+- Every card operation requires account lookup and vice versa.
+- Splitting would require distributed transactions for card/account updates.
 
 ---
 
-## 6. Customer Management & Data Migration
+### BC-3: Transaction Processing
 
-### Description
+**Scope:** Online transaction entry/viewing and daily batch posting.
 
-Handles customer record maintenance and provides batch export/import capabilities for customer data migration between systems.
+| Attribute | Value |
+|-----------|-------|
+| **Programs (online)** | COTRN00C, COTRN01C, COTRN02C |
+| **Programs (batch)** | CBTRN01C, CBTRN02C |
+| **Copybooks** | CVTRA05Y, CVTRA06Y, CVTRA01Y, CVACT01Y, CVACT03Y, CVCUS01Y, CVACT02Y |
+| **Data stores** | TRANSACT, DALYTRAN (input), DALYREJS (output), ACCTDAT, CCXREF, TCATBALF |
+| **CICS Transactions** | CT00, CT01, CT02 |
+| **JCL Jobs** | POSTTRAN, DALYREJS, TRANBKP |
+| **Candidate service** | **Transaction Service** (REST API + PostgreSQL + Spring Batch) |
 
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| CBCUS01C | Batch | `app/cbl/CBCUS01C.cbl` | -- | Customer data processing |
-| CBEXPORT | Batch | `app/cbl/CBEXPORT.cbl` | -- | Export customer data |
-| CBIMPORT | Batch | `app/cbl/CBIMPORT.cbl` | -- | Import customer data |
-
-### Owned Data Stores
-
-| VSAM File | Copybook | Description |
-|:----------|:---------|:------------|
-| CUSTDAT | CVCUS01Y | Customer master (500-byte records) |
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| CBEXPORT | ACCTDAT | R | Export account data alongside customer |
-| CBEXPORT | CARDDAT | R | Export card data alongside customer |
-| CBEXPORT | CCXREF | R | Cross-reference for export |
-| CBIMPORT | ACCTDAT | W | Import account records |
-| CBIMPORT | CARDDAT | W | Import card records |
-| CBIMPORT | CCXREF | W | Import cross-reference records |
-
-### BMS Maps & Copybooks
-
-- **Maps:** None (batch only)
-- **Data Copybooks:** CVCUS01Y, CVEXPORT, CUSTREC
+**Isolation analysis:** TRANSACT is the most shared dataset — accessed by 11 programs across 3 contexts. The daily-batch posting programs (CBTRN01C, CBTRN02C) validate transactions against ACCTDAT and CCXREF, creating a hard dependency on BC-2. DALYTRAN and DALYREJS are batch-only and isolated.
 
 ---
 
-## 7. Credit Card Authorization Extension (IMS/DB2/MQ)
+### BC-4: Billing & Payments
 
-### Description
+**Scope:** Bill payment processing.
 
-Optional module that processes real-time credit card authorization requests via MQ, stores authorization history in IMS hierarchical DB, and tracks fraud cases in DB2. Requires IMS DB, DB2, and MQ infrastructure.
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | COBIL00C |
+| **Copybooks** | CVACT01Y, CVACT03Y, CVTRA05Y, COCOM01Y |
+| **Data stores** | ACCTDAT (R/W), CCXREF (R), TRANSACT (W) |
+| **CICS Transaction** | CB00 |
+| **Candidate service** | **Payment Service** (REST API) |
 
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COPAUA0C | CICS | `app/app-authorization-ims-db2-mq/cbl/COPAUA0C.cbl` | CP00 | Process Authorization Requests (MQ trigger) |
-| COPAUS0C | CICS | `app/app-authorization-ims-db2-mq/cbl/COPAUS0C.cbl` | CPVS | Pending Authorization Summary |
-| COPAUS1C | CICS | `app/app-authorization-ims-db2-mq/cbl/COPAUS1C.cbl` | CPVD | Pending Authorization Details |
-| COPAUS2C | CICS | `app/app-authorization-ims-db2-mq/cbl/COPAUS2C.cbl` | -- | Authorization sub-program |
-| CBPAUP0C | Batch | `app/app-authorization-ims-db2-mq/cbl/CBPAUP0C.cbl` | -- | Purge Expired Authorizations (CBPAUP0J) |
-| DBUNLDGS | Batch | `app/app-authorization-ims-db2-mq/cbl/DBUNLDGS.CBL` | -- | IMS DB unload utility |
-| PAUDBLOD | Batch | `app/app-authorization-ims-db2-mq/cbl/PAUDBLOD.CBL` | -- | IMS DB load utility |
-| PAUDBUNL | Batch | `app/app-authorization-ims-db2-mq/cbl/PAUDBUNL.CBL` | -- | IMS DB unload utility |
-
-### Owned Data Stores
-
-| Store | Type | Description |
-|:------|:-----|:------------|
-| DBPAUTP0 | IMS HIDAM | Primary authorization database |
-| DBPAUTX0 | IMS HIDAM Index | Authorization index |
-| AUTHFRDS | DB2 Table | Fraud tracking records |
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| COPAUA0C | ACCTDAT | R | Retrieve account for authorization validation |
-| COPAUA0C | CCXREF | R | Card-to-account lookup |
-| COPAUA0C | CUSTDAT | R | Retrieve customer for authorization |
-| COPAUS0C | ACCTDAT | R | Account summary display |
-| COPAUS0C | CCXREF | R | Card-to-account lookup |
-
-### BMS Maps & Copybooks
-
-- **Maps:** COPAU00, COPAU01
-- **BMS Copybooks:** COPAU00.bms, COPAU01.bms
-- **Data Copybooks:** CCPAUERY, CCPAURLY, CCPAURQY, CIPAUDTY, CIPAUSMY, IMSFUNCS, PADFLPCB, PASFLPCB, PAUTBPCB
+**Isolation analysis:** Bill payment reads account data from BC-2 and writes transactions to BC-3's TRANSACT file. It acts as a cross-cutting operation between the two core contexts.
 
 ---
 
-## 8. Transaction Type Management Extension (DB2)
+### BC-5: Financial Calculations (Interest & Category Balances)
 
-### Description
+**Scope:** Monthly interest calculation and transaction-category balance maintenance.
 
-Optional module that maintains transaction type reference data in DB2 tables with online CICS screens and batch maintenance. Demonstrates embedded static SQL patterns.
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | CBACT04C |
+| **Copybooks** | CVTRA01Y, CVTRA02Y, CVTRA05Y, CVACT01Y, CVACT03Y |
+| **Data stores** | TCATBALF (R/W), DISCGRP (R), ACCTDAT (R/W), CCXREF (R), TRANSACT (R) |
+| **JCL Jobs** | INTCALC, COMBTRAN |
+| **Control-M Folder** | MONTHLY-InterestCalculation |
+| **Candidate service** | **Interest Calculation Engine** (Spring Batch job) |
 
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| COTRTLIC | CICS | `app/app-transaction-type-db2/cbl/COTRTLIC.cbl` | CTLI | Tran Type list/update/delete |
-| COTRTUPC | CICS | `app/app-transaction-type-db2/cbl/COTRTUPC.cbl` | CTTU | Tran Type add/edit |
-| COBTUPDT | Batch | `app/app-transaction-type-db2/cbl/COBTUPDT.cbl` | -- | Batch transaction type maintenance (MNTTRDB2) |
-
-### Owned Data Stores
-
-| Store | Type | Description |
-|:------|:-----|:------------|
-| CARDDEMO.TRANSACTION_TYPE | DB2 Table | Transaction type codes and descriptions |
-| CARDDEMO.TRANSACTION_TYPE_CATEGORY | DB2 Table | Transaction category codes |
-
-### Cross-Domain Data Dependencies
-
-None -- this extension is self-contained within DB2.
-
-### BMS Maps & Copybooks
-
-- **Maps:** COTRTLI, COTRTUP
-- **BMS Copybooks:** COTRTLI.bms, COTRTUP.bms
-- **Data Copybooks:** CSDB2RPY, CSDB2RWY
+**Isolation analysis:** TCATBALF and DISCGRP are exclusively used by this context. However, it reads ACCTDAT, CCXREF, and TRANSACT from BC-2/BC-3 and writes updated balances back to ACCTDAT. This is a high-coupling seam.
 
 ---
 
-## 9. Account Inquiry via MQ Extension (VSAM-MQ)
+### BC-6: Reporting & Statements
 
-### Description
+**Scope:** Transaction reports and account statements.
 
-Optional module providing system date inquiry and account detail retrieval through MQ request/response patterns. Demonstrates asynchronous processing integration.
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | CORPT00C (online), CBTRN03C, CBSTM03A, CBSTM03B (batch) |
+| **Copybooks** | CVTRA05Y, CVTRA03Y, CVTRA04Y, CVTRA07Y, CVACT03Y, COSTM01, CUSTREC, CVACT01Y |
+| **Data stores** | TRANSACT (R), CCXREF (R), TRANTYPE (R), TRANCATG (R), CUSTDAT (R), ACCTDAT (R) |
+| **CICS Transaction** | CR00 |
+| **JCL Jobs** | TRANREPT, CREASTMT |
+| **Candidate service** | **Reporting Service** (Spring Batch + PDF/HTML generation) |
 
-### Program Inventory
-
-| Program | Type | File Path | Tran ID | Function |
-|:--------|:-----|:----------|:--------|:---------|
-| CODATE01 | CICS | `app/app-vsam-mq/cbl/CODATE01.cbl` | CDRD | System Date Inquiry via MQ |
-| COACCT01 | CICS | `app/app-vsam-mq/cbl/COACCT01.cbl` | CDRA | Account Details Inquiry via MQ |
-
-### Owned Data Stores
-
-None -- reads from ACCTDAT owned by Account Management.
-
-### Cross-Domain Data Dependencies
-
-| Program | Foreign File | Access | Purpose |
-|:--------|:-------------|:-------|:--------|
-| COACCT01 | ACCTDAT | R | Retrieve account details for MQ response |
-
-### BMS Maps & Copybooks
-
-- **Maps:** None (MQ-driven, no BMS screens)
-- **Data Copybooks:** None specific; uses CVACT01Y from Account Management
+**Isolation analysis:** Entirely read-only against data from BC-2 and BC-3. TRANTYPE and TRANCATG reference files are used only here and in the DB2 Transaction Type extension. This context has no write-coupling to any other context, making it the easiest to extract.
 
 ---
 
-## Data Coupling Matrix
+### BC-7: Reference Data Management (DB2 Extension)
 
-The following grid shows which programs access which VSAM files. Access types: **R** = Read, **W** = Write, **R+W** = Read and Write, **B** = Browse.
+**Scope:** Transaction type and category maintenance.
 
-| Program | ACCTDAT | CARDDAT | CARDAIX | CCXREF | CXACAIX | CUSTDAT | TRANSACT | USRSEC | DALYTRAN | TCATBALF | DISCGRP | TRANTYPE | TRANCATG |
-|:--------|:-------:|:-------:|:-------:|:------:|:-------:|:-------:|:--------:|:------:|:--------:|:--------:|:-------:|:--------:|:--------:|
-| **COSGN00C** | | | | | | | | R | | | | | |
-| **COMEN01C** | | | | | | | | | | | | | |
-| **COADM01C** | | | | | | | | | | | | | |
-| **COACTVWC** | R | | R | R | | R | | | | | | | |
-| **COACTUPC** | R+W | | R | R | | R+W | | | | | | | |
-| **COCRDLIC** | R | B | | | | | | | | | | | |
-| **COCRDSLC** | R | R | | R | | | | | | | | | |
-| **COCRDUPC** | R | R+W | | R | | R | | | | | | | |
-| **COTRN00C** | | | | R | | | B | | | | | | |
-| **COTRN01C** | | | | R | | | R | | | | | | |
-| **COTRN02C** | | R | | R | | | W | | | | | | |
-| **CORPT00C** | | | | | | | R | | | | | | |
-| **COBIL00C** | R+W | | | R | | | W | | | | | | |
-| **COUSR00C** | | | | | | | | R+B | | | | | |
-| **COUSR01C** | | | | | | | | W | | | | | |
-| **COUSR02C** | | | | | | | | R+W | | | | | |
-| **COUSR03C** | | | | | | | | R+W | | | | | |
-| **CBACT04C** | R+W | | | | | | R | | | R+W | R | | R |
-| **CBTRN02C** | R+W | | | R | | | | | R | R+W | | R | R |
-| **CBTRN03C** | | | | R | | | R | | | | | | |
-| **CBSTM03A** | R | | | | | R | R | | | | | | |
-| **CBCUS01C** | | | | | | R+W | | | | | | | |
-| **CBEXPORT** | R | R | | R | | R | | | | | | | |
-| **CBIMPORT** | W | W | | W | | W | | | | | | | |
-| **COPAUA0C** | R | | | R | | R | | | | | | | |
-| **COPAUS0C** | R | | | R | | | | | | | | | |
-| **COACCT01** | R | | | | | | | | | | | | |
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | COTRTLIC, COTRTUPC, COBTUPDT |
+| **Copybooks** | DB2 DCL/DDL, extension-specific copybooks |
+| **Data stores** | DB2 TRANSACTION_TYPE, TRANSACTION_TYPE_CATEGORY; VSAM TRANTYPE, TRANCATG (via extract) |
+| **CICS Transactions** | CTLI, CTTU |
+| **JCL Jobs** | CREADB21, TRANEXTR, MNTTRDB2 |
+| **Control-M Folder** | WEEKLY-TransactionTypesDBRefresh |
+| **Candidate service** | **Reference Data Service** (REST API + PostgreSQL) |
+
+**Isolation analysis:** DB2 tables are mastered here and extracted to VSAM flat files consumed by BC-6 (Reporting). Once VSAM is eliminated, this context simply manages relational reference tables.
 
 ---
 
-## Dependency Graph
+### BC-8: Authorization Processing (IMS/DB2/MQ Extension)
 
-```mermaid
-graph LR
-    subgraph "Authentication & Session"
-        COSGN00C
-        COMEN01C
-        COADM01C
-    end
+**Scope:** Real-time credit card authorization, fraud detection.
 
-    subgraph "Account Management"
-        COACTVWC
-        COACTUPC
-        CBACT04C
-    end
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | CBPAUP0C, COPAUA0C, COPAUS0C, COPAUS1C, COPAUS2C, PAUDBLOD, PAUDBUNL, DBUNLDGS |
+| **Data stores** | IMS DB (DBPAUTP0/DBPAUTX0), DB2 AUTHFRDS, MQ queues, ACCTDAT/CUSTDAT (VSAM read) |
+| **CICS Transactions** | CAUT, CAUV, CAUF (from extension CSD) |
+| **Candidate service** | **Authorization Service** (event-driven microservice) |
 
-    subgraph "Card Management"
-        COCRDLIC
-        COCRDSLC
-        COCRDUPC
-    end
+**Isolation analysis:** IMS DB and MQ queues are exclusive to this context. Reads ACCTDAT and CUSTDAT from BC-2 for validation. DB2 fraud table is exclusive. Cross-subsystem (IMS + DB2 + MQ) transactions make this the most technically complex context.
 
-    subgraph "Transaction Processing"
-        COTRN00C
-        COTRN01C
-        COTRN02C
-        COBIL00C
-        CBTRN02C
-        CBSTM03A
-        CBTRN03C
-        CORPT00C
-    end
+---
 
-    subgraph "User Security"
-        COUSR00C
-        COUSR01C
-        COUSR02C
-        COUSR03C
-    end
+### BC-9: Data Migration (Branch Export/Import)
 
-    subgraph "Customer Migration"
-        CBEXPORT
-        CBIMPORT
-    end
+**Scope:** Cross-branch data transfer.
 
-    subgraph "Data Stores"
-        ACCTDAT[(ACCTDAT)]
-        CARDDAT[(CARDDAT)]
-        CCXREF[(CCXREF)]
-        CUSTDAT[(CUSTDAT)]
-        TRANSACT[(TRANSACT)]
-        USRSEC[(USRSEC)]
-        TCATBALF[(TCATBALF)]
-        DALYTRAN[(DALYTRAN)]
-    end
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | CBEXPORT, CBIMPORT |
+| **Copybooks** | CVEXPORT (exclusive), plus CVCUS01Y, CVACT01Y, CVACT03Y, CVTRA05Y, CVACT02Y |
+| **Data stores** | All core VSAM files (R for export, W for import), EXPFILE (exclusive) |
+| **JCL Jobs** | CBEXPORT, CBIMPORT |
+| **Candidate service** | **Data Migration Utility** (Spring Batch ETL) |
 
-    %% Auth & Session reads
-    COSGN00C -->|R| USRSEC
+**Isolation analysis:** CVEXPORT copybook is exclusive. However, CBEXPORT reads and CBIMPORT writes every core VSAM file (accounts, cards, customers, cross-refs, transactions), creating maximum data-coupling. This context should be migrated last, after all data stores are in the relational target.
 
-    %% Account Management cross-domain reads
-    COACTVWC -->|R| CCXREF
-    COACTVWC -->|R| CUSTDAT
-    COACTUPC -->|R+W| CUSTDAT
-    COACTUPC -->|R| CCXREF
-    CBACT04C -->|R| TRANSACT
-    CBACT04C -->|R+W| TCATBALF
+---
 
-    %% Card Management cross-domain reads
-    COCRDLIC -->|R| ACCTDAT
-    COCRDSLC -->|R| ACCTDAT
-    COCRDUPC -->|R| ACCTDAT
-    COCRDUPC -->|R| CUSTDAT
+### BC-10: Infrastructure Utilities
 
-    %% Transaction Processing cross-domain reads/writes
-    COTRN00C -->|R| CCXREF
-    COTRN01C -->|R| CCXREF
-    COTRN02C -->|R| CCXREF
-    COTRN02C -->|R| CARDDAT
-    COBIL00C -->|R+W| ACCTDAT
-    COBIL00C -->|R| CCXREF
-    CBTRN02C -->|R+W| ACCTDAT
-    CBTRN02C -->|R| CCXREF
-    CBSTM03A -->|R| ACCTDAT
-    CBSTM03A -->|R| CUSTDAT
-    CBTRN03C -->|R| CCXREF
+**Scope:** File management, scheduling support, and wait utilities.
 
-    %% Customer Migration cross-domain
-    CBEXPORT -->|R| ACCTDAT
-    CBEXPORT -->|R| CARDDAT
-    CBEXPORT -->|R| CCXREF
-    CBIMPORT -->|W| ACCTDAT
-    CBIMPORT -->|W| CARDDAT
-    CBIMPORT -->|W| CCXREF
+| Attribute | Value |
+|-----------|-------|
+| **Programs** | COBSWAIT, CSUTLDTC, COBDATFT (assembler) |
+| **JCL Jobs** | CLOSEFIL, OPENFIL, WAITSTEP, DISCGRP |
+| **Control-M Folders** | Shared across DAILY/WEEKLY/MONTHLY schedules |
+| **Candidate service** | **Eliminated** — replaced by database connection pooling, cloud scheduler, and standard date libraries. |
+
+**Isolation analysis:** These are platform utilities, not business logic. They become unnecessary once VSAM is replaced (no CICS file open/close) and mainframe scheduling is replaced with cloud-native orchestration.
+
+---
+
+## Extraction Seams
+
+An extraction seam is a point where two bounded contexts interact. The difficulty rating reflects the effort to decouple them.
+
+| Seam ID | From Context | To Context | Interaction Type | Shared Data | Difficulty | Rationale |
+|---------|-------------|------------|-----------------|-------------|------------|-----------|
+| S-1 | BC-1 (Identity) | BC-2..BC-8 (All online) | COMMAREA fields: USER-ID, USER-TYPE | None (in-memory) | **Easy** | Replace COMMAREA user fields with JWT claims in HTTP headers. No shared data files. |
+| S-2 | BC-3 (Transactions) | BC-2 (Accounts) | VSAM reads: ACCTDAT, CCXREF during posting | ACCTDAT, CCXREF | **Hard** | Transaction posting validates against account data and updates account balances. Requires distributed transaction or saga pattern. |
+| S-3 | BC-4 (Billing) | BC-2 (Accounts) | VSAM R/W: ACCTDAT balance update | ACCTDAT | **Hard** | Payment updates account balance — requires atomic consistency or compensating transactions. |
+| S-4 | BC-4 (Billing) | BC-3 (Transactions) | VSAM W: TRANSACT (new payment record) | TRANSACT | **Medium** | Payment writes a transaction record. Can be decoupled via an event (PaymentCompleted → Transaction created). |
+| S-5 | BC-5 (Interest) | BC-2 (Accounts) | VSAM R/W: ACCTDAT balance update | ACCTDAT | **Hard** | Interest calculation updates account balances. Must run as a batch saga with reconciliation. |
+| S-6 | BC-5 (Interest) | BC-3 (Transactions) | VSAM R: TRANSACT for category sums | TRANSACT | **Medium** | Read-only; can be replaced with a database view or API call. |
+| S-7 | BC-6 (Reporting) | BC-2 + BC-3 | VSAM R: ACCTDAT, CUSTDAT, TRANSACT, CCXREF | Multiple (read-only) | **Easy** | Read-only access. Replace with database queries or a read-replica/CQRS projection. |
+| S-8 | BC-7 (Ref Data) | BC-6 (Reporting) | VSAM flat file: TRANTYPE, TRANCATG extract | TRANTYPE, TRANCATG | **Easy** | Replace file extract with direct DB table access. |
+| S-9 | BC-8 (Auth) | BC-2 (Accounts) | VSAM R: ACCTDAT, CUSTDAT for validation | ACCTDAT, CUSTDAT | **Medium** | Read-only validation. Replace with API call to Account Service. MQ → event bus. |
+| S-10 | BC-9 (Migration) | BC-2 + BC-3 | VSAM R/W: all core files | All core VSAM files | **Hard** | Touches every data entity. Must be rebuilt after all data stores migrate. |
+| S-11 | BC-3 (Batch posting) | BC-5 (Interest) | VSAM R/W: TCATBALF category balances | TCATBALF | **Medium** | CBTRN02C updates TCATBALF during posting; CBACT04C reads it during interest calc. Sequential batch dependency. |
+| S-12 | BC-10 (Infra) | All batch contexts | JCL: CLOSEFIL/OPENFIL/WAITSTEP | CICS file state | **Easy** | Eliminated when VSAM is replaced — no file open/close needed for a database. |
+
+---
+
+## Extraction Difficulty Summary
+
+| Difficulty | Count | Seams |
+|------------|-------|-------|
+| **Easy** | 4 | S-1, S-7, S-8, S-12 |
+| **Medium** | 4 | S-4, S-6, S-9, S-11 |
+| **Hard** | 4 | S-2, S-3, S-5, S-10 |
+
+---
+
+## Candidate Microservice Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                        API Gateway / BFF                        │
+└──────┬──────────┬──────────┬──────────┬──────────┬──────────────┘
+       │          │          │          │          │
+  ┌────▼────┐ ┌───▼────┐ ┌──▼───┐ ┌───▼────┐ ┌───▼──────┐
+  │Identity │ │Account │ │Trans │ │Payment │ │Reporting │
+  │Service  │ │Service │ │Svc   │ │Service │ │Service   │
+  └────┬────┘ └───┬────┘ └──┬───┘ └───┬────┘ └───┬──────┘
+       │          │          │         │          │
+       │     ┌────▼──────────▼─────────▼──┐       │
+       │     │    Core Database           │◄──────┘ (read replica)
+       │     │  (PostgreSQL / Aurora)     │
+       │     └────────────┬───────────────┘
+       │                  │
+  ┌────▼────┐    ┌────────▼────────┐    ┌──────────────┐
+  │User DB  │    │ Event Bus       │    │Authorization │
+  │(or IdP) │    │ (Kafka / SQS)   │    │Service       │
+  └─────────┘    └────────┬────────┘    └──────┬───────┘
+                          │                    │
+                 ┌────────▼────────┐   ┌───────▼───────┐
+                 │Interest Calc   │   │Fraud Analytics│
+                 │(Spring Batch)  │   │(PostgreSQL)   │
+                 └────────────────┘   └───────────────┘
 ```
 
+### Service Boundaries
+
+| Service | Owns | Exposes | Consumes |
+|---------|------|---------|----------|
+| **Identity Service** | User store (USRSEC → relational/IdP) | JWT tokens, User CRUD API | — |
+| **Account Service** | ACCTDAT, CARDDAT, CCXREF, CUSTDAT → `accounts`, `cards`, `card_xref`, `customers` tables | Account/Card/Customer CRUD, balance queries | Identity (JWT validation) |
+| **Transaction Service** | TRANSACT, DALYTRAN → `transactions`, `daily_transactions` tables | Transaction CRUD, batch posting | Account Service (validation) |
+| **Payment Service** | — (stateless) | Payment API | Account Service (balance update), Transaction Service (record creation) |
+| **Reporting Service** | Report templates, generated output | Report generation API | Account + Transaction (read-only queries) |
+| **Reference Data Service** | TRANTYPE, TRANCATG, DISCGRP → `transaction_types`, `transaction_categories`, `disclosure_groups` tables | Ref data CRUD API | — |
+| **Authorization Service** | IMS DB → `authorizations` table, DB2 AUTHFRDS → `fraud_cases` table | Auth request/response (event-driven) | Account Service (validation), Event Bus |
+| **Interest Calculation Engine** | TCATBALF → `category_balances` table | Scheduled batch job | Account + Transaction (reads), Account (balance writes) |
+
 ---
 
-## Shared / Cross-Cutting Artifacts
+## Data Store Migration Target
 
-The following copybooks and utility programs are used across multiple domains and must be addressed as part of any migration.
-
-### Shared Copybooks
-
-| Copybook | Used By Domains | Purpose |
-|:---------|:----------------|:--------|
-| COCOM01Y | All online (1-5, 7-9) | COMMAREA session state structure |
-| COTTL01Y | All online (1-5, 7-8) | Standard screen title line |
-| CSDAT01Y | All online (1-5, 7-8) | Date working storage fields |
-| CSMSG01Y | All online (1-5, 7-8) | Standard message area line 1 |
-| CSMSG02Y | All online (1-5, 7-8) | Standard message area line 2 |
-| CSUSR01Y | 1 (Auth), 5 (User Sec) | User security record layout |
-| CSSETATY | All online (1-5, 7-8) | Set attribute byte utility |
-| CSSTRPFY | Most online (2-4, 7) | String-to-PIC field utility |
-| CODATECN | Most online + batch | Date conversion condition names |
-| CSLKPCDY | Several online | Lookup code utility |
-| CSUTLDPY | Programs calling CSUTLDTC | Date utility parameters |
-| CSUTLDWY | Programs calling CSUTLDTC | Date utility working storage |
-| CVACT03Y | 2, 3, 4, 6, 7 | CCXREF record layout (cross-domain) |
-
-### Shared Utility Programs
-
-| Program | Used By | Purpose |
-|:--------|:--------|:--------|
-| CSUTLDTC | All domains with date processing | Date arithmetic and formatting |
-| COBSWAIT | Batch scheduling | Timer control for wait steps |
+| Current Store | Type | Target Table(s) | Migration Complexity |
+|--------------|------|-----------------|---------------------|
+| ACCTDAT | VSAM KSDS | `accounts` | Medium — shared across many programs |
+| CARDDAT | VSAM KSDS | `cards` | Medium |
+| CCXREF | VSAM KSDS + AIX | `card_account_xref` (or FK on `cards`) | Low — becomes a foreign key relationship |
+| CUSTDAT | VSAM KSDS | `customers` | Medium |
+| TRANSACT | VSAM KSDS | `transactions` | High — most shared dataset |
+| USRSEC | VSAM KSDS | `users` (or external IdP) | Low — isolated |
+| DALYTRAN | Sequential | `daily_transactions` (staging table) | Low — batch input only |
+| TCATBALF | VSAM KSDS | `category_balances` | Low — batch only |
+| DISCGRP | VSAM KSDS | `disclosure_groups` | Low — batch only |
+| TRANTYPE | VSAM (from DB2 extract) | `transaction_types` (already in DB2) | Very Low |
+| TRANCATG | VSAM (from DB2 extract) | `transaction_categories` (already in DB2) | Very Low |
+| IMS DBPAUTP0 | IMS HIDAM | `authorizations` | High — hierarchical to relational mapping |
+| DB2 AUTHFRDS | DB2 table | `fraud_cases` | Very Low — already relational |
+| DB2 TRANSACTION_TYPE | DB2 table | `transaction_types` | Very Low — direct port |

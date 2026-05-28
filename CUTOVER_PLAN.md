@@ -1,275 +1,379 @@
-# CardDemo Cutover Plan
+# CardDemo Migration Cutover Plan
 
-This document details the migration execution plan for converting the CardDemo COBOL/CICS application to Java microservices using the strangler fig pattern.
+## Guiding Principles
 
----
-
-## 1. Migration Sequence
-
-Migration proceeds in four phases ordered by ascending risk. Each phase builds on the services and APIs delivered in prior phases.
-
-### Phase 1 -- Low Risk
-
-**Goal:** Migrate self-contained, read-heavy programs with minimal cross-domain writes.
-
-| Program | Domain | Data Stores | APIs to Create |
-|:--------|:-------|:------------|:---------------|
-| COUSR00C | User Security | USRSEC (R+B) | `GET /api/v1/users` |
-| COUSR01C | User Security | USRSEC (W) | `POST /api/v1/users` |
-| COUSR02C | User Security | USRSEC (R+W) | `PUT /api/v1/users/{userId}` |
-| COUSR03C | User Security | USRSEC (R+W) | `DELETE /api/v1/users/{userId}` |
-| COSGN00C | Auth & Session | USRSEC (R) | `POST /api/v1/auth/login`, `POST /api/v1/auth/logout` |
-| COMEN01C | Auth & Session | -- | `GET /api/v1/menu` (navigation) |
-| COADM01C | Auth & Session | -- | `GET /api/v1/admin/menu` (navigation) |
-| COTRN00C | Transaction Read | TRANSACT (B), CCXREF (R) | `GET /api/v1/transactions` |
-| COTRN01C | Transaction Read | TRANSACT (R), CCXREF (R) | `GET /api/v1/transactions/{tranId}` |
-
-**Dependencies on other phases:** None. These programs are entry points or read-only.
-
-**Exit criteria:** All Phase 1 APIs pass integration tests. Strangler proxy routes read traffic to Java services while COBOL handles writes.
-
-### Phase 2 -- Medium Risk
-
-**Goal:** Migrate read-heavy programs with moderate complexity (browse cursors, report generation) and the isolated DB2 extension.
-
-| Program | Domain | Data Stores | APIs to Create |
-|:--------|:-------|:------------|:---------------|
-| COCRDLIC | Card List | CARDDAT (B), ACCTDAT (R) | `GET /api/v1/cards` |
-| COCRDSLC | Card View | CARDDAT (R), CCXREF (R), ACCTDAT (R) | `GET /api/v1/cards/{cardNum}` |
-| COACTVWC | Account View | ACCTDAT (R), CARDAIX (R), CCXREF (R), CUSTDAT (R) | `GET /api/v1/accounts/{acctId}` |
-| CORPT00C | Reports | TRANSACT (R) | `GET /api/v1/transactions/reports` |
-| CBTRN03C | Reports (batch) | TRANSACT (R), CCXREF (R) | `POST /api/v1/transactions/reports/generate` |
-| COTRTLIC | Tran Type List | DB2 TRANSACTION_TYPE | `GET /api/v1/transaction-types` |
-| COTRTUPC | Tran Type Edit | DB2 TRANSACTION_TYPE | `POST/PUT /api/v1/transaction-types` |
-| COBTUPDT | Tran Type Batch | DB2 TRANSACTION_TYPE | Batch job endpoint |
-
-**Dependencies on other phases:** Requires Phase 1 auth services for session management.
-
-**Exit criteria:** Card and account read APIs pass integration tests. Report generation produces identical output to COBOL. DB2 extension fully migrated.
-
-### Phase 3 -- High Risk
-
-**Goal:** Migrate programs with write operations, state machines, and data conversion complexity.
-
-| Program | Domain | Data Stores | APIs to Create |
-|:--------|:-------|:------------|:---------------|
-| COCRDUPC | Card Update | CARDDAT (R+W), CCXREF (R), ACCTDAT (R), CUSTDAT (R) | `PUT /api/v1/cards/{cardNum}` |
-| COTRN02C (online) | Transaction Add | TRANSACT (W), CCXREF (R), CARDDAT (R) | `POST /api/v1/transactions` |
-| CBEXPORT | Customer Export | CUSTDAT (R), ACCTDAT (R), CARDDAT (R), CCXREF (R) | `POST /api/v1/customers/export` |
-| CBIMPORT | Customer Import | CUSTDAT (W), ACCTDAT (W), CARDDAT (W), CCXREF (W) | `POST /api/v1/customers/import` |
-
-**Dependencies on other phases:** Requires Phase 2 card and account read APIs. COCRDUPC depends on CCXREF lookup service.
-
-**Exit criteria:** Card update state machine passes all 10-state transition tests. Transaction add is idempotent. Export/import round-trip test passes with all COMP/COMP-3 fields validated.
-
-### Phase 4 -- Critical Risk
-
-**Goal:** Migrate the most complex programs requiring rewrites, saga patterns, and financial calculation validation.
-
-| Program | Domain | Data Stores | APIs to Create |
-|:--------|:-------|:------------|:---------------|
-| COBIL00C | Bill Payment | TRANSACT (W), ACCTDAT (R+W), CCXREF (R) | `POST /api/v1/transactions/bill-payment` |
-| CBTRN02C (batch) | Batch Post | TRANSACT, ACCTDAT (R+W), TCATBALF (R+W), DALYTRAN (R), CCXREF (R), TRANTYPE (R), TRANCATG (R) | `POST /api/v1/transactions/batch/post` |
-| CBSTM03A/B | Statement Gen | TRANSACT (R), ACCTDAT (R), CUSTDAT (R) | `GET /api/v1/transactions/statements/{acct}` |
-| CBACT04C | Interest Calc | ACCTDAT (R+W), TRANSACT (R), TCATBALF (R+W), DISCGRP (R), TRANCATG (R) | `POST /api/v1/accounts/batch/interest` |
-| COACTUPC | Account Update | ACCTDAT (R+W), CUSTDAT (R+W), CARDAIX (R), CCXREF (R) | `PUT /api/v1/accounts/{acctId}` |
-| COPAUA0C | Auth Request | IMS DB, MQ, ACCTDAT (R), CCXREF (R), CUSTDAT (R) | `POST /api/v1/authorizations` |
-| COPAUS0C | Auth Summary | IMS DB, ACCTDAT (R), CCXREF (R) | `GET /api/v1/authorizations` |
-| COPAUS1C | Auth Details | IMS DB, DB2 | `GET /api/v1/authorizations/{authId}` |
-| COPAUS2C | Auth Sub-prog | IMS DB | Internal service |
-| CBPAUP0C | Purge Auth | IMS DB | `POST /api/v1/authorizations/batch/purge` |
-| DBUNLDGS | IMS Unload | IMS DB | Batch utility |
-| PAUDBLOD | IMS Load | IMS DB | Batch utility |
-| PAUDBUNL | IMS Unload | IMS DB | Batch utility |
-
-**Dependencies on other phases:** All prior phases must be complete. Account and Card APIs must support both read and write.
-
-**Exit criteria:** Financial calculations match COBOL output to the penny. Saga patterns for dual/triple-writes have compensating transactions. Statement output matches behavioral spec. Authorization extension data model redesigned from hierarchical to relational.
+1. **Lowest-risk, highest-value first** — Start with isolated, well-understood domains that deliver immediate value.
+2. **Strangler facade** — Maintain a coexistence layer so legacy and modern systems run in parallel.
+3. **Data migration before code migration** — Move data to the target relational database early; both old and new code can read from it via the facade.
+4. **Dual-run validation** — Critical financial processes run on both old and new systems with automated reconciliation before cutover.
+5. **Reversibility** — Every phase has a rollback plan that can be executed within the batch window.
 
 ---
 
-## 2. Pre-Migration Actions by Risk Tier
+## Phase 0: Foundation (Weeks 1–4)
 
-### CRITICAL Programs -- Document Before Touching Code
+### Objective
+Establish the target platform, CI/CD pipeline, and strangler facade infrastructure.
 
-#### COACTUPC (Account Update, 4,236 lines)
+### Programs Migrating
+None — infrastructure only.
 
-1. **Extract validation rules:** Catalog all ~50 validation flags and their business rules into a formal specification document.
-2. **Decompose dual-entity logic:** Separate Account Update and Customer Update into independent services with clear API boundaries.
-3. **Map the 16-state EVALUATE dispatcher:** Document every state transition and the conditions that trigger them.
-4. **Write integration tests:** Create tests for each validation path, including the undocumented SSN exclusion rules (0, 666, 900-999).
+### Activities
 
-#### CBSTM03A (Statement Generation)
+| # | Activity | Duration |
+|---|----------|----------|
+| 1 | Provision cloud environment (AWS/Azure): compute, PostgreSQL/Aurora, Kafka/SQS, container orchestration (EKS/ECS). | Week 1 |
+| 2 | Set up CI/CD pipeline for Java/Kotlin microservices (GitHub Actions / Jenkins). | Week 1–2 |
+| 3 | Deploy rehosting environment (NTT DATA UniKix or Micro Focus on EC2) for COBOL coexistence. | Week 2–3 |
+| 4 | Build the **API Gateway / Strangler Facade** — routes requests to either legacy CICS or new REST services. | Week 2–4 |
+| 5 | Design and create the target relational schema based on VSAM record layouts (copybook → DDL mapping). | Week 3–4 |
+| 6 | Implement automated data sync: VSAM → PostgreSQL replication via CDC or batch extract/load. | Week 3–4 |
+| 7 | Establish monitoring, logging (ELK/CloudWatch), and alerting for both legacy and modern stacks. | Week 4 |
 
-1. **Do not translate -- rewrite from scratch.** The ALTER/GO TO self-modifying control flow and PSA/TCB/TIOT pointer arithmetic are z/OS-specific and have no Java equivalent.
-2. **Capture output format:** Use actual statement output files as the behavioral specification.
-3. **Build golden-file tests:** Compare Java output against known-good COBOL statement files field by field.
-4. **Document CBSTM03B interface:** Map the sub-program call contract (parameters, return values).
+### Data Stores Affected
+- Target PostgreSQL/Aurora schema created (empty).
+- VSAM files continue as source of truth.
 
-#### CBACT04C (Interest Calculation)
+### Integration Bridges
+- API Gateway configured but routing 100% to legacy.
+- CDC/ETL pipeline established for continuous data sync.
 
-1. **Document the interest formula:** `monthly_interest = category_balance * rate_percentage / 1200`.
-2. **Document the default-group fallback:** When file status '23' (record not found) is returned from DISCGRP, the program falls back to a default disclosure group.
-3. **Stub out 1400-COMPUTE-FEES:** This section is referenced but incomplete -- define the intended behavior.
-4. **Define cycle-reset semantics:** The program destructively zeros `ACCT-CURR-CYC-CREDIT` and `ACCT-CURR-CYC-DEBIT` after calculation.
-5. **Document transaction ID generation:** Concatenates PARM-DATE with sequential suffix -- replace with sequence generator.
+### Rollback Plan
+- Tear down cloud infrastructure; revert to mainframe-only operation.
+- No production data has been migrated; no business risk.
 
-#### CBTRN02C (Batch Transaction Posting)
-
-1. **Map the triple-write sequence:** Documents writes to TCATBALF + ACCTFILE + TRANSACT with no transactional boundary.
-2. **Define saga/compensating transactions:** Design compensating writes for each step in case of failure.
-3. **Document the TCATBALF upsert pattern:** Implicit upsert triggered by file status '23' (record not found triggers INSERT instead of UPDATE).
-4. **Complete validation logic:** Address the "ADD MORE VALIDATIONS HERE" comment at line 377.
-5. **Document overlimit calculation:** Currently undocumented; extract from code and specify.
-
-#### COBIL00C (Bill Payment)
-
-1. **Replace READPREV-based ID generation:** The current pattern reads the last transaction ID and adds 1, creating a race condition under concurrent access. Replace with a database sequence.
-2. **Define saga for dual-write:** TRANSACT + ACCTDAT writes happen in a single CICS pseudo-conversation without transactional guarantee.
-3. **Document hardcoded values:** Transaction type '02', category 2, merchant ID 999999999.
-4. **Document "pay in full" behavior:** Only full-balance payment is supported (no partial payment). Confirm if this is intentional.
-
-### HIGH Programs -- Add Test Harnesses First
-
-#### COCRDUPC (Credit Card Update, 1,560 lines)
-
-1. **Map all 10 states and transitions:** Document the complete state machine including guard conditions.
-2. **Test optimistic locking:** Verify concurrent update behavior and ensure data integrity.
-3. **Document private COMMAREA append pattern:** The program extends the standard COMMAREA via offset arithmetic -- this pattern is fragile and must be refactored.
-
-#### COTRN02C (Online Transaction Add)
-
-1. **Test CCXREF validation paths:** Ensure all card-to-account lookup scenarios are covered (valid card, expired card, invalid card, suspended card).
-2. **Ensure WRITE to TRANSACT is idempotent:** Duplicate submissions should not create duplicate transaction records.
-3. **Document transaction ID generation:** Same READPREV pattern as COBIL00C -- replace with sequence generator.
-
-#### CBEXPORT / CBIMPORT (Customer Data Migration)
-
-1. **Validate all COMP/COMP-3 conversions:** The CVEXPORT copybook uses packed decimal fields and REDEFINES for polymorphic record types. Numeric conversion errors could corrupt data.
-2. **Build round-trip test:** Export from COBOL, import to Java, re-export from Java, and compare with original.
-3. **Test all REDEFINES variants:** Ensure each polymorphic record type is correctly deserialized.
+### Acceptance Criteria
+- [ ] Target database schema deployed and validated against copybook record layouts.
+- [ ] API Gateway routes test requests to legacy CICS and returns correct responses.
+- [ ] CDC/ETL pipeline syncs sample data from VSAM to PostgreSQL with <1-minute lag.
+- [ ] CI/CD pipeline builds and deploys a skeleton Spring Boot service.
+- [ ] Rehosted COBOL environment passes smoke tests with production-like data.
 
 ---
 
-## 3. Strangler Fig Implementation
+## Phase 1: Identity & User Administration (Weeks 5–8)
 
-Transaction Processing is extracted first because it has the highest business value, well-defined read/write boundaries, and clear API contracts.
+### Objective
+Replace USRSEC VSAM-based authentication with modern identity management. This is the lowest-risk extraction because USRSEC is used by only 5 programs and is completely isolated from financial data.
 
-### Phase 1 APIs -- Read-Only (Lowest Risk)
+### Programs Migrating
 
-| API | Source Program | VSAM Files | Notes |
-|:----|:--------------|:-----------|:------|
-| `GET /api/v1/transactions` | COTRN00C | TRANSACT (browse), CCXREF (read) | Pagination via cursor |
-| `GET /api/v1/transactions/{tranId}` | COTRN01C | TRANSACT (read), CCXREF (read) | Single record lookup |
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| COSGN00C | Sign-on | 260 | Spring Security + JWT |
+| COUSR00C | User List | 695 | User Management REST API |
+| COUSR01C | User Add | 299 | User Management REST API |
+| COUSR02C | User Update | 414 | User Management REST API |
+| COUSR03C | User Delete | 359 | User Management REST API |
 
-**Implementation:** Deploy Java service behind API gateway. Route `/api/v1/transactions` GET requests to Java; all other transaction traffic continues to COBOL via CICS.
+### Data Stores Affected
 
-### Phase 2 APIs -- Writes (Medium Risk)
+| Store | Action |
+|-------|--------|
+| USRSEC (VSAM) | Migrate to `users` table in PostgreSQL. Decommission VSAM file after validation. |
 
-| API | Source Program | VSAM Files | Notes |
-|:----|:--------------|:-----------|:------|
-| `POST /api/v1/transactions` | COTRN02C (online) | TRANSACT (write), CCXREF (read), CARDDAT (read) | Validate card via CCXREF before write |
-| `POST /api/v1/transactions/bill-payment` | COBIL00C | TRANSACT (write), ACCTDAT (read+write), CCXREF (read) | Saga pattern for dual-write |
+### Integration Bridges
+- **3270-to-API bridge:** During transition, the legacy menu programs (COMEN01C, COADM01C) call the new Identity Service via the API Gateway instead of reading USRSEC directly. COMMAREA user fields populated from JWT claims.
+- **Dual authentication:** Both USRSEC and the new user store accept logins for 2 weeks of parallel run.
 
-**Implementation:** Add write endpoints to Transaction Service. Consume Account Service API for balance updates (anti-corruption layer). Replace READPREV ID generation with sequence.
+### Rollback Plan
+- Re-enable USRSEC VSAM file as the authentication source.
+- API Gateway routes sign-on requests back to COSGN00C.
+- User data remains in both VSAM and PostgreSQL during parallel run; VSAM is the fallback source of truth.
 
-### Phase 3 APIs -- Batch (Highest Risk)
-
-| API | Source Program | VSAM Files | Notes |
-|:----|:--------------|:-----------|:------|
-| `POST /api/v1/transactions/batch/post` | CBTRN02C (batch) | Multiple (see Phase 4) | Spring Batch job; saga for triple-write |
-| `GET /api/v1/transactions/reports` | CORPT00C, CBTRN03C | TRANSACT, CCXREF | Report generation |
-| `GET /api/v1/transactions/statements/{acct}` | CBSTM03A/B | TRANSACT, ACCTDAT, CUSTDAT | Rewrite from scratch |
-
-**Implementation:** Spring Batch for POSTTRAN replacement. Statement generator is a full rewrite using behavioral spec.
-
-### Anti-Corruption Layer -- Consumed APIs
-
-| Service | API | Used By | Purpose |
-|:--------|:----|:--------|:--------|
-| Account Service | `GET /api/v1/accounts/{acctId}` | COBIL00C, CBTRN02C, CBSTM03A | Retrieve account for validation/display |
-| Account Service | `PUT /api/v1/accounts/{acctId}` | COBIL00C, CBTRN02C | Update balances |
-| Account Service | `GET /api/v1/accounts/by-card/{cardNum}` | COTRN00-02C, COBIL00C | Card-to-account lookup (replaces CCXREF read) |
-| Customer Service | `GET /api/v1/customers/{custId}` | CBSTM03A | Customer data for statement headers |
+### Acceptance Criteria
+- [ ] All existing users from USRSEC successfully migrated to PostgreSQL.
+- [ ] Login via new Identity Service returns valid JWT accepted by all downstream programs.
+- [ ] User CRUD operations (list/add/update/delete) functional via REST API.
+- [ ] Legacy 3270 sign-on screen continues to work via the bridge (for users who haven't migrated to web UI).
+- [ ] Zero authentication failures during 2-week parallel run.
+- [ ] USRSEC VSAM file decommissioned.
 
 ---
 
-## 4. Batch Cycle Cutover
+## Phase 2: Reference Data & Reporting (Weeks 9–14)
 
-### Current JCL Job Chain
+### Objective
+Migrate read-only and reference-data domains. These have minimal write-coupling and pose the lowest risk to operational data.
 
-The following 13 core batch jobs execute in sequence as the daily batch cycle (from `README.md` lines 296-327):
+### Programs Migrating
 
-| Step | Job | Program | Purpose |
-|:----:|:----|:--------|:--------|
-| 1 | CLOSEFIL | IEFBR14 | Close VSAM files in CICS |
-| 2 | COMBTRAN | SORT | Combine system transactions with daily ones |
-| 3 | POSTTRAN | CBTRN02C | Core transaction posting |
-| 4 | INTCALC | CBACT04C | Interest calculation |
-| 5 | CREASTMT | CBSTM03A | Statement generation |
-| 6 | TRANREPT | CBTRN03C | Transaction report |
-| 7 | TRANBKP | IDCAMS | Backup transaction master |
-| 8 | ACCTFILE | IDCAMS | Refresh account master |
-| 9 | CARDFILE | IDCAMS | Refresh card master |
-| 10 | CUSTFILE | IDCAMS | Refresh customer master |
-| 11 | XREFFILE | IDCAMS | Refresh cross-reference |
-| 12 | TRANIDX | IDCAMS | Define AIX for transaction file |
-| 13 | OPENFIL | IEFBR14 | Open files in CICS |
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| COTRTLIC | Transaction Type List (DB2) | ~400 | Reference Data REST API |
+| COTRTUPC | Transaction Type Add/Edit (DB2) | ~400 | Reference Data REST API |
+| COBTUPDT | Batch Txn Type Maintenance | ~400 | Reference Data REST API (or Spring Batch) |
+| CORPT00C | Report Submission (online) | 649 | Reporting REST API |
+| CBTRN03C | Transaction Detail Report (batch) | 649 | Spring Batch + Jasper/BIRT |
+| CBSTM03A | Account Statements (batch) | 924 | Spring Batch + PDF/HTML generation |
+| CBSTM03B | Statement Subroutine | 230 | Merged into statement generator |
 
-### Target Scheduler
+### Data Stores Affected
 
-Replace JCL with **Spring Batch** jobs orchestrated by **Spring Cloud Data Flow** or **Apache Airflow**.
+| Store | Action |
+|-------|--------|
+| DB2 TRANSACTION_TYPE | Migrate to PostgreSQL `transaction_types` table. |
+| DB2 TRANSACTION_TYPE_CATEGORY | Migrate to PostgreSQL `transaction_categories` table. |
+| VSAM TRANTYPE / TRANCATG | Decommission — no longer needed once reports read from PostgreSQL directly. |
+| TRANSACT (VSAM) | Read-only access via CDC-replicated `transactions` table in PostgreSQL. |
 
-**Execution DAG:**
+### Integration Bridges
+- **Report trigger bridge:** CORPT00C currently submits batch jobs via CICS WRITEQ TD. The new Reporting Service accepts REST requests and triggers Spring Batch jobs.
+- **TRANEXTR elimination:** The weekly DB2→VSAM extract job becomes unnecessary; reporting reads directly from PostgreSQL.
+
+### Rollback Plan
+- Re-enable DB2 tables and VSAM extract job (TRANEXTR) as the reference data source.
+- Route reporting requests back to legacy CORPT00C and batch JCL.
+- CDC-replicated `transactions` table remains available; reports can switch between sources.
+
+### Acceptance Criteria
+- [ ] Transaction type CRUD operations functional via REST API with PostgreSQL backend.
+- [ ] Transaction detail reports match legacy output byte-for-byte (or pixel-for-pixel for formatted output).
+- [ ] Account statements generate identical content to CBSTM03A output.
+- [ ] TRANEXTR weekly extract job decommissioned; no VSAM TRANTYPE/TRANCATG references remain.
+- [ ] Control-M WEEKLY-TransactionTypesDBRefresh folder updated to trigger new batch jobs.
+- [ ] Report generation SLA maintained (same or better completion time).
+
+---
+
+## Phase 3: Account & Card Services (Weeks 15–24)
+
+### Objective
+Build the core Account Service behind the strangler facade. This is the highest-coupling domain and requires the most careful migration.
+
+### Programs Migrating
+
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| COACTVWC | Account View | 941 | Account REST API |
+| COACTUPC | Account Update | 4,236 | Account REST API |
+| COCRDLIC | Card List | 1,459 | Card REST API |
+| COCRDSLC | Card Detail/Search | 887 | Card REST API |
+| COCRDUPC | Card Update | 1,560 | Card REST API |
+| CBACT01C | Batch Account Read | 430 | Eliminated (SQL query) |
+| CBACT02C | Batch Card Read | 178 | Eliminated (SQL query) |
+| CBACT03C | Batch Cross-Ref Read | 178 | Eliminated (SQL query) |
+| CBCUS01C | Batch Customer Read | 178 | Eliminated (SQL query) |
+
+### Data Stores Affected
+
+| Store | Action |
+|-------|--------|
+| ACCTDAT (VSAM) | Primary migration to `accounts` table. Bi-directional sync during transition. |
+| CARDDAT (VSAM) | Migrate to `cards` table. |
+| CCXREF (VSAM + AIX) | Migrate to `card_account_xref` table (or FK relationship). |
+| CUSTDAT (VSAM) | Migrate to `customers` table. |
+
+### Integration Bridges
+- **VSAM-to-DB sync:** Bi-directional during transition. New API writes to PostgreSQL; CDC replicates back to VSAM for batch programs that haven't migrated yet (Phases 4–5).
+- **3270-to-API bridge:** CICS online programs replaced with REST APIs. A thin 3270 emulation layer (optional) routes terminal users to the web UI.
+- **Batch consumers:** CBTRN01C, CBTRN02C, CBACT04C, and CBSTM03B continue to read VSAM files via the sync bridge.
+
+### Rollback Plan
+- Disable new Account/Card APIs in the API Gateway; route all traffic back to CICS programs.
+- Bi-directional sync ensures VSAM files are current; COBOL programs resume from consistent state.
+- Rollback window: up to 4 hours (time to re-enable CICS transactions and verify data consistency).
+
+### Acceptance Criteria
+- [ ] Account CRUD via REST API passes all functional tests (credit limit, cash limit, balance validation).
+- [ ] Card list/search/update via REST API matches legacy CICS behavior (pagination, AIX browsing).
+- [ ] Customer data accessible via Account Service API.
+- [ ] Bi-directional VSAM↔PostgreSQL sync verified: changes in either direction propagate within 30 seconds.
+- [ ] Batch programs (CBTRN01C, CBTRN02C, CBACT04C) continue to run successfully against synced VSAM data.
+- [ ] PCI DSS compliance validated for card data handling in the new service.
+- [ ] 2-week parallel run with zero data discrepancies.
+- [ ] COACTUPC validation rules (credit limit, cash limit, balance) produce identical outcomes in Java.
+
+---
+
+## Phase 4: Transaction Processing & Payments (Weeks 25–34)
+
+### Objective
+Migrate online transaction management and bill payment, then migrate batch transaction posting.
+
+### Sub-Phase 4a: Online Transactions & Payments (Weeks 25–28)
+
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| COTRN00C | Transaction List | 699 | Transaction REST API |
+| COTRN01C | Transaction View | 330 | Transaction REST API |
+| COTRN02C | Transaction Add | 783 | Transaction REST API |
+| COBIL00C | Bill Payment | 572 | Payment REST API |
+
+### Sub-Phase 4b: Batch Transaction Posting (Weeks 29–34)
+
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| CBTRN01C | Post Daily Transactions | 494 | Spring Batch job |
+| CBTRN02C | Post with Rejections | 731 | Spring Batch job |
+
+### Data Stores Affected
+
+| Store | Action |
+|-------|--------|
+| TRANSACT (VSAM) | Primary migration to `transactions` table. VSAM file decommissioned after batch posting migrates. |
+| DALYTRAN | Migrate to `daily_transactions` staging table. |
+| DALYREJS | Migrate to `rejected_transactions` table. |
+| TCATBALF | Continue on VSAM until Phase 5. |
+
+### Integration Bridges
+- **Transaction write bridge (4a):** New Transaction API writes to PostgreSQL; CDC replicates to VSAM TRANSACT for batch programs still on COBOL during 4a.
+- **Daily file bridge (4b):** Daily transaction input (DALYTRAN) fed from the new system's transaction queue or staging table instead of the legacy flat file.
+- **Payment → Account/Transaction events:** Bill payment triggers account-balance-update and transaction-creation events via Kafka/SQS instead of direct VSAM writes.
+
+### Rollback Plan
+- **4a rollback:** Re-enable CICS transaction programs; API Gateway routes back to legacy. Bi-directional sync ensures data consistency.
+- **4b rollback:** Re-enable JCL batch posting jobs (POSTTRAN); feed DALYTRAN from the original source. Control-M DAILY-TransactionBackup folder reverts to original configuration.
+
+### Acceptance Criteria
+- [ ] Online transaction list/view/add produces identical results to legacy CICS programs.
+- [ ] Bill payment correctly updates account balances and creates transaction records.
+- [ ] Batch posting (CBTRN02C equivalent) processes daily transactions with identical acceptance/rejection logic.
+- [ ] Rejected transactions written to `rejected_transactions` table match legacy DALYREJS output.
+- [ ] Category balances (TCATBALF) updated correctly during posting.
+- [ ] 4-week dual-run for batch posting with automated reconciliation: zero discrepancies.
+- [ ] Control-M DAILY-TransactionBackup schedule updated to trigger new Spring Batch jobs.
+- [ ] TRANSACT VSAM file decommissioned (end of Phase 4b).
+
+---
+
+## Phase 5: Financial Calculations & Authorization (Weeks 35–46)
+
+### Objective
+Migrate the highest-risk batch processes (interest calculation) and the most complex extension (authorization processing).
+
+### Sub-Phase 5a: Interest Calculation (Weeks 35–40)
+
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| CBACT04C | Interest Calculator | 652 | Spring Batch job (Interest Calculation Engine) |
+
+### Sub-Phase 5b: Authorization Processing (Weeks 41–46)
+
+| Program | Function | LOC | Target |
+|---------|----------|-----|--------|
+| CBPAUP0C | Batch Auth Processing | — | Authorization Microservice (event-driven) |
+| COPAUA0C | Auth Admin Online | — | Authorization REST API |
+| COPAUS0C–2C | Auth Screen Programs | — | Authorization Web UI |
+| PAUDBLOD/PAUDBUNL/DBUNLDGS | IMS DB Load/Unload | — | PostgreSQL migration scripts |
+| COACCT01 | Account MQ Inquiry | — | Eliminated (Account Service API) |
+| CODATE01 | Date MQ Inquiry | — | Eliminated (standard Java date API) |
+
+### Data Stores Affected
+
+| Store | Action |
+|-------|--------|
+| TCATBALF (VSAM) | Migrate to `category_balances` table. Decommission. |
+| DISCGRP (VSAM) | Migrate to `disclosure_groups` table. Decommission. |
+| IMS DB (DBPAUTP0/DBPAUTX0) | Migrate to `authorizations` table in PostgreSQL. Decommission IMS. |
+| DB2 AUTHFRDS | Migrate to `fraud_cases` table in PostgreSQL. Decommission DB2. |
+| MQ Queues | Replace with Kafka topics or SQS queues. Decommission MQ. |
+
+### Integration Bridges
+- **Interest calc dual-run:** Run both COBOL and Java interest calculations on the same data for 3 monthly cycles. Automated comparison of every account balance.
+- **Auth routing:** MQ facade routes authorization requests to either legacy or new authorization service. Traffic gradually shifted (10% → 50% → 100%).
+- **IMS migration bridge:** IMS data extracted via PAUDBUNL, transformed, and loaded into PostgreSQL.
+
+### Rollback Plan
+- **5a rollback:** Re-enable JCL INTCALC/COMBTRAN jobs. TCATBALF/DISCGRP VSAM files restored from backup. Control-M MONTHLY-InterestCalculation reverts. Rollback must occur before next month's cycle.
+- **5b rollback:** MQ facade routes 100% traffic back to legacy CICS authorization programs. IMS DB remains available as fallback. Rollback window: 1 hour (MQ routing change).
+
+### Acceptance Criteria
+- [ ] Interest calculation produces identical results for all accounts across 3 monthly dual-run cycles.
+- [ ] Disclosure-group rates and compounding rules validated by business SMEs.
+- [ ] Authorization service processes requests within SLA (<500ms p99).
+- [ ] Fraud detection logic produces identical results to legacy DB2 + IMS path.
+- [ ] MQ → Kafka/SQS migration transparent to upstream authorization requestors.
+- [ ] IMS data fully migrated to PostgreSQL with zero data loss.
+- [ ] All VSAM files (TCATBALF, DISCGRP) decommissioned.
+- [ ] Control-M MONTHLY-InterestCalculation updated to new Spring Batch triggers.
+
+---
+
+## Phase 6: Cleanup & Decommissioning (Weeks 47–52)
+
+### Objective
+Migrate remaining utilities, decommission all VSAM files, remove the COBOL rehosting environment, and complete the modernization.
+
+### Programs Migrating
+
+| Program | Function | Target |
+|---------|----------|--------|
+| CBEXPORT | Branch Data Export | Spring Batch ETL (JSON/CSV) |
+| CBIMPORT | Branch Data Import | Spring Batch ETL |
+| COBSWAIT | Wait Utility | Eliminated |
+| CSUTLDTC | Date Utility | Java `java.time` API |
+| COBDATFT | Date Format (ASM) | Java `DateTimeFormatter` |
+| COMEN01C | Main Menu | Web UI (already delivered) |
+| COADM01C | Admin Menu | Web UI (already delivered) |
+
+### Data Stores Affected
+
+| Store | Action |
+|-------|--------|
+| All remaining VSAM files | Verify zero active references; archive and decommission. |
+| Rehosted COBOL environment | Shut down after 4-week soak period with zero traffic. |
+
+### Integration Bridges
+- None — all bridges decommissioned. All traffic routes to new services.
+
+### Rollback Plan
+- Rehosted COBOL environment maintained in cold standby for 90 days after decommissioning.
+- VSAM data archived to S3 (Glacier) for compliance retention.
+- In case of critical issues, the rehosted environment can be restarted and the API Gateway reconfigured within 4 hours.
+
+### Acceptance Criteria
+- [ ] Zero programs reference VSAM files.
+- [ ] All Control-M schedules updated to new Spring Batch / cloud-native triggers.
+- [ ] Branch export/import functional via new ETL pipeline.
+- [ ] Rehosted COBOL environment receives zero requests for 4 consecutive weeks.
+- [ ] COBOL environment decommissioned; cold standby available for 90 days.
+- [ ] All EBCDIC data archived to cloud storage with documented retention policy.
+- [ ] Complete system operates on modern stack: Java/Kotlin + Spring Boot + PostgreSQL + Kafka.
+- [ ] End-to-end integration tests pass for all business scenarios.
+- [ ] Performance benchmarks meet or exceed mainframe SLAs.
+
+---
+
+## Timeline Summary
 
 ```
-CLOSEFIL ──> COMBTRAN ──> POSTTRAN ──> INTCALC ──> CREASTMT ──> TRANREPT ──> OPENFIL
-                                                                    │
-                                                                    v
-                                                              (data refreshes)
-                                                            TRANBKP, ACCTFILE,
-                                                            CARDFILE, CUSTFILE,
-                                                            XREFFILE, TRANIDX
+Phase 0: Foundation                         [Weeks 1–4]
+  ├── Cloud infra, CI/CD, schema design
+  └── Rehosting env, API Gateway, CDC pipeline
+
+Phase 1: Identity & User Admin             [Weeks 5–8]        ◄─ Lowest risk
+  └── USRSEC → PostgreSQL, Spring Security
+
+Phase 2: Reference Data & Reporting        [Weeks 9–14]
+  └── DB2 tables → PostgreSQL, Report engine
+
+Phase 3: Account & Card Services           [Weeks 15–24]      ◄─ Highest value
+  └── ACCTDAT/CARDDAT/CCXREF/CUSTDAT → PostgreSQL
+
+Phase 4: Transactions & Payments           [Weeks 25–34]
+  ├── 4a: Online transaction CRUD
+  └── 4b: Batch posting (dual-run)
+
+Phase 5: Financial Calc & Authorization    [Weeks 35–46]      ◄─ Highest risk
+  ├── 5a: Interest calculation (3-month dual-run)
+  └── 5b: IMS/DB2/MQ → Kafka/PostgreSQL
+
+Phase 6: Cleanup & Decommissioning         [Weeks 47–52]
+  └── Branch migration, utilities, COBOL shutdown
 ```
-
-Each job is implemented as a Spring Batch `Job` with explicit step dependencies enforced by the orchestrator.
-
-### Dual-Run Validation Strategy
-
-During the parallel-run period:
-
-1. **Run both COBOL and Java batch jobs** against the same input data (DALYTRAN feed).
-2. **Compare outputs field-by-field** using the test harness (`test-harness/` directory) for TRANSACT, ACCTDAT, TCATBALF, and statement files.
-3. **Track discrepancies** in a validation report with per-record match/mismatch status.
-4. **Promote Java** only when 100% match is achieved over a minimum of 5 consecutive batch cycles.
 
 ---
 
-## 5. Rollback Strategy
+## Risk Gates Between Phases
 
-### Per-Phase Rollback
+Each phase transition requires sign-off on the acceptance criteria above, plus:
 
-| Phase | Rollback Approach | Data Implications |
-|:------|:------------------|:------------------|
-| Phase 1 (Read-only) | Redirect API gateway back to COBOL CICS | No data changes to reconcile |
-| Phase 2 (Read + Reports) | Redirect API gateway; discard generated reports | No data changes; re-run reports from COBOL |
-| Phase 3 (Writes) | Redirect API gateway; replay missed transactions from audit log | Reconcile TRANSACT and CARDDAT from COBOL master |
-| Phase 4 (Batch + Financial) | Revert to JCL batch cycle; restore VSAM files from pre-cutover backup | Full VSAM restore required; reconcile any Java-posted transactions |
-
-### Data Synchronization During Parallel Run
-
-- **Read APIs:** No synchronization needed -- both systems read from the same VSAM files (or their Java-side replicas).
-- **Write APIs:** During Phase 3+, implement **dual-write via change data capture (CDC)**:
-  - Java service writes to its database AND publishes events
-  - A CDC connector writes changes back to VSAM for COBOL fallback
-  - On rollback, VSAM is the source of truth
-- **Batch jobs:** During dual-run, both COBOL and Java process the same DALYTRAN feed. The Java output is validated but not promoted until it passes all checks.
-
-### Emergency Rollback Procedure
-
-1. **Halt** all Java batch jobs and API traffic via feature flags.
-2. **Restore** VSAM files from the most recent pre-batch backup (GDG generation).
-3. **Re-route** API gateway to COBOL CICS endpoints.
-4. **Re-run** the COBOL batch cycle from CLOSEFIL through OPENFIL.
-5. **Validate** data integrity by running the test harness comparison.
-6. **Notify** stakeholders and initiate root cause analysis.
+| Gate | Requirement |
+|------|-------------|
+| Phase 0 → 1 | CDC pipeline lag < 1 minute; API Gateway routing verified. |
+| Phase 1 → 2 | Zero authentication failures in parallel run. |
+| Phase 2 → 3 | Reports match legacy output; reference data CRUD verified. |
+| Phase 3 → 4 | Bi-directional sync verified; batch programs unaffected. |
+| Phase 4 → 5 | Transaction posting dual-run: zero discrepancies for 4 weeks. |
+| Phase 5 → 6 | Interest calculation dual-run: zero discrepancies for 3 monthly cycles. |
