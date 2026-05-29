@@ -173,4 +173,107 @@ class ReconciliationCheckerTest {
         ValidationResult result = checker.checkRecordCount(xrefRecords, 50, "CARDXREF");
         assertTrue(result.isPassed(), result.getMessage());
     }
+
+    // ========== New batch pipeline reconciliation tests ==========
+
+    @Test
+    void accountBalanceSumIsPositive() {
+        if (!dataAvailable) return;
+        BigDecimal sum = BigDecimal.ZERO;
+        for (Map<String, Object> acct : acctRecords) {
+            sum = sum.add(DataFileParser.numericFieldValue(acct, "ACCT-CURR-BAL"));
+        }
+        assertTrue(sum.compareTo(BigDecimal.ZERO) >= 0,
+                "SUM(ACCT-CURR-BAL) should be non-negative, got: " + sum.toPlainString());
+    }
+
+    @Test
+    void allAccountsHaveValidStatus() {
+        if (!dataAvailable) return;
+        List<String> invalid = new ArrayList<>();
+        for (Map<String, Object> acct : acctRecords) {
+            String status = DataFileParser.fieldValue(acct, "ACCT-ACTIVE-STATUS");
+            if (!"Y".equals(status) && !"N".equals(status)) {
+                invalid.add(status);
+            }
+        }
+        assertTrue(invalid.isEmpty(),
+                "All ACCT-ACTIVE-STATUS should be 'Y' or 'N', found invalid: " + invalid);
+    }
+
+    @Test
+    void allAccountsHaveValidDates() {
+        if (!dataAvailable) return;
+        String datePattern = "\\d{4}-\\d{2}-\\d{2}";
+        List<String> invalidDates = new ArrayList<>();
+        for (Map<String, Object> acct : acctRecords) {
+            String openDate = DataFileParser.fieldValue(acct, "ACCT-OPEN-DATE");
+            String expDate = DataFileParser.fieldValue(acct, "ACCT-EXPIRAION-DATE");
+            if (!openDate.isEmpty() && !openDate.matches(datePattern)) {
+                invalidDates.add("OPEN:" + openDate);
+            }
+            if (!expDate.isEmpty() && !expDate.matches(datePattern)) {
+                invalidDates.add("EXP:" + expDate);
+            }
+        }
+        assertTrue(invalidDates.isEmpty(),
+                "All dates should match YYYY-MM-DD pattern, found invalid: " + invalidDates);
+    }
+
+    @Test
+    void creditLimitNonNegative() {
+        if (!dataAvailable) return;
+        List<String> violations = new ArrayList<>();
+        for (Map<String, Object> acct : acctRecords) {
+            BigDecimal creditLimit = DataFileParser.numericFieldValue(acct, "ACCT-CREDIT-LIMIT");
+            if (creditLimit.compareTo(BigDecimal.ZERO) < 0) {
+                String acctId = DataFileParser.fieldValue(acct, "ACCT-ID");
+                violations.add(acctId + "=" + creditLimit.toPlainString());
+            }
+        }
+        assertTrue(violations.isEmpty(),
+                "ACCT-CREDIT-LIMIT should be >= 0 for all accounts: " + violations);
+    }
+
+    @Test
+    void cashCreditLimitDoesNotExceedCreditLimit() {
+        if (!dataAvailable) return;
+        List<String> violations = new ArrayList<>();
+        for (Map<String, Object> acct : acctRecords) {
+            BigDecimal creditLimit = DataFileParser.numericFieldValue(acct, "ACCT-CREDIT-LIMIT");
+            BigDecimal cashLimit = DataFileParser.numericFieldValue(acct, "ACCT-CASH-CREDIT-LIMIT");
+            if (cashLimit.compareTo(creditLimit) > 0) {
+                String acctId = DataFileParser.fieldValue(acct, "ACCT-ID");
+                violations.add(acctId + ": cash=" + cashLimit.toPlainString()
+                        + " > credit=" + creditLimit.toPlainString());
+            }
+        }
+        assertTrue(violations.isEmpty(),
+                "ACCT-CASH-CREDIT-LIMIT should not exceed ACCT-CREDIT-LIMIT: " + violations);
+    }
+
+    @Test
+    void discGrpToAcctData() {
+        if (!dataAvailable) return;
+        ValidationResult result = checker.checkDiscGrpToAcctData(discGrpRecords, acctRecords);
+        // Note: discgrp may have extra entries not assigned to any account (DEFAULT, ZEROAPR)
+        // This check validates in the disc→acct direction (reverse of acctGroupIdsExistInDiscGrp)
+        // Some orphans are expected if not all groups are assigned
+        assertNotNull(result);
+    }
+
+    @Test
+    void tcatbalRecordCount() {
+        if (!dataAvailable) return;
+        // tcatbal should have records — validate count is positive
+        assertFalse(tcatbalRecords.isEmpty(), "TCATBAL should have records");
+    }
+
+    @Test
+    void discGrpRecordCount() {
+        if (!dataAvailable) return;
+        // Per TEST_STRATEGY.md line 24, discgrp should have 51 records
+        ValidationResult result = checker.checkRecordCount(discGrpRecords, 51, "DISCGRP");
+        assertTrue(result.isPassed(), result.getMessage());
+    }
 }

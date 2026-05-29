@@ -140,6 +140,78 @@ class RecordComparatorTest {
         assertEquals(110, layout.getRecordLength());
     }
 
+    @Test
+    void toleranceAwareComparisonZeroToleranceMismatch() throws Exception {
+        RecordLayout layout = RecordLayout.outfileLayout();
+        byte[] record1 = buildSampleOutfileRecord();
+        byte[] record2 = buildSampleOutfileRecord();
+
+        // Modify OUT-ACCT-CURR-BAL in record2: change from 1940.00 to 1940.01 (+0.01 difference)
+        byte[] modifiedBal = ZonedDecimalCodec.encode(new BigDecimal("1940.01"), 12, 2);
+        System.arraycopy(modifiedBal, 0, record2, 12, 12);
+
+        Path cobolFile = tempDir.resolve("OUTFILE_TOL_COBOL");
+        Path javaFile = tempDir.resolve("OUTFILE_TOL_JAVA");
+
+        writeBytes(cobolFile, record1);
+        writeBytes(javaFile, record2);
+
+        // With default (ZERO) tolerance, should report a mismatch
+        ComparisonReport report = comparator.compareFixedLength(
+                cobolFile, javaFile, layout, "CBACT01C", config);
+        assertFalse(report.isFullMatch(), "Zero tolerance should detect 0.01 difference");
+        assertTrue(report.getTotalMismatches() > 0);
+    }
+
+    @Test
+    void toleranceAwareComparisonGlobalTolerancePass() throws Exception {
+        RecordLayout layout = RecordLayout.outfileLayout();
+        byte[] record1 = buildSampleOutfileRecord();
+        byte[] record2 = buildSampleOutfileRecord();
+
+        // Modify OUT-ACCT-CURR-BAL in record2: +0.01 difference
+        byte[] modifiedBal = ZonedDecimalCodec.encode(new BigDecimal("1940.01"), 12, 2);
+        System.arraycopy(modifiedBal, 0, record2, 12, 12);
+
+        Path cobolFile = tempDir.resolve("OUTFILE_TOL2_COBOL");
+        Path javaFile = tempDir.resolve("OUTFILE_TOL2_JAVA");
+
+        writeBytes(cobolFile, record1);
+        writeBytes(javaFile, record2);
+
+        // With global tolerance of 0.01, should pass
+        config.setNumericTolerance(new BigDecimal("0.01"));
+        ComparisonReport report = comparator.compareFixedLength(
+                cobolFile, javaFile, layout, "CBACT01C", config);
+        assertTrue(report.isFullMatch(), "0.01 tolerance should allow 0.01 difference");
+    }
+
+    @Test
+    void toleranceAwareComparisonFieldSpecificOverride() throws Exception {
+        RecordLayout layout = RecordLayout.outfileLayout();
+        byte[] record1 = buildSampleOutfileRecord();
+        byte[] record2 = buildSampleOutfileRecord();
+
+        // Modify OUT-ACCT-CURR-BAL in record2: +0.01 difference
+        byte[] modifiedBal = ZonedDecimalCodec.encode(new BigDecimal("1940.01"), 12, 2);
+        System.arraycopy(modifiedBal, 0, record2, 12, 12);
+
+        Path cobolFile = tempDir.resolve("OUTFILE_TOL3_COBOL");
+        Path javaFile = tempDir.resolve("OUTFILE_TOL3_JAVA");
+
+        writeBytes(cobolFile, record1);
+        writeBytes(javaFile, record2);
+
+        // Global tolerance is ZERO, but field-specific tolerance for OUT-ACCT-CURR-BAL is 0.01
+        config.setNumericTolerance(BigDecimal.ZERO);
+        config.getFieldTolerances().put("OUT-ACCT-CURR-BAL", new BigDecimal("0.01"));
+
+        ComparisonReport report = comparator.compareFixedLength(
+                cobolFile, javaFile, layout, "CBACT01C", config);
+        assertTrue(report.isFullMatch(),
+                "Field-specific tolerance should override global and allow 0.01 difference");
+    }
+
     /**
      * Builds a sample OUTFILE record (107 bytes) for testing.
      */
