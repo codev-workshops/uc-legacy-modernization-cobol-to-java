@@ -177,4 +177,217 @@ class BusinessValidatorTest {
         assertFalse(result.isPassed());
         assertTrue(result.getMessage().contains("not reset"));
     }
+
+    // Rule 8: Interest amount calculation
+
+    @Test
+    void interestAmountWithinTolerance() {
+        // balance=1200, rate=18.0 → expected = 1200 * 18 / 1200 = 18.00
+        ValidationResult result = validator.validateInterestAmount(
+                new BigDecimal("1200.00"),
+                new BigDecimal("18.0"),
+                new BigDecimal("18.00"),
+                new BigDecimal("0.01"));
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void interestAmountExactMatch() {
+        // balance=1000, rate=12.0 → expected = 1000 * 12 / 1200 = 10.00
+        ValidationResult result = validator.validateInterestAmount(
+                new BigDecimal("1000.00"),
+                new BigDecimal("12.0"),
+                new BigDecimal("10.00"),
+                BigDecimal.ZERO);
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void interestAmountRoundingFailsWithZeroTolerance() {
+        // balance=1000, rate=7.0 → expected = 1000 * 7 / 1200 = 5.8333...
+        // actual = 5.83 (COBOL truncation)
+        ValidationResult result = validator.validateInterestAmount(
+                new BigDecimal("1000.00"),
+                new BigDecimal("7.0"),
+                new BigDecimal("5.83"),
+                BigDecimal.ZERO);
+        assertFalse(result.isPassed());
+    }
+
+    @Test
+    void interestAmountRoundingPassesWithTolerance() {
+        // balance=1000, rate=7.0 → expected = 5.8333...
+        // actual = 5.83, within 0.01 tolerance
+        ValidationResult result = validator.validateInterestAmount(
+                new BigDecimal("1000.00"),
+                new BigDecimal("7.0"),
+                new BigDecimal("5.83"),
+                new BigDecimal("0.01"));
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void interestAmountOutsideTolerance() {
+        ValidationResult result = validator.validateInterestAmount(
+                new BigDecimal("1000.00"),
+                new BigDecimal("12.0"),
+                new BigDecimal("15.00"),
+                new BigDecimal("0.01"));
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("Interest amount mismatch"));
+    }
+
+    // Rule 9: Interest transaction type
+
+    @Test
+    void interestTransactionTypeCorrect() {
+        ValidationResult result = validator.validateInterestTransactionType("01", "0005");
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void interestTransactionTypeWrongTypeCd() {
+        ValidationResult result = validator.validateInterestTransactionType("02", "0005");
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("TRAN-TYPE-CD"));
+    }
+
+    @Test
+    void interestTransactionTypeWrongCatCd() {
+        ValidationResult result = validator.validateInterestTransactionType("01", "0001");
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("TRAN-CAT-CD"));
+    }
+
+    // Rule 10: Account active status
+
+    @Test
+    void accountActiveValid() {
+        ValidationResult result = validator.validateAccountActive("Y");
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void accountActiveInvalid() {
+        ValidationResult result = validator.validateAccountActive("N");
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("not active"));
+    }
+
+    @Test
+    void accountActiveNull() {
+        ValidationResult result = validator.validateAccountActive(null);
+        assertFalse(result.isPassed());
+    }
+
+    // Rule 11: Sort order verification
+
+    @Test
+    void sortOrderCorrect() {
+        List<String> keys = Arrays.asList("001", "002", "003", "010");
+        ValidationResult result = validator.validateSortOrder(keys);
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void sortOrderViolation() {
+        List<String> keys = Arrays.asList("001", "003", "002", "010");
+        ValidationResult result = validator.validateSortOrder(keys);
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("Sort order violation"));
+    }
+
+    @Test
+    void sortOrderSingleElement() {
+        ValidationResult result = validator.validateSortOrder(Collections.singletonList("001"));
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void sortOrderEmpty() {
+        ValidationResult result = validator.validateSortOrder(Collections.emptyList());
+        assertTrue(result.isPassed());
+    }
+
+    // Rule 12: No duplicate keys
+
+    @Test
+    void noDuplicatesValid() {
+        List<String> keys = Arrays.asList("001", "002", "003");
+        ValidationResult result = validator.validateNoDuplicateKeys(keys);
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void duplicatesFound() {
+        List<String> keys = Arrays.asList("001", "002", "001");
+        ValidationResult result = validator.validateNoDuplicateKeys(keys);
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("Duplicate key"));
+    }
+
+    @Test
+    void noDuplicatesEmpty() {
+        ValidationResult result = validator.validateNoDuplicateKeys(Collections.emptyList());
+        assertTrue(result.isPassed());
+    }
+
+    // Rule 13: Export sequence numbering
+
+    @Test
+    void sequenceNumberingCorrect() {
+        List<Integer> seqNums = Arrays.asList(1, 2, 3, 4, 5);
+        ValidationResult result = validator.validateSequenceNumbering(seqNums);
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void sequenceNumberingGap() {
+        List<Integer> seqNums = Arrays.asList(1, 2, 4, 5);
+        ValidationResult result = validator.validateSequenceNumbering(seqNums);
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("Sequence number gap"));
+    }
+
+    @Test
+    void sequenceNumberingStartsWrong() {
+        List<Integer> seqNums = Arrays.asList(0, 1, 2);
+        ValidationResult result = validator.validateSequenceNumbering(seqNums);
+        assertFalse(result.isPassed());
+    }
+
+    @Test
+    void sequenceNumberingEmpty() {
+        ValidationResult result = validator.validateSequenceNumbering(Collections.emptyList());
+        assertTrue(result.isPassed());
+    }
+
+    // Rule 14: Report total consistency
+
+    @Test
+    void reportTotalsMatch() {
+        List<BigDecimal> pageTotals = Arrays.asList(
+                new BigDecimal("100.00"),
+                new BigDecimal("200.00"),
+                new BigDecimal("150.00"));
+        ValidationResult result = validator.validateReportTotals(pageTotals, new BigDecimal("450.00"));
+        assertTrue(result.isPassed());
+    }
+
+    @Test
+    void reportTotalsMismatch() {
+        List<BigDecimal> pageTotals = Arrays.asList(
+                new BigDecimal("100.00"),
+                new BigDecimal("200.00"));
+        ValidationResult result = validator.validateReportTotals(pageTotals, new BigDecimal("400.00"));
+        assertFalse(result.isPassed());
+        assertTrue(result.getMessage().contains("Report total mismatch"));
+    }
+
+    @Test
+    void reportTotalsEmpty() {
+        ValidationResult result = validator.validateReportTotals(
+                Collections.emptyList(), BigDecimal.ZERO);
+        assertTrue(result.isPassed());
+    }
 }

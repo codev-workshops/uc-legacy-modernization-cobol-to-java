@@ -54,7 +54,8 @@ public class FieldComparator {
                                                 FieldDefinition def, ToleranceConfig config) {
         BigDecimal cobolVal = ZonedDecimalCodec.decode(cobolField, def.getScale());
         BigDecimal javaVal = ZonedDecimalCodec.decode(javaField, def.getScale());
-        return cobolVal.subtract(javaVal).abs().compareTo(config.getNumericTolerance()) <= 0
+        BigDecimal tolerance = config.getToleranceForField(def.getName());
+        return cobolVal.subtract(javaVal).abs().compareTo(tolerance) <= 0
                 ? CompareResult.MATCH : CompareResult.MISMATCH;
     }
 
@@ -62,7 +63,8 @@ public class FieldComparator {
                                         FieldDefinition def, ToleranceConfig config) {
         BigDecimal cobolPacked = PackedDecimalCodec.decode(cobolField, def.getScale());
         BigDecimal javaPacked = PackedDecimalCodec.decode(javaField, def.getScale());
-        return cobolPacked.subtract(javaPacked).abs().compareTo(config.getNumericTolerance()) <= 0
+        BigDecimal tolerance = config.getToleranceForField(def.getName());
+        return cobolPacked.subtract(javaPacked).abs().compareTo(tolerance) <= 0
                 ? CompareResult.MATCH : CompareResult.MISMATCH;
     }
 

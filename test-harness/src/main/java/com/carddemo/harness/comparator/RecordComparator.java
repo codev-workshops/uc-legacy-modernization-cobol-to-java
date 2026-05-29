@@ -196,7 +196,7 @@ public class RecordComparator {
         StringBuilder ann = new StringBuilder();
         if (field.getType() == FieldDefinition.FieldType.DISPLAY_SIGNED ||
                 field.getType() == FieldDefinition.FieldType.COMP3) {
-            ann.append("tolerance: ").append(config.getNumericTolerance().toPlainString());
+            ann.append("tolerance: ").append(config.getToleranceForField(field.getName()).toPlainString());
         }
         if (field.isDateField() && config.isNormalizeDates()) {
             if (!ann.isEmpty()) ann.append(", ");

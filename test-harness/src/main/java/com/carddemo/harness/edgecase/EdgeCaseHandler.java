@@ -1,13 +1,16 @@
 package com.carddemo.harness.edgecase;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 /**
- * Handles CBACT01C-specific edge cases discovered during COBOL analysis.
+ * Handles program-specific edge cases discovered during COBOL analysis.
  */
 public final class EdgeCaseHandler {
 
     private EdgeCaseHandler() {}
+
+    // ========== CBACT01C edge cases ==========
 
     /**
      * Edge case 1: When ACCT-CURR-CYC-DEBIT is zero, COBOL substitutes 2525.00.
@@ -63,5 +66,69 @@ public final class EdgeCaseHandler {
             case 3 -> new BigDecimal("-1025.00");
             default -> BigDecimal.ZERO;
         };
+    }
+
+    // ========== CBTRN02C edge cases ==========
+
+    /**
+     * Returns true when the account is inactive (ACCT-ACTIVE-STATUS ≠ 'Y'),
+     * meaning the transaction should be rejected.
+     */
+    public static boolean isRejectedForInactiveAccount(String activeStatus) {
+        return !"Y".equals(activeStatus);
+    }
+
+    /**
+     * Returns true when the card number is not found in the XREF file,
+     * meaning the transaction should be rejected.
+     */
+    public static boolean isRejectedForMissingCard(String cardNum, Set<String> xrefCards) {
+        return !xrefCards.contains(cardNum);
+    }
+
+    /**
+     * Expected reject record length: 350-byte transaction + 80-byte reason.
+     */
+    public static int expectedRejectRecordLength() {
+        return 430;
+    }
+
+    // ========== CBACT04C edge cases ==========
+
+    /**
+     * Returns true when the TCAT balance is zero — no interest should be calculated.
+     */
+    public static boolean shouldSkipInterestCalc(BigDecimal tcatBalance) {
+        return tcatBalance.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    /**
+     * Returns true when no matching disclosure group exists for the given group ID.
+     */
+    public static boolean shouldSkipNoDisclosureGroup(String groupId, Set<String> discGroupIds) {
+        return !discGroupIds.contains(groupId);
+    }
+
+    /**
+     * Expected interest transaction type code.
+     */
+    public static String expectedInterestTypeCd() {
+        return "01";
+    }
+
+    /**
+     * Expected interest transaction category code.
+     */
+    public static String expectedInterestCatCd() {
+        return "0005";
+    }
+
+    // ========== CBTRN03C edge cases ==========
+
+    /**
+     * Detects when a page boundary is reached and page totals should be emitted.
+     */
+    public static boolean isPageBoundary(int lineCounter, int linesPerPage) {
+        return lineCounter >= linesPerPage;
     }
 }

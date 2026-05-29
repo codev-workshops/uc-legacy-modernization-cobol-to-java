@@ -191,14 +191,114 @@ public class ReconciliationChecker {
     public ValidationResult checkNumericFieldSum(
             List<Map<String, Object>> records, String fieldName,
             BigDecimal expectedSum, String description) {
+        return checkNumericFieldSum(records, fieldName, expectedSum, description, BigDecimal.ZERO);
+    }
+
+    /**
+     * Validate numeric field sum across all records with configurable tolerance.
+     */
+    public ValidationResult checkNumericFieldSum(
+            List<Map<String, Object>> records, String fieldName,
+            BigDecimal expectedSum, String description, BigDecimal tolerance) {
         BigDecimal actualSum = BigDecimal.ZERO;
         for (Map<String, Object> record : records) {
             actualSum = actualSum.add(DataFileParser.numericFieldValue(record, fieldName));
         }
-        if (actualSum.compareTo(expectedSum) != 0) {
+        if (actualSum.subtract(expectedSum).abs().compareTo(tolerance) > 0) {
             return ValidationResult.fail(
-                    "%s: expected sum=%s, actual sum=%s",
-                    description, expectedSum.toPlainString(), actualSum.toPlainString());
+                    "%s: expected sum=%s, actual sum=%s (tolerance=%s)",
+                    description, expectedSum.toPlainString(), actualSum.toPlainString(),
+                    tolerance.toPlainString());
+        }
+        return ValidationResult.pass();
+    }
+
+    /**
+     * Transaction master growth check.
+     * After posting, transaction master count should grow by exactly the posted count.
+     * (RECONCILIATION_CHECKS.md line 52)
+     */
+    public ValidationResult checkTransactionMasterGrowth(int beforeCount, int afterCount, int postedCount) {
+        int expectedAfter = beforeCount + postedCount;
+        if (afterCount != expectedAfter) {
+            return ValidationResult.fail(
+                    "Transaction master growth mismatch: before=%d + posted=%d = %d, but after=%d",
+                    beforeCount, postedCount, expectedAfter, afterCount);
+        }
+        return ValidationResult.pass();
+    }
+
+    /**
+     * Record count conservation for COMBTRAN.
+     * Combined file count = backup count + system transaction count.
+     * (RECONCILIATION_CHECKS.md line 184)
+     */
+    public ValidationResult checkCombinedRecordCount(int bkupCount, int systranCount, int combinedCount) {
+        int expected = bkupCount + systranCount;
+        if (combinedCount != expected) {
+            return ValidationResult.fail(
+                    "COMBTRAN record count mismatch: bkup=%d + systran=%d = %d, but combined=%d",
+                    bkupCount, systranCount, expected, combinedCount);
+        }
+        return ValidationResult.pass();
+    }
+
+    /**
+     * End-of-day aggregate balance check.
+     * SUM(balance_after) = SUM(balance_before) + SUM(posted) + SUM(interest).
+     * (RECONCILIATION_CHECKS.md lines 384-394)
+     */
+    public ValidationResult checkEndOfDayBalance(
+            BigDecimal sumBalanceBefore, BigDecimal sumBalanceAfter,
+            BigDecimal sumPosted, BigDecimal sumInterest) {
+        BigDecimal expected = sumBalanceBefore.add(sumPosted).add(sumInterest);
+        if (expected.compareTo(sumBalanceAfter) != 0) {
+            return ValidationResult.fail(
+                    "End-of-day balance mismatch: before=%s + posted=%s + interest=%s = %s, but after=%s",
+                    sumBalanceBefore.toPlainString(), sumPosted.toPlainString(),
+                    sumInterest.toPlainString(), expected.toPlainString(),
+                    sumBalanceAfter.toPlainString());
+        }
+        return ValidationResult.pass();
+    }
+
+    /**
+     * End-of-day reject accounting.
+     * dalytran count = posted count + reject count.
+     * (RECONCILIATION_CHECKS.md line 392)
+     */
+    public ValidationResult checkRejectAccounting(int dalytranCount, int postedCount, int rejectCount) {
+        int expected = postedCount + rejectCount;
+        if (dalytranCount != expected) {
+            return ValidationResult.fail(
+                    "Reject accounting mismatch: dalytran=%d, but posted=%d + rejected=%d = %d",
+                    dalytranCount, postedCount, rejectCount, expected);
+        }
+        return ValidationResult.pass();
+    }
+
+    /**
+     * Export record type counts — each export type count must match source count.
+     * (RECONCILIATION_CHECKS.md lines 220-227)
+     */
+    public ValidationResult checkExportTypeCounts(
+            int custExport, int acctExport, int tranExport, int xrefExport,
+            int custSource, int acctSource, int tranSource, int xrefSource) {
+        if (custExport != custSource) {
+            return ValidationResult.fail(
+                    "Customer export count mismatch: export=%d, source=%d", custExport, custSource);
+        }
+        if (acctExport != acctSource) {
+            return ValidationResult.fail(
+                    "Account export count mismatch: export=%d, source=%d", acctExport, acctSource);
+        }
+        if (tranExport != tranSource) {
+            return ValidationResult.fail(
+                    "Transaction export count mismatch: export=%d, source=%d", tranExport, tranSource);
+        }
+        if (xrefExport != xrefSource) {
+            return ValidationResult.fail(
+                    "XREF export count mismatch: export=%d, source=%d", xrefExport, xrefSource);
         }
         return ValidationResult.pass();
     }
