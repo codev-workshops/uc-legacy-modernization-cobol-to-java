@@ -1,0 +1,67 @@
+{
+  "source_file": "app/data/ASCII/trantype.txt",
+  "copybook": "CVTRA03Y.cpy",
+  "description": "Transaction type reference \u2014 description for each transaction type",
+  "record_length": 60,
+  "record_count": 7,
+  "field_definitions": [
+    {
+      "name": "TRAN-TYPE",
+      "offset": 0,
+      "length": 2,
+      "pic": "PIC X(02)",
+      "description": "Transaction type code (01=Purchase, 02=Payment, etc.)"
+    },
+    {
+      "name": "TRAN-TYPE-DESC",
+      "offset": 2,
+      "length": 50,
+      "pic": "PIC X(50)",
+      "description": "Type description"
+    }
+  ],
+  "records": [
+    {
+      "_record_number": 1,
+      "TRAN-TYPE": "01",
+      "TRAN-TYPE-DESC": "Purchase",
+      "FILLER": "00000000"
+    },
+    {
+      "_record_number": 2,
+      "TRAN-TYPE": "02",
+      "TRAN-TYPE-DESC": "Payment",
+      "FILLER": "00000000"
+    },
+    {
+      "_record_number": 3,
+      "TRAN-TYPE": "03",
+      "TRAN-TYPE-DESC": "Credit",
+      "FILLER": "00000000"
+    },
+    {
+      "_record_number": 4,
+      "TRAN-TYPE": "04",
+      "TRAN-TYPE-DESC": "Authorization",
+      "FILLER": "00000000"
+    },
+    {
+      "_record_number": 5,
+      "TRAN-TYPE": "05",
+      "TRAN-TYPE-DESC": "Refund",
+      "FILLER": "00000000"
+    },
+    {
+      "_record_number": 6,
+      "TRAN-TYPE": "06",
+      "TRAN-TYPE-DESC": "Reversal",
+      "FILLER": "00000000"
+    },
+    {
+      "_record_number": 7,
+      "TRAN-TYPE": "07",
+      "TRAN-TYPE-DESC": "Adjustment",
+      "FILLER": "00000000"
+    }
+  ]
+}

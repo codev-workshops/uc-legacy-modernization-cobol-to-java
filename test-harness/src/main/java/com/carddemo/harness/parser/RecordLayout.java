@@ -154,6 +154,131 @@ public final class RecordLayout {
         return new RecordLayout("VBRC-REC2", 39, fields);
     }
 
+    /**
+     * CARD-RECORD layout from CVACT02Y.cpy: 150 bytes total.
+     */
+    public static RecordLayout cardRecordLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("CARD-NUM", 0, 16, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CARD-ACCT-ID", 16, 11, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("CARD-CVV-CD", 27, 3, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("CARD-EMBOSSED-NAME", 30, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CARD-EXPIRAION-DATE", 80, 10, FieldType.ALPHANUMERIC, 0, true));
+        fields.add(new FieldDefinition("CARD-ACTIVE-STATUS", 90, 1, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("FILLER", 91, 59, FieldType.FILLER));
+        return new RecordLayout("CARD-RECORD", 150, fields);
+    }
+
+    /**
+     * CARD-XREF-RECORD layout from CVACT03Y.cpy: 50 bytes total.
+     */
+    public static RecordLayout cardXrefLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("XREF-CARD-NUM", 0, 16, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("XREF-CUST-ID", 16, 9, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("XREF-ACCT-ID", 25, 11, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("FILLER", 36, 14, FieldType.FILLER));
+        return new RecordLayout("CARD-XREF-RECORD", 50, fields);
+    }
+
+    /**
+     * CUSTOMER-RECORD layout from CVCUS01Y.cpy: 500 bytes total.
+     */
+    public static RecordLayout customerRecordLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("CUST-ID", 0, 9, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("CUST-FIRST-NAME", 9, 25, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-MIDDLE-NAME", 34, 25, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-LAST-NAME", 59, 25, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-ADDR-LINE-1", 84, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-ADDR-LINE-2", 134, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-ADDR-LINE-3", 184, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-ADDR-STATE-CD", 234, 2, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-ADDR-COUNTRY-CD", 236, 3, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-ADDR-ZIP", 239, 10, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-PHONE-NUM-1", 249, 15, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-PHONE-NUM-2", 264, 15, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-SSN", 279, 9, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("CUST-GOVT-ISSUED-ID", 288, 20, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-DOB-YYYY-MM-DD", 308, 10, FieldType.ALPHANUMERIC, 0, true));
+        fields.add(new FieldDefinition("CUST-EFT-ACCOUNT-ID", 318, 10, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-PRI-CARD-HOLDER-IND", 328, 1, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("CUST-FICO-CREDIT-SCORE", 329, 3, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("FILLER", 332, 168, FieldType.FILLER));
+        return new RecordLayout("CUSTOMER-RECORD", 500, fields);
+    }
+
+    /**
+     * DALYTRAN-RECORD layout from CVTRA06Y.cpy: 350 bytes total.
+     */
+    public static RecordLayout dailyTranLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("DALYTRAN-ID", 0, 16, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-TYPE-CD", 16, 2, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-CAT-CD", 18, 4, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-SOURCE", 22, 10, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-DESC", 32, 100, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-AMT", 132, 11, FieldType.DISPLAY_SIGNED, 2));
+        fields.add(new FieldDefinition("DALYTRAN-MERCHANT-ID", 143, 9, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-MERCHANT-NAME", 152, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-MERCHANT-CITY", 202, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-MERCHANT-ZIP", 252, 10, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-CARD-NUM", 262, 16, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-ORIG-TS", 278, 26, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DALYTRAN-PROC-TS", 304, 26, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("FILLER", 330, 20, FieldType.FILLER));
+        return new RecordLayout("DALYTRAN-RECORD", 350, fields);
+    }
+
+    /**
+     * DIS-GROUP-RECORD layout from CVTRA02Y.cpy: 50 bytes total.
+     */
+    public static RecordLayout discGroupLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("DIS-ACCT-GROUP-ID", 0, 10, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DIS-TRAN-TYPE-CD", 10, 2, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("DIS-TRAN-CAT-CD", 12, 4, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("DIS-INT-RATE", 16, 6, FieldType.DISPLAY_SIGNED, 2));
+        fields.add(new FieldDefinition("FILLER", 22, 28, FieldType.FILLER));
+        return new RecordLayout("DIS-GROUP-RECORD", 50, fields);
+    }
+
+    /**
+     * TRAN-CAT-BAL-RECORD layout from CVTRA01Y.cpy: 50 bytes total.
+     */
+    public static RecordLayout tranCatBalLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("TRANCAT-ACCT-ID", 0, 11, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("TRANCAT-TYPE-CD", 11, 2, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("TRANCAT-CD", 13, 4, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("TRAN-CAT-BAL", 17, 11, FieldType.DISPLAY_SIGNED, 2));
+        fields.add(new FieldDefinition("FILLER", 28, 22, FieldType.FILLER));
+        return new RecordLayout("TRAN-CAT-BAL-RECORD", 50, fields);
+    }
+
+    /**
+     * TRAN-CAT-RECORD layout from CVTRA04Y.cpy: 60 bytes total.
+     */
+    public static RecordLayout tranCatLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("TRAN-TYPE-CD", 0, 2, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("TRAN-CAT-CD", 2, 4, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("TRAN-CAT-TYPE-DESC", 6, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("FILLER", 56, 4, FieldType.FILLER));
+        return new RecordLayout("TRAN-CAT-RECORD", 60, fields);
+    }
+
+    /**
+     * TRAN-TYPE-RECORD layout from CVTRA03Y.cpy: 60 bytes total.
+     */
+    public static RecordLayout tranTypeLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("TRAN-TYPE", 0, 2, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("TRAN-TYPE-DESC", 2, 50, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("FILLER", 52, 8, FieldType.FILLER));
+        return new RecordLayout("TRAN-TYPE-RECORD", 60, fields);
+    }
+
     // ------------------------------------------------------------------
     // JSON-based layout loading
     // ------------------------------------------------------------------
