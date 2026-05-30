@@ -1,0 +1,12 @@
+server:
+  port: 0
+
+spring:
+  application:
+    name: carddemo-gateway-test
+  cloud:
+    gateway:
+      routes: []
+
+jwt:
+  secret: test-secret-key-for-unit-tests-only-32chars

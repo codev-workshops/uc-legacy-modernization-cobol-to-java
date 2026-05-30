@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: carddemo-postgres
+    environment:
+      POSTGRES_DB: carddemo
+      POSTGRES_USER: carddemo
+      POSTGRES_PASSWORD: carddemo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/init-schemas.sql:/docker-entrypoint-initdb.d/01-init-schemas.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carddemo -d carddemo"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./carddemo-auth-service
+      dockerfile: Dockerfile
+    container_name: carddemo-auth-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo?currentSchema=security
+      SPRING_DATASOURCE_USERNAME: carddemo
+      SPRING_DATASOURCE_PASSWORD: carddemo
+
+  account-service:
+    build:
+      context: ./carddemo-account-service
+      dockerfile: Dockerfile
+    container_name: carddemo-account-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo?currentSchema=account
+      SPRING_DATASOURCE_USERNAME: carddemo
+      SPRING_DATASOURCE_PASSWORD: carddemo
+
+  transaction-service:
+    build:
+      context: ./carddemo-transaction-service
+      dockerfile: Dockerfile
+    container_name: carddemo-transaction-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo?currentSchema=transaction
+      SPRING_DATASOURCE_USERNAME: carddemo
+      SPRING_DATASOURCE_PASSWORD: carddemo
+
+  batch-service:
+    build:
+      context: ./carddemo-batch-service
+      dockerfile: Dockerfile
+    container_name: carddemo-batch-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo?currentSchema=account
+      SPRING_DATASOURCE_USERNAME: carddemo
+      SPRING_DATASOURCE_PASSWORD: carddemo
+
+  report-service:
+    build:
+      context: ./carddemo-report-service
+      dockerfile: Dockerfile
+    container_name: carddemo-report-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo?currentSchema=transaction
+      SPRING_DATASOURCE_USERNAME: carddemo
+      SPRING_DATASOURCE_PASSWORD: carddemo
+
+  gateway:
+    build:
+      context: ./carddemo-gateway
+      dockerfile: Dockerfile
+    container_name: carddemo-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - account-service
+      - transaction-service
+      - batch-service
+      - report-service
+
+  frontend:
+    build:
+      context: ./carddemo-frontend
+      dockerfile: Dockerfile
+    container_name: carddemo-frontend
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres-data:
