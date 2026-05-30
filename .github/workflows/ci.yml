@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, 'migration-test*', 'feature/**' ]
+  pull_request:
+    branches: [ main, 'migration-test*' ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and verify (parent project)
+        run: mvn clean verify -B
+
+      - name: Run test-harness tests
+        run: cd test-harness && mvn test -B
