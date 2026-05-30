@@ -8,7 +8,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     open-in-view: false
   flyway:
     enabled: true
@@ -16,9 +16,28 @@ spring:
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
 
 server:
   port: 8084
+
+carddemo:
+  account-service:
+    url: ${ACCOUNT_SERVICE_URL:http://localhost:8082}
+  auth-purge:
+    days-threshold: ${AUTH_PURGE_DAYS:90}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      accountService:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 30s
 
 management:
   endpoints:
