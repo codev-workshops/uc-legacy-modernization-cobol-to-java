@@ -10,7 +10,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 ```
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
-├── carddemo-batch               — Spring Batch jobs (WaitJob migrated from COBSWAIT)
+├── carddemo-batch               — Spring Batch jobs (WaitJob, CardDataPrinterJob, etc.)
 ├── carddemo-online              — Online CICS migration (future)
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
@@ -26,6 +26,9 @@ mvn test -pl carddemo-common
 
 # Run test-harness (standalone, not part of parent reactor)
 cd test-harness && mvn test
+
+# Run only carddemo-batch tests
+mvn verify -pl carddemo-batch -am
 
 # Run migration against local ASCII data
 mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/ASCII
