@@ -17,6 +17,11 @@ spring:
 server:
   port: 0
 
+jwt:
+  secret: TestSecretKeyThatIsAtLeast32BytesLongForHS256AlgorithmTesting!!
+  access-token-expiration: 900000
+  refresh-token-expiration: 604800000
+
 management:
   endpoints:
     web:
