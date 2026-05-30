@@ -11,7 +11,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
 ├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, InterestCalculationJob, StatementGenerationJob, etc.)
-├── carddemo-online              — Auth, user management, Spring Security + JWT
+├── carddemo-online              — Auth, user management, transaction CRUD, Spring Security + JWT
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
 
@@ -58,10 +58,23 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
 - JWT-based stateless authentication via `JwtUtil` / `JwtAuthenticationFilter`.
 - Roles: `ADMIN` (userType `A`) and `USER` (userType `U`) — mapped from COBOL
   `CSUSR01Y.cpy` SEC-USR-TYPE and `COCOM01Y.cpy` CDEMO-USRTYP-ADMIN/USER.
-- `POST /api/auth/login` is public; `/api/users/**` requires `ROLE_ADMIN`.
+- `POST /api/auth/login` is public; `/api/users/**` requires `ROLE_ADMIN`;
+  `/api/transactions/**` requires any authenticated user.
 - JWT secret configured via `carddemo.jwt.secret` property (env var `CARDDEMO_JWT_SECRET`).
 - COMMAREA session state (`CDEMO-USER-ID`, `CDEMO-USER-TYPE`) is replaced by JWT claims
   (`sub` = userId, `userType` claim).
+
+## Transaction Management (carddemo-online)
+
+- `GET /api/transactions` — paginated list with optional `accountId`, `cardNum`,
+  `startDate`, `endDate` query parameters.
+- `GET /api/transactions/{id}` — single transaction detail.
+- `POST /api/transactions` — add transaction with posting validation (reuses
+  `TransactionValidationService` from carddemo-common).
+- Posting validation rules (from CBTRN02C): 100 invalid card, 101 account not found,
+  102 overlimit, 103 expired. Rejections return HTTP 422 with `reasonCode`.
+- `TransactionValidationService` in `carddemo-common` is the shared validation service
+  extracted from batch `TransactionPostingProcessor` logic.
 
 ## CI
 
