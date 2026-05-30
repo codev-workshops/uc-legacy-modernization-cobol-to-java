@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -82,6 +83,14 @@ public class Main {
             }
         }
 
+        // Compare CBACT03C SYSOUT (line-by-line text output, not binary records)
+        Path cobolCbact03c = Paths.get(cobolDir, "CBACT03C.SYSOUT");
+        Path javaCbact03c = Paths.get(javaDir, "CBACT03C.SYSOUT");
+        if (Files.exists(cobolCbact03c) && Files.exists(javaCbact03c)) {
+            LOG.info("Comparing CBACT03C SYSOUT (text output)...");
+            allPassed &= compareTextOutput(cobolCbact03c, javaCbact03c, "CBACT03C");
+        }
+
         System.out.println();
         System.out.println(allPassed ? "OVERALL RESULT: ALL COMPARISONS PASSED"
                 : "OVERALL RESULT: SOME COMPARISONS FAILED");
@@ -105,6 +114,29 @@ public class Main {
                 cobolFile, javaFile, layout, programName, config);
         System.out.println(report.generate());
         return report.isFullMatch();
+    }
+
+    private static boolean compareTextOutput(Path cobolFile, Path javaFile,
+                                                String programName) throws IOException {
+        List<String> cobolLines = Files.readAllLines(cobolFile);
+        List<String> javaLines = Files.readAllLines(javaFile);
+        boolean match = true;
+        int maxLines = Math.max(cobolLines.size(), javaLines.size());
+
+        for (int i = 0; i < maxLines; i++) {
+            String cobolLine = i < cobolLines.size() ? cobolLines.get(i) : "<MISSING>";
+            String javaLine = i < javaLines.size() ? javaLines.get(i) : "<MISSING>";
+            if (!cobolLine.equals(javaLine)) {
+                LOG.warn("{} line {} differs: COBOL=[{}] JAVA=[{}]",
+                        programName, i + 1, cobolLine, javaLine);
+                match = false;
+            }
+        }
+
+        System.out.printf("=== %s SYSOUT Comparison ===%n", programName);
+        System.out.printf("  COBOL lines: %d  Java lines: %d  Match: %s%n",
+                cobolLines.size(), javaLines.size(), match ? "YES" : "NO");
+        return match;
     }
 
     private static ToleranceConfig loadToleranceConfig(String filePath) {
