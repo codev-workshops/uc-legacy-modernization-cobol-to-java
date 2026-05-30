@@ -16,3 +16,7 @@ spring:
   flyway:
     enabled: true
     schemas: transaction
+
+feign:
+  account-service:
+    url: http://localhost:8082

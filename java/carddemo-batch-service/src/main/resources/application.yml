@@ -16,3 +16,7 @@ spring:
   batch:
     jdbc:
       initialize-schema: always
+
+feign:
+  account-service:
+    url: http://localhost:8082

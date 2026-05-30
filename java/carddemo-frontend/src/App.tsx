@@ -10,6 +10,10 @@ import { AccountEdit } from './pages/AccountEdit';
 import { CardList } from './pages/CardList';
 import { CardDetail } from './pages/CardDetail';
 import { CardEdit } from './pages/CardEdit';
+import { TransactionList } from './pages/TransactionList';
+import { TransactionDetail } from './pages/TransactionDetail';
+import { TransactionAdd } from './pages/TransactionAdd';
+import { BillPayment } from './pages/BillPayment';
 
 function App() {
   return (
@@ -31,12 +35,15 @@ function App() {
           <Route path="/card-update/:num" element={<ProtectedRoute><CardEdit /></ProtectedRoute>} />
           <Route path="/card-update" element={<ProtectedRoute><CardEdit /></ProtectedRoute>} />
 
+          {/* Transaction pages */}
+          <Route path="/transaction-list" element={<ProtectedRoute><TransactionList /></ProtectedRoute>} />
+          <Route path="/transaction-view/:id" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
+          <Route path="/transaction-view" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
+          <Route path="/transaction-add" element={<ProtectedRoute><TransactionAdd /></ProtectedRoute>} />
+          <Route path="/bill-payment" element={<ProtectedRoute><BillPayment /></ProtectedRoute>} />
+
           {/* Remaining stub pages */}
-          <Route path="/transaction-list" element={<ProtectedRoute><StubPage title="Transaction List" /></ProtectedRoute>} />
-          <Route path="/transaction-view" element={<ProtectedRoute><StubPage title="Transaction View" /></ProtectedRoute>} />
-          <Route path="/transaction-add" element={<ProtectedRoute><StubPage title="Transaction Add" /></ProtectedRoute>} />
           <Route path="/transaction-reports" element={<ProtectedRoute><StubPage title="Transaction Reports" /></ProtectedRoute>} />
-          <Route path="/bill-payment" element={<ProtectedRoute><StubPage title="Bill Payment" /></ProtectedRoute>} />
           <Route path="/pending-auth" element={<ProtectedRoute><StubPage title="Pending Authorization View" /></ProtectedRoute>} />
 
           {/* Admin menu stub pages */}
