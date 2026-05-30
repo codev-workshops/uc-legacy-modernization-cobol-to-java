@@ -1,0 +1,46 @@
+{
+  "testCaseId": "TC-18",
+  "description": "Non-unique AIX \u2014 same ACCT-ID",
+  "inputFile": "tc18_nonunique_aix.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "AIXTEST00000000180000000100012345678              ",
+        "fields": {
+          "XREF-CARD-NUM": "AIXTEST000000001",
+          "XREF-CUST-ID": 800000001,
+          "XREF-ACCT-ID": 12345678,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 1,
+        "rawLine": "AIXTEST00000000280000000200012345678              ",
+        "fields": {
+          "XREF-CARD-NUM": "AIXTEST000000002",
+          "XREF-CUST-ID": 800000002,
+          "XREF-ACCT-ID": 12345678,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 2,
+        "rawLine": "AIXTEST00000000380000000300012345678              ",
+        "fields": {
+          "XREF-CARD-NUM": "AIXTEST000000003",
+          "XREF-CUST-ID": 800000003,
+          "XREF-ACCT-ID": 12345678,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 8,
+    "abend": false
+  }
+}

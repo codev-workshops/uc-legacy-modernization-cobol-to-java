@@ -1,0 +1,24 @@
+{
+  "testCaseId": "TC-06",
+  "description": "XREF-CARD-NUM with special characters",
+  "inputFile": "tc06_special_chars.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "@#$%&*()-+=<>{} 22222222222222222222              ",
+        "fields": {
+          "XREF-CARD-NUM": "@#$%&*()-+=<>{} ",
+          "XREF-CUST-ID": 222222222,
+          "XREF-ACCT-ID": 22222222222,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 4,
+    "abend": false
+  }
+}

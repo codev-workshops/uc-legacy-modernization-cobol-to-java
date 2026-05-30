@@ -1,0 +1,68 @@
+{
+  "testCaseId": "TC-16",
+  "description": "Records not in key order",
+  "inputFile": "tc16_unsorted_input.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "AAAAA0000000000170000000170000000001              ",
+        "fields": {
+          "XREF-CARD-NUM": "AAAAA00000000001",
+          "XREF-CUST-ID": 700000001,
+          "XREF-ACCT-ID": 70000000001,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 1,
+        "rawLine": "BBBBB0000000000270000000270000000002              ",
+        "fields": {
+          "XREF-CARD-NUM": "BBBBB00000000002",
+          "XREF-CUST-ID": 700000002,
+          "XREF-ACCT-ID": 70000000002,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 2,
+        "rawLine": "CCCCC0000000000370000000370000000003              ",
+        "fields": {
+          "XREF-CARD-NUM": "CCCCC00000000003",
+          "XREF-CUST-ID": 700000003,
+          "XREF-ACCT-ID": 70000000003,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 3,
+        "rawLine": "DDDDD0000000000470000000470000000004              ",
+        "fields": {
+          "XREF-CARD-NUM": "DDDDD00000000004",
+          "XREF-CUST-ID": 700000004,
+          "XREF-ACCT-ID": 70000000004,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 4,
+        "rawLine": "EEEEE0000000000570000000570000000005              ",
+        "fields": {
+          "XREF-CARD-NUM": "EEEEE00000000005",
+          "XREF-CUST-ID": 700000005,
+          "XREF-ACCT-ID": 70000000005,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 12,
+    "abend": false
+  }
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "name": "XREF-CARD-NUM",
+    "offset": 0,
+    "length": 16,
+    "type": "ALPHANUMERIC",
+    "scale": 0,
+    "dateField": false,
+    "occurrences": 1
+  },
+  {
+    "name": "XREF-CUST-ID",
+    "offset": 16,
+    "length": 9,
+    "type": "DISPLAY_NUMERIC",
+    "scale": 0,
+    "dateField": false,
+    "occurrences": 1
+  },
+  {
+    "name": "XREF-ACCT-ID",
+    "offset": 25,
+    "length": 11,
+    "type": "DISPLAY_NUMERIC",
+    "scale": 0,
+    "dateField": false,
+    "occurrences": 1
+  },
+  {
+    "name": "FILLER",
+    "offset": 36,
+    "length": 14,
+    "type": "FILLER",
+    "scale": 0,
+    "dateField": false,
+    "occurrences": 1
+  }
+]

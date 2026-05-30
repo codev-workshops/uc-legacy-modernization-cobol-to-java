@@ -1,0 +1,24 @@
+{
+  "testCaseId": "TC-01",
+  "description": "Single valid record",
+  "inputFile": "tc01_single_record.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "411111111111111112345678912345678901              ",
+        "fields": {
+          "XREF-CARD-NUM": "4111111111111111",
+          "XREF-CUST-ID": 123456789,
+          "XREF-ACCT-ID": 12345678901,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 4,
+    "abend": false
+  }
+}
