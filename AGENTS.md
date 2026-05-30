@@ -10,8 +10,8 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 ```
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
-├── carddemo-batch               — Spring Batch jobs (WaitJob, CardDataPrinterJob, etc.)
-├── carddemo-online              — Online CICS migration (future)
+├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob = CBACT02C)
+├── carddemo-online              — Auth, user management, Spring Security + JWT
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
 
@@ -23,6 +23,9 @@ mvn clean verify -B
 
 # Run only carddemo-common tests
 mvn test -pl carddemo-common
+
+# Run only carddemo-online tests
+mvn test -pl carddemo-online
 
 # Run test-harness (standalone, not part of parent reactor)
 cd test-harness && mvn test
@@ -46,9 +49,19 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
 - Codecs (`ZonedDecimalCodec`, `PackedDecimalCodec`) in `carddemo-common` are ports of
   `test-harness/src/main/java/com/carddemo/harness/codec/`.
 - `DateFormatUtil` replaces the `COBDATFT` assembler; `WaitUtil` replaces `MVSWAIT`.
-- JaCoCo 80% minimum line coverage enforced on `carddemo-common` and `carddemo-batch`.
+- JaCoCo 80% minimum line coverage enforced on `carddemo-common`, `carddemo-batch`, and `carddemo-online`.
 - Do NOT modify files under `app/` or `test-harness/` — those are the legacy COBOL source
   and its validation harness.
+
+## Auth & Security (carddemo-online)
+
+- JWT-based stateless authentication via `JwtUtil` / `JwtAuthenticationFilter`.
+- Roles: `ADMIN` (userType `A`) and `USER` (userType `U`) — mapped from COBOL
+  `CSUSR01Y.cpy` SEC-USR-TYPE and `COCOM01Y.cpy` CDEMO-USRTYP-ADMIN/USER.
+- `POST /api/auth/login` is public; `/api/users/**` requires `ROLE_ADMIN`.
+- JWT secret configured via `carddemo.jwt.secret` property (env var `CARDDEMO_JWT_SECRET`).
+- COMMAREA session state (`CDEMO-USER-ID`, `CDEMO-USER-TYPE`) is replaced by JWT claims
+  (`sub` = userId, `userType` claim).
 
 ## CI
 
