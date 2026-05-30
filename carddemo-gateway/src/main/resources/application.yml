@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: carddemo-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://${AUTH_SERVICE_HOST:localhost}:8081
+          predicates:
+            - Path=/api/auth/**
+        - id: account-service
+          uri: http://${ACCOUNT_SERVICE_HOST:localhost}:8082
+          predicates:
+            - Path=/api/accounts/**,/api/customers/**,/api/cards/**
+        - id: transaction-service
+          uri: http://${TRANSACTION_SERVICE_HOST:localhost}:8083
+          predicates:
+            - Path=/api/transactions/**
+        - id: authorization-service
+          uri: http://${AUTHORIZATION_SERVICE_HOST:localhost}:8084
+          predicates:
+            - Path=/api/authorizations/**
+  main:
+    web-application-type: reactive
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.carddemo: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: staging
+
+logging:
+  level:
+    com.carddemo: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    com.carddemo: WARN

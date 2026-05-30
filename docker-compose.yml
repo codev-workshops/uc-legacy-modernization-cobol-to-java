@@ -1,0 +1,38 @@
+services:
+  postgres-auth:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: carddemo_auth_db
+      POSTGRES_USER: carddemo
+      POSTGRES_PASSWORD: carddemo
+    ports: ["5441:5432"]
+
+  postgres-account:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: carddemo_account_db
+      POSTGRES_USER: carddemo
+      POSTGRES_PASSWORD: carddemo
+    ports: ["5442:5432"]
+
+  postgres-transaction:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: carddemo_transaction_db
+      POSTGRES_USER: carddemo
+      POSTGRES_PASSWORD: carddemo
+    ports: ["5443:5432"]
+
+  postgres-authz:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: carddemo_authz_db
+      POSTGRES_USER: carddemo
+      POSTGRES_PASSWORD: carddemo
+    ports: ["5444:5432"]
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
