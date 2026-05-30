@@ -11,7 +11,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
 ├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, InterestCalculationJob, StatementGenerationJob, etc.)
-├── carddemo-online              — Auth, user management, bill payment, Spring Security + JWT
+├── carddemo-online              — REST APIs: Auth, Users, Accounts, Cards, Transactions, Bill Payment, Reports, Menu
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
 
@@ -59,12 +59,14 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
 - Roles: `ADMIN` (userType `A`) and `USER` (userType `U`) — mapped from COBOL
   `CSUSR01Y.cpy` SEC-USR-TYPE and `COCOM01Y.cpy` CDEMO-USRTYP-ADMIN/USER.
 - `POST /api/auth/login` is public; `/api/users/**` requires `ROLE_ADMIN`.
-- `POST /api/bills/pay` requires any authenticated user — processes online bill payments
-  (migrated from `COBIL00C.cbl`). Validates account exists and is active, reduces balance,
-  creates a transaction record with type `02` / category `2`.
+- `GET/PUT /api/accounts/{id}`, `GET /api/accounts` — account management (from `COACTVWC/COACTUPC`).
+- `GET/PUT /api/cards/{cardNum}`, `GET /api/cards` — card management (from `COCRDLIC/COCRDSLC/COCRDUPC`).
+- `GET/POST /api/transactions`, `GET /api/transactions/{id}` — transaction management (from `COTRN00-02C`).
+- `POST /api/bills/pay` — bill payment (from `COBIL00C`). Validates account active, reduces balance.
+- `POST /api/reports/generate`, `GET /api/reports/{id}` — triggers batch report jobs (from `CORPT00C`).
+- `GET /api/menu` — returns available operations based on user role (from `COMEN01C`).
 - JWT secret configured via `carddemo.jwt.secret` property (env var `CARDDEMO_JWT_SECRET`).
-- COMMAREA session state (`CDEMO-USER-ID`, `CDEMO-USER-TYPE`) is replaced by JWT claims
-  (`sub` = userId, `userType` claim).
+- COMMAREA session state replaced by JWT claims (`sub` = userId, `userType` claim).
 
 ## CI
 
