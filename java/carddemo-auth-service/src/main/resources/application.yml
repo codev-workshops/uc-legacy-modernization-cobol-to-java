@@ -16,3 +16,7 @@ spring:
   flyway:
     enabled: true
     schemas: security
+
+jwt:
+  secret: CardDemoSecretKeyForJWTTokenGenerationMustBeAtLeast256Bits!
+  expiration-ms: 3600000
