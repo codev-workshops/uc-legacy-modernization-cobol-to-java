@@ -383,6 +383,25 @@ Feel free to raise issues, create code, and submit merge requests for enhancemen
 
 This project is intended to be a community resource and is released under the Apache 2.0 license.
 
+## Java Migration (Spring Boot)
+
+The `carddemo-*` modules contain the ongoing Java 17 / Spring Boot 3.2.5 migration:
+
+| Module | Description |
+|--------|-------------|
+| `carddemo-common` | JPA entities, repositories, codecs, and utilities |
+| `carddemo-batch` | Spring Batch jobs — `TransactionBackupJob` (CBTRN01C) |
+| `carddemo-online` | Online CICS migration (future) |
+| `carddemo-migration` | CLI data loader: ASCII/EBCDIC → DB |
+
+```bash
+# Build all Java modules with coverage check
+mvn clean verify -B
+
+# Run only batch module tests
+mvn test -pl carddemo-batch
+```
+
 ## COBOL-to-Java Test Harness
 
 The `test-harness/` directory contains a Java test harness for validating the Java rewrite of COBOL batch programs against known-good COBOL output. It compares output files field by field using record layouts derived directly from the COBOL copybooks and FD sections.
