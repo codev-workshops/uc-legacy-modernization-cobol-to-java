@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EntityScan("com.carddemo.common.entity")
-@EnableJpaRepositories("com.carddemo.common.repository")
+@EntityScan(basePackages = "com.carddemo.common.entity")
+@EnableJpaRepositories(basePackages = "com.carddemo.common.repository")
 public class BatchApplication {
 
     public static void main(String[] args) {

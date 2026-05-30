@@ -405,6 +405,31 @@ mvn exec:java -Dexec.mainClass=com.carddemo.harness.Main \
 
 See [`test-harness/README.md`](test-harness/README.md) for full documentation.
 
+## Java Migration
+
+The `carddemo-*` Maven modules contain the ongoing Java 17 / Spring Boot 3.2.5 migration:
+
+| Module | Description |
+| :----- | :---------- |
+| `carddemo-common` | JPA entities (from COBOL copybooks), repositories, codecs, utilities |
+| `carddemo-batch` | Spring Batch jobs migrating COBOL batch programs |
+| `carddemo-online` | Online CICS migration (future) |
+| `carddemo-migration` | CLI data loader: ASCII/EBCDIC flat files → database |
+
+### Migrated Batch Jobs
+
+| COBOL Program | Java Job | Description |
+| :------------ | :------- | :---------- |
+| `CBACT03C` | `XrefPrinterJob` | Reads card cross-reference data and produces a fixed-width report |
+
+```bash
+# Build all Java modules with coverage check
+mvn clean verify -B
+
+# Run batch module tests only
+mvn verify -pl carddemo-common,carddemo-batch -am
+```
+
 ## Project Status
 
 The CardDemo application has been enhanced with optional features that extend its functionality:
