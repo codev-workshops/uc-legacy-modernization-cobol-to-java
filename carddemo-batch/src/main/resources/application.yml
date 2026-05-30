@@ -1,0 +1,14 @@
+spring:
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+carddemo:
+  export:
+    file-path: ${java.io.tmpdir}/carddemo-export.dat

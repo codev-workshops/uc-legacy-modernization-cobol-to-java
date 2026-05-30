@@ -10,7 +10,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 ```
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
-├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob = CBACT02C)
+├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, DataExportJob, DataImportJob)
 ├── carddemo-online              — Online CICS migration (future)
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
@@ -23,6 +23,9 @@ mvn clean verify -B
 
 # Run only carddemo-common tests
 mvn test -pl carddemo-common
+
+# Run only carddemo-batch tests (unit + integration)
+mvn verify -pl carddemo-batch
 
 # Run test-harness (standalone, not part of parent reactor)
 cd test-harness && mvn test
@@ -47,6 +50,9 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
   `test-harness/src/main/java/com/carddemo/harness/codec/`.
 - `DateFormatUtil` replaces the `COBDATFT` assembler; `WaitUtil` replaces `MVSWAIT`.
 - JaCoCo 80% minimum line coverage enforced on `carddemo-common` and `carddemo-batch`.
+- Batch export/import uses a pipe-delimited polymorphic flat file (record types:
+  C=Customer, A=Account, X=CardXref, T=Transaction, D=Card, B=TranCatBalance).
+- `RecordConverter` maps between JPA entities and export-record field arrays.
 - Do NOT modify files under `app/` or `test-harness/` — those are the legacy COBOL source
   and its validation harness.
 
