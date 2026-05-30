@@ -39,7 +39,7 @@ class TransactionBackupJobConfigTest {
     @SuppressWarnings("unchecked")
     void readerBeanExists() {
         JpaPagingItemReader<Transaction> reader =
-                context.getBean("transactionReader", JpaPagingItemReader.class);
+                context.getBean("transactionBackupReader", JpaPagingItemReader.class);
         assertNotNull(reader);
     }
 

@@ -15,27 +15,27 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.test.JobLauncherTestUtils;
-import org.springframework.batch.test.context.SpringBatchTest;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBatchTest
 @SpringBootTest(classes = BatchApplication.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Sql(scripts = "/test-data/accounts.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class AccountReaderWriterJobIT {
 
     @Autowired
-    private JobLauncherTestUtils jobLauncherTestUtils;
+    private JobLauncher jobLauncher;
 
     @Autowired
+    @Qualifier("accountReaderWriterJob")
     private Job accountReaderWriterJob;
 
-    @Value("${batch.output.dir}")
+    @Value("${batch.output.dir:./output}")
     private String outputDir;
 
     private Path outfilePath;
@@ -44,7 +44,6 @@ class AccountReaderWriterJobIT {
 
     @BeforeEach
     void setUp() throws Exception {
-        jobLauncherTestUtils.setJob(accountReaderWriterJob);
         Path dir = Paths.get(outputDir);
         Files.createDirectories(dir);
         outfilePath = dir.resolve("OUTFILE.dat");
@@ -59,7 +58,7 @@ class AccountReaderWriterJobIT {
         JobParameters params = new JobParametersBuilder()
                 .addLong("run.id", System.nanoTime())
                 .toJobParameters();
-        return jobLauncherTestUtils.launchJob(params);
+        return jobLauncher.run(accountReaderWriterJob, params);
     }
 
     @Test
