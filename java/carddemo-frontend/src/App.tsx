@@ -5,6 +5,11 @@ import { LoginPage } from './pages/LoginPage';
 import { MainMenu } from './pages/MainMenu';
 import { AdminMenu } from './pages/AdminMenu';
 import { StubPage } from './pages/StubPage';
+import { AccountView } from './pages/AccountView';
+import { AccountEdit } from './pages/AccountEdit';
+import { CardList } from './pages/CardList';
+import { CardDetail } from './pages/CardDetail';
+import { CardEdit } from './pages/CardEdit';
 
 function App() {
   return (
@@ -15,12 +20,18 @@ function App() {
           <Route path="/menu" element={<ProtectedRoute><MainMenu /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminMenu /></ProtectedRoute>} />
 
-          {/* User menu stub pages */}
-          <Route path="/account-view" element={<ProtectedRoute><StubPage title="Account View" /></ProtectedRoute>} />
-          <Route path="/account-update" element={<ProtectedRoute><StubPage title="Account Update" /></ProtectedRoute>} />
-          <Route path="/card-list" element={<ProtectedRoute><StubPage title="Credit Card List" /></ProtectedRoute>} />
-          <Route path="/card-view" element={<ProtectedRoute><StubPage title="Credit Card View" /></ProtectedRoute>} />
-          <Route path="/card-update" element={<ProtectedRoute><StubPage title="Credit Card Update" /></ProtectedRoute>} />
+          {/* Account & card pages */}
+          <Route path="/account-view/:id" element={<ProtectedRoute><AccountView /></ProtectedRoute>} />
+          <Route path="/account-view" element={<ProtectedRoute><AccountView /></ProtectedRoute>} />
+          <Route path="/account-update/:id" element={<ProtectedRoute><AccountEdit /></ProtectedRoute>} />
+          <Route path="/account-update" element={<ProtectedRoute><AccountEdit /></ProtectedRoute>} />
+          <Route path="/card-list" element={<ProtectedRoute><CardList /></ProtectedRoute>} />
+          <Route path="/card-view/:num" element={<ProtectedRoute><CardDetail /></ProtectedRoute>} />
+          <Route path="/card-view" element={<ProtectedRoute><CardDetail /></ProtectedRoute>} />
+          <Route path="/card-update/:num" element={<ProtectedRoute><CardEdit /></ProtectedRoute>} />
+          <Route path="/card-update" element={<ProtectedRoute><CardEdit /></ProtectedRoute>} />
+
+          {/* Remaining stub pages */}
           <Route path="/transaction-list" element={<ProtectedRoute><StubPage title="Transaction List" /></ProtectedRoute>} />
           <Route path="/transaction-view" element={<ProtectedRoute><StubPage title="Transaction View" /></ProtectedRoute>} />
           <Route path="/transaction-add" element={<ProtectedRoute><StubPage title="Transaction Add" /></ProtectedRoute>} />
