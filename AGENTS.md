@@ -10,7 +10,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 ```
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
-├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, InterestCalculationJob, etc.)
+├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, InterestCalculationJob, StatementGenerationJob, etc.)
 ├── carddemo-online              — Auth, user management, Spring Security + JWT
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```

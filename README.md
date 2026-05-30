@@ -390,7 +390,7 @@ The `carddemo-*` modules contain the ongoing Java 17 / Spring Boot 3.2.5 migrati
 | Module | Description |
 |--------|-------------|
 | `carddemo-common` | JPA entities, repositories, codecs, and utilities |
-| `carddemo-batch` | Spring Batch jobs — `TransactionBackupJob` (CBTRN01C), `TransactionPostingJob` (CBTRN02C) |
+| `carddemo-batch` | Spring Batch jobs — `TransactionBackupJob` (CBTRN01C), `TransactionPostingJob` (CBTRN02C), `StatementGenerationJob` (CBSTM03A/B) |
 | `carddemo-online` | Online CICS migration (future) |
 | `carddemo-migration` | CLI data loader: ASCII/EBCDIC → DB |
 
@@ -441,6 +441,7 @@ The `carddemo-*` Maven modules contain the ongoing Java 17 / Spring Boot 3.2.5 m
 | :------------ | :------- | :---------- |
 | `CBACT03C` | `XrefPrinterJob` | Reads card cross-reference data and produces a fixed-width report |
 | `CBTRN02C` | `TransactionPostingJob` | Daily transaction posting: validates and posts transactions, rejects overlimit/expired |
+| `CBSTM03A`/`CBSTM03B` | `StatementGenerationJob` | Account statement generation: cross-table joins via card_xref, formatted text output |
 
 ```bash
 # Build all Java modules with coverage check
