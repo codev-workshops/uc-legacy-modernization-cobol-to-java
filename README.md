@@ -391,7 +391,7 @@ The `carddemo-*` modules contain the ongoing Java 17 / Spring Boot 3.2.5 migrati
 |--------|-------------|
 | `carddemo-common` | JPA entities, repositories, codecs, and utilities |
 | `carddemo-batch` | Spring Batch jobs — `TransactionBackupJob` (CBTRN01C), `TransactionPostingJob` (CBTRN02C), `StatementGenerationJob` (CBSTM03A/B) |
-| `carddemo-online` | Online CICS migration — auth, user CRUD, transaction management |
+| `carddemo-online` | Auth, user CRUD, reports (async batch), role-based menu |
 | `carddemo-migration` | CLI data loader: ASCII/EBCDIC → DB |
 
 ```bash
@@ -432,18 +432,8 @@ The `carddemo-*` Maven modules contain the ongoing Java 17 / Spring Boot 3.2.5 m
 | :----- | :---------- |
 | `carddemo-common` | JPA entities (from COBOL copybooks), repositories, codecs, utilities |
 | `carddemo-batch` | Spring Batch jobs migrating COBOL batch programs |
-| `carddemo-online` | Online CICS migration — auth, user CRUD, transaction management |
+| `carddemo-online` | Auth, user CRUD, reports (async batch), role-based menu |
 | `carddemo-migration` | CLI data loader: ASCII/EBCDIC flat files → database |
-
-### Online Endpoints (carddemo-online)
-
-| Endpoint | Source | Description |
-| :------- | :----- | :---------- |
-| `POST /api/auth/login` | `COSGN00C` | JWT authentication |
-| `GET/POST /api/users` | `COUSR00C`–`COUSR03C` | User CRUD (admin only) |
-| `GET /api/transactions` | `COTRN00C`/`COTRN01C` | Paginated transaction list (filter by account/card/date) |
-| `GET /api/transactions/{id}` | `COTRN01C` | Transaction detail |
-| `POST /api/transactions` | `COTRN02C` | Add transaction with posting validation (overlimit 102, expired 103) |
 
 ### Migrated Batch Jobs
 
@@ -460,6 +450,16 @@ mvn clean verify -B
 # Run batch module tests only
 mvn verify -pl carddemo-common,carddemo-batch -am
 ```
+
+### Online API Endpoints (carddemo-online)
+
+| Endpoint | Method | Auth | COBOL Source | Description |
+| :------- | :----- | :--- | :----------- | :---------- |
+| `/api/auth/login` | POST | Public | `COSGN00C` | JWT login |
+| `/api/users/**` | CRUD | ADMIN | `COUSR00C`–`COUSR03C` | User management |
+| `/api/reports/generate` | POST | Authenticated | `CORPT00C` | Triggers `transactionReportJob` asynchronously |
+| `/api/reports/{id}` | GET | Authenticated | `CORPT00C` | Retrieves report status and output path |
+| `/api/menu` | GET | Authenticated | `COMEN01C`/`COADM01C` | Role-based menu (11 regular + 6 admin items) |
 
 ## Project Status
 
