@@ -9,6 +9,7 @@ import org.springframework.batch.core.*;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -32,6 +33,10 @@ class TransactionBackupJobIT {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
+    @Qualifier("transactionBackupJob")
+    private Job transactionBackupJob;
+
+    @Autowired
     private TransactionRepository transactionRepository;
 
     @DynamicPropertySource
@@ -47,6 +52,7 @@ class TransactionBackupJobIT {
 
     @BeforeEach
     void setUp() {
+        jobLauncherTestUtils.setJob(transactionBackupJob);
         transactionRepository.deleteAll();
     }
 

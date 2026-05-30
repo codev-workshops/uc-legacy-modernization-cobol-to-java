@@ -3,6 +3,9 @@ package com.carddemo.online.controller;
 import com.carddemo.online.service.AccountService;
 import com.carddemo.online.service.AuthService;
 import com.carddemo.online.service.BillPaymentService;
+import com.carddemo.online.service.CardService;
+import com.carddemo.online.service.ReportService;
+import com.carddemo.online.service.TransactionService;
 import com.carddemo.online.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +64,41 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleInvalidPayment(
             BillPaymentService.InvalidPaymentException ex) {
         return ResponseEntity.badRequest()
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(CardService.CardNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCardNotFound(
+            CardService.CardNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TransactionService.TransactionNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTransactionNotFound(
+            TransactionService.TransactionNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(TransactionService.TransactionRejectedException.class)
+    public ResponseEntity<Map<String, Object>> handleTransactionRejected(
+            TransactionService.TransactionRejectedException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("error", ex.getMessage(), "reasonCode", ex.getReasonCode()));
+    }
+
+    @ExceptionHandler(ReportService.ReportNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleReportNotFound(
+            ReportService.ReportNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(ReportService.ReportGenerationException.class)
+    public ResponseEntity<Map<String, String>> handleReportGenerationFailed(
+            ReportService.ReportGenerationException ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", ex.getMessage()));
     }
 

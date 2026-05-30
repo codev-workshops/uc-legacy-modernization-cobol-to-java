@@ -31,9 +31,9 @@ public class TransactionBackupJobConfig {
     private String outputPath;
 
     @Bean
-    public JpaPagingItemReader<Transaction> transactionReader(EntityManagerFactory entityManagerFactory) {
+    public JpaPagingItemReader<Transaction> transactionBackupReader(EntityManagerFactory entityManagerFactory) {
         return new JpaPagingItemReaderBuilder<Transaction>()
-                .name("transactionReader")
+                .name("transactionBackupReader")
                 .entityManagerFactory(entityManagerFactory)
                 .queryString("SELECT t FROM Transaction t ORDER BY t.tranId")
                 .pageSize(CHUNK_SIZE)
@@ -48,11 +48,11 @@ public class TransactionBackupJobConfig {
     @Bean
     public Step transactionBackupStep(JobRepository jobRepository,
                                       PlatformTransactionManager transactionManager,
-                                      JpaPagingItemReader<Transaction> transactionReader,
+                                      JpaPagingItemReader<Transaction> transactionBackupReader,
                                       TransactionBackupFileWriter transactionBackupWriter) {
         return new StepBuilder("transactionBackupStep", jobRepository)
                 .<Transaction, Transaction>chunk(CHUNK_SIZE, transactionManager)
-                .reader(transactionReader)
+                .reader(transactionBackupReader)
                 .writer(transactionBackupWriter)
                 .build();
     }

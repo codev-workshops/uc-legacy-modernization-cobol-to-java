@@ -15,6 +15,7 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -27,8 +28,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.carddemo.batch.BatchApplication;
+
 @SpringBatchTest
-@SpringBootTest
+@SpringBootTest(classes = BatchApplication.class)
 class CustomerReaderJobIT {
 
     private static Path outputDir;
@@ -38,6 +41,10 @@ class CustomerReaderJobIT {
 
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+
+    @Autowired
+    @Qualifier("customerReaderJob")
+    private Job customerReaderJob;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -51,6 +58,7 @@ class CustomerReaderJobIT {
 
     @BeforeEach
     void setUp() {
+        jobLauncherTestUtils.setJob(customerReaderJob);
         customerRepository.deleteAll();
     }
 

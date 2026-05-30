@@ -2,6 +2,7 @@ package com.carddemo.batch.job.wait;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
@@ -12,11 +13,12 @@ import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.carddemo.batch.TestBatchApplication;
+import com.carddemo.batch.BatchApplication;
 
-@SpringBootTest(classes = TestBatchApplication.class)
+@SpringBootTest(classes = BatchApplication.class)
 @SpringBatchTest
 class WaitJobTest {
 
@@ -24,7 +26,13 @@ class WaitJobTest {
     private JobLauncherTestUtils jobLauncherTestUtils;
 
     @Autowired
+    @Qualifier("waitJob")
     private Job waitJob;
+
+    @BeforeEach
+    void setUp() {
+        jobLauncherTestUtils.setJob(waitJob);
+    }
 
     // --- valid input --------------------------------------------------------
 
