@@ -154,6 +154,18 @@ public final class RecordLayout {
         return new RecordLayout("VBRC-REC2", 39, fields);
     }
 
+    /**
+     * CARD-XREF-RECORD layout from CVACT03Y.cpy: 50 bytes total.
+     */
+    public static RecordLayout xrefFileLayout() {
+        List<FieldDefinition> fields = new ArrayList<>();
+        fields.add(new FieldDefinition("XREF-CARD-NUM", 0, 16, FieldType.ALPHANUMERIC));
+        fields.add(new FieldDefinition("XREF-CUST-ID", 16, 9, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("XREF-ACCT-ID", 25, 11, FieldType.DISPLAY_NUMERIC));
+        fields.add(new FieldDefinition("FILLER", 36, 14, FieldType.FILLER));
+        return new RecordLayout("CARD-XREF-RECORD", 50, fields);
+    }
+
     // ------------------------------------------------------------------
     // JSON-based layout loading
     // ------------------------------------------------------------------
