@@ -1,0 +1,12 @@
+{
+  "testCaseId": "TC-19",
+  "description": "Empty VSAM file (0 records)",
+  "inputFile": "tc19_empty.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [],
+    "totalDisplayLines": 2,
+    "abend": false
+  }
+}

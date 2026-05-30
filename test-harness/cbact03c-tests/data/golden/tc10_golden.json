@@ -1,0 +1,24 @@
+{
+  "testCaseId": "TC-10",
+  "description": "FILLER contains non-space data",
+  "inputFile": "tc10_nonempty_filler.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "FILLERTEST00000144444444444444444444TESTFILLER1234",
+        "fields": {
+          "XREF-CARD-NUM": "FILLERTEST000001",
+          "XREF-CUST-ID": 444444444,
+          "XREF-ACCT-ID": 44444444444,
+          "FILLER": "TESTFILLER1234"
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 4,
+    "abend": false
+  }
+}

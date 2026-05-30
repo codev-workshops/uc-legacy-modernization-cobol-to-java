@@ -1,0 +1,24 @@
+{
+  "testCaseId": "TC-05",
+  "description": "XREF-CARD-NUM with leading spaces",
+  "inputFile": "tc05_leading_spaces.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "   123456789012311111111111111111111              ",
+        "fields": {
+          "XREF-CARD-NUM": "   1234567890123",
+          "XREF-CUST-ID": 111111111,
+          "XREF-ACCT-ID": 11111111111,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 4,
+    "abend": false
+  }
+}

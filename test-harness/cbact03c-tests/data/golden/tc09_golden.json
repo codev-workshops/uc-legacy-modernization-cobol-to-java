@@ -1,0 +1,24 @@
+{
+  "testCaseId": "TC-09",
+  "description": "XREF-CARD-NUM all spaces",
+  "inputFile": "tc09_all_spaces_cardnum.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "                33333333333333333333              ",
+        "fields": {
+          "XREF-CARD-NUM": "                ",
+          "XREF-CUST-ID": 333333333,
+          "XREF-ACCT-ID": 33333333333,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 4,
+    "abend": false
+  }
+}

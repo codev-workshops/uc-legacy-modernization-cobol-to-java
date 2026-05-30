@@ -1,0 +1,46 @@
+{
+  "testCaseId": "TC-13",
+  "description": "CBIMPORT INITIALIZE \u2014 FILLER spaces",
+  "inputFile": "tc13_initialized_filler.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "IMPRT0000000000160000000160000000001              ",
+        "fields": {
+          "XREF-CARD-NUM": "IMPRT00000000001",
+          "XREF-CUST-ID": 600000001,
+          "XREF-ACCT-ID": 60000000001,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 1,
+        "rawLine": "IMPRT0000000000260000000260000000002              ",
+        "fields": {
+          "XREF-CARD-NUM": "IMPRT00000000002",
+          "XREF-CUST-ID": 600000002,
+          "XREF-ACCT-ID": 60000000002,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 2,
+        "rawLine": "IMPRT0000000000360000000360000000003              ",
+        "fields": {
+          "XREF-CARD-NUM": "IMPRT00000000003",
+          "XREF-CUST-ID": 600000003,
+          "XREF-ACCT-ID": 60000000003,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 8,
+    "abend": false
+  }
+}

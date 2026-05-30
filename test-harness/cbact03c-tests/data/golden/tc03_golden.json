@@ -1,0 +1,1113 @@
+{
+  "testCaseId": "TC-03",
+  "description": "Large dataset (100 records)",
+  "inputFile": "tc03_large_dataset.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "CARD00000000000110000000110000000001              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000001",
+          "XREF-CUST-ID": 100000001,
+          "XREF-ACCT-ID": 10000000001,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 1,
+        "rawLine": "CARD00000000000210000000210000000002              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000002",
+          "XREF-CUST-ID": 100000002,
+          "XREF-ACCT-ID": 10000000002,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 2,
+        "rawLine": "CARD00000000000310000000310000000003              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000003",
+          "XREF-CUST-ID": 100000003,
+          "XREF-ACCT-ID": 10000000003,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 3,
+        "rawLine": "CARD00000000000410000000410000000004              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000004",
+          "XREF-CUST-ID": 100000004,
+          "XREF-ACCT-ID": 10000000004,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 4,
+        "rawLine": "CARD00000000000510000000510000000005              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000005",
+          "XREF-CUST-ID": 100000005,
+          "XREF-ACCT-ID": 10000000005,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 5,
+        "rawLine": "CARD00000000000610000000610000000006              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000006",
+          "XREF-CUST-ID": 100000006,
+          "XREF-ACCT-ID": 10000000006,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 6,
+        "rawLine": "CARD00000000000710000000710000000007              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000007",
+          "XREF-CUST-ID": 100000007,
+          "XREF-ACCT-ID": 10000000007,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 7,
+        "rawLine": "CARD00000000000810000000810000000008              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000008",
+          "XREF-CUST-ID": 100000008,
+          "XREF-ACCT-ID": 10000000008,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 8,
+        "rawLine": "CARD00000000000910000000910000000009              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000009",
+          "XREF-CUST-ID": 100000009,
+          "XREF-ACCT-ID": 10000000009,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 9,
+        "rawLine": "CARD00000000001010000001010000000010              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000010",
+          "XREF-CUST-ID": 100000010,
+          "XREF-ACCT-ID": 10000000010,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 10,
+        "rawLine": "CARD00000000001110000001110000000011              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000011",
+          "XREF-CUST-ID": 100000011,
+          "XREF-ACCT-ID": 10000000011,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 11,
+        "rawLine": "CARD00000000001210000001210000000012              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000012",
+          "XREF-CUST-ID": 100000012,
+          "XREF-ACCT-ID": 10000000012,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 12,
+        "rawLine": "CARD00000000001310000001310000000013              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000013",
+          "XREF-CUST-ID": 100000013,
+          "XREF-ACCT-ID": 10000000013,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 13,
+        "rawLine": "CARD00000000001410000001410000000014              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000014",
+          "XREF-CUST-ID": 100000014,
+          "XREF-ACCT-ID": 10000000014,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 14,
+        "rawLine": "CARD00000000001510000001510000000015              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000015",
+          "XREF-CUST-ID": 100000015,
+          "XREF-ACCT-ID": 10000000015,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 15,
+        "rawLine": "CARD00000000001610000001610000000016              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000016",
+          "XREF-CUST-ID": 100000016,
+          "XREF-ACCT-ID": 10000000016,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 16,
+        "rawLine": "CARD00000000001710000001710000000017              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000017",
+          "XREF-CUST-ID": 100000017,
+          "XREF-ACCT-ID": 10000000017,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 17,
+        "rawLine": "CARD00000000001810000001810000000018              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000018",
+          "XREF-CUST-ID": 100000018,
+          "XREF-ACCT-ID": 10000000018,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 18,
+        "rawLine": "CARD00000000001910000001910000000019              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000019",
+          "XREF-CUST-ID": 100000019,
+          "XREF-ACCT-ID": 10000000019,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 19,
+        "rawLine": "CARD00000000002010000002010000000020              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000020",
+          "XREF-CUST-ID": 100000020,
+          "XREF-ACCT-ID": 10000000020,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 20,
+        "rawLine": "CARD00000000002110000002110000000021              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000021",
+          "XREF-CUST-ID": 100000021,
+          "XREF-ACCT-ID": 10000000021,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 21,
+        "rawLine": "CARD00000000002210000002210000000022              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000022",
+          "XREF-CUST-ID": 100000022,
+          "XREF-ACCT-ID": 10000000022,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 22,
+        "rawLine": "CARD00000000002310000002310000000023              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000023",
+          "XREF-CUST-ID": 100000023,
+          "XREF-ACCT-ID": 10000000023,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 23,
+        "rawLine": "CARD00000000002410000002410000000024              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000024",
+          "XREF-CUST-ID": 100000024,
+          "XREF-ACCT-ID": 10000000024,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 24,
+        "rawLine": "CARD00000000002510000002510000000025              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000025",
+          "XREF-CUST-ID": 100000025,
+          "XREF-ACCT-ID": 10000000025,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 25,
+        "rawLine": "CARD00000000002610000002610000000026              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000026",
+          "XREF-CUST-ID": 100000026,
+          "XREF-ACCT-ID": 10000000026,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 26,
+        "rawLine": "CARD00000000002710000002710000000027              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000027",
+          "XREF-CUST-ID": 100000027,
+          "XREF-ACCT-ID": 10000000027,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 27,
+        "rawLine": "CARD00000000002810000002810000000028              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000028",
+          "XREF-CUST-ID": 100000028,
+          "XREF-ACCT-ID": 10000000028,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 28,
+        "rawLine": "CARD00000000002910000002910000000029              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000029",
+          "XREF-CUST-ID": 100000029,
+          "XREF-ACCT-ID": 10000000029,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 29,
+        "rawLine": "CARD00000000003010000003010000000030              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000030",
+          "XREF-CUST-ID": 100000030,
+          "XREF-ACCT-ID": 10000000030,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 30,
+        "rawLine": "CARD00000000003110000003110000000031              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000031",
+          "XREF-CUST-ID": 100000031,
+          "XREF-ACCT-ID": 10000000031,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 31,
+        "rawLine": "CARD00000000003210000003210000000032              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000032",
+          "XREF-CUST-ID": 100000032,
+          "XREF-ACCT-ID": 10000000032,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 32,
+        "rawLine": "CARD00000000003310000003310000000033              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000033",
+          "XREF-CUST-ID": 100000033,
+          "XREF-ACCT-ID": 10000000033,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 33,
+        "rawLine": "CARD00000000003410000003410000000034              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000034",
+          "XREF-CUST-ID": 100000034,
+          "XREF-ACCT-ID": 10000000034,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 34,
+        "rawLine": "CARD00000000003510000003510000000035              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000035",
+          "XREF-CUST-ID": 100000035,
+          "XREF-ACCT-ID": 10000000035,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 35,
+        "rawLine": "CARD00000000003610000003610000000036              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000036",
+          "XREF-CUST-ID": 100000036,
+          "XREF-ACCT-ID": 10000000036,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 36,
+        "rawLine": "CARD00000000003710000003710000000037              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000037",
+          "XREF-CUST-ID": 100000037,
+          "XREF-ACCT-ID": 10000000037,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 37,
+        "rawLine": "CARD00000000003810000003810000000038              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000038",
+          "XREF-CUST-ID": 100000038,
+          "XREF-ACCT-ID": 10000000038,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 38,
+        "rawLine": "CARD00000000003910000003910000000039              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000039",
+          "XREF-CUST-ID": 100000039,
+          "XREF-ACCT-ID": 10000000039,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 39,
+        "rawLine": "CARD00000000004010000004010000000040              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000040",
+          "XREF-CUST-ID": 100000040,
+          "XREF-ACCT-ID": 10000000040,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 40,
+        "rawLine": "CARD00000000004110000004110000000041              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000041",
+          "XREF-CUST-ID": 100000041,
+          "XREF-ACCT-ID": 10000000041,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 41,
+        "rawLine": "CARD00000000004210000004210000000042              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000042",
+          "XREF-CUST-ID": 100000042,
+          "XREF-ACCT-ID": 10000000042,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 42,
+        "rawLine": "CARD00000000004310000004310000000043              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000043",
+          "XREF-CUST-ID": 100000043,
+          "XREF-ACCT-ID": 10000000043,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 43,
+        "rawLine": "CARD00000000004410000004410000000044              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000044",
+          "XREF-CUST-ID": 100000044,
+          "XREF-ACCT-ID": 10000000044,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 44,
+        "rawLine": "CARD00000000004510000004510000000045              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000045",
+          "XREF-CUST-ID": 100000045,
+          "XREF-ACCT-ID": 10000000045,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 45,
+        "rawLine": "CARD00000000004610000004610000000046              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000046",
+          "XREF-CUST-ID": 100000046,
+          "XREF-ACCT-ID": 10000000046,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 46,
+        "rawLine": "CARD00000000004710000004710000000047              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000047",
+          "XREF-CUST-ID": 100000047,
+          "XREF-ACCT-ID": 10000000047,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 47,
+        "rawLine": "CARD00000000004810000004810000000048              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000048",
+          "XREF-CUST-ID": 100000048,
+          "XREF-ACCT-ID": 10000000048,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 48,
+        "rawLine": "CARD00000000004910000004910000000049              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000049",
+          "XREF-CUST-ID": 100000049,
+          "XREF-ACCT-ID": 10000000049,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 49,
+        "rawLine": "CARD00000000005010000005010000000050              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000050",
+          "XREF-CUST-ID": 100000050,
+          "XREF-ACCT-ID": 10000000050,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 50,
+        "rawLine": "CARD00000000005110000005110000000051              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000051",
+          "XREF-CUST-ID": 100000051,
+          "XREF-ACCT-ID": 10000000051,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 51,
+        "rawLine": "CARD00000000005210000005210000000052              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000052",
+          "XREF-CUST-ID": 100000052,
+          "XREF-ACCT-ID": 10000000052,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 52,
+        "rawLine": "CARD00000000005310000005310000000053              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000053",
+          "XREF-CUST-ID": 100000053,
+          "XREF-ACCT-ID": 10000000053,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 53,
+        "rawLine": "CARD00000000005410000005410000000054              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000054",
+          "XREF-CUST-ID": 100000054,
+          "XREF-ACCT-ID": 10000000054,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 54,
+        "rawLine": "CARD00000000005510000005510000000055              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000055",
+          "XREF-CUST-ID": 100000055,
+          "XREF-ACCT-ID": 10000000055,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 55,
+        "rawLine": "CARD00000000005610000005610000000056              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000056",
+          "XREF-CUST-ID": 100000056,
+          "XREF-ACCT-ID": 10000000056,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 56,
+        "rawLine": "CARD00000000005710000005710000000057              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000057",
+          "XREF-CUST-ID": 100000057,
+          "XREF-ACCT-ID": 10000000057,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 57,
+        "rawLine": "CARD00000000005810000005810000000058              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000058",
+          "XREF-CUST-ID": 100000058,
+          "XREF-ACCT-ID": 10000000058,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 58,
+        "rawLine": "CARD00000000005910000005910000000059              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000059",
+          "XREF-CUST-ID": 100000059,
+          "XREF-ACCT-ID": 10000000059,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 59,
+        "rawLine": "CARD00000000006010000006010000000060              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000060",
+          "XREF-CUST-ID": 100000060,
+          "XREF-ACCT-ID": 10000000060,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 60,
+        "rawLine": "CARD00000000006110000006110000000061              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000061",
+          "XREF-CUST-ID": 100000061,
+          "XREF-ACCT-ID": 10000000061,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 61,
+        "rawLine": "CARD00000000006210000006210000000062              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000062",
+          "XREF-CUST-ID": 100000062,
+          "XREF-ACCT-ID": 10000000062,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 62,
+        "rawLine": "CARD00000000006310000006310000000063              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000063",
+          "XREF-CUST-ID": 100000063,
+          "XREF-ACCT-ID": 10000000063,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 63,
+        "rawLine": "CARD00000000006410000006410000000064              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000064",
+          "XREF-CUST-ID": 100000064,
+          "XREF-ACCT-ID": 10000000064,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 64,
+        "rawLine": "CARD00000000006510000006510000000065              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000065",
+          "XREF-CUST-ID": 100000065,
+          "XREF-ACCT-ID": 10000000065,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 65,
+        "rawLine": "CARD00000000006610000006610000000066              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000066",
+          "XREF-CUST-ID": 100000066,
+          "XREF-ACCT-ID": 10000000066,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 66,
+        "rawLine": "CARD00000000006710000006710000000067              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000067",
+          "XREF-CUST-ID": 100000067,
+          "XREF-ACCT-ID": 10000000067,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 67,
+        "rawLine": "CARD00000000006810000006810000000068              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000068",
+          "XREF-CUST-ID": 100000068,
+          "XREF-ACCT-ID": 10000000068,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 68,
+        "rawLine": "CARD00000000006910000006910000000069              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000069",
+          "XREF-CUST-ID": 100000069,
+          "XREF-ACCT-ID": 10000000069,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 69,
+        "rawLine": "CARD00000000007010000007010000000070              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000070",
+          "XREF-CUST-ID": 100000070,
+          "XREF-ACCT-ID": 10000000070,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 70,
+        "rawLine": "CARD00000000007110000007110000000071              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000071",
+          "XREF-CUST-ID": 100000071,
+          "XREF-ACCT-ID": 10000000071,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 71,
+        "rawLine": "CARD00000000007210000007210000000072              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000072",
+          "XREF-CUST-ID": 100000072,
+          "XREF-ACCT-ID": 10000000072,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 72,
+        "rawLine": "CARD00000000007310000007310000000073              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000073",
+          "XREF-CUST-ID": 100000073,
+          "XREF-ACCT-ID": 10000000073,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 73,
+        "rawLine": "CARD00000000007410000007410000000074              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000074",
+          "XREF-CUST-ID": 100000074,
+          "XREF-ACCT-ID": 10000000074,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 74,
+        "rawLine": "CARD00000000007510000007510000000075              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000075",
+          "XREF-CUST-ID": 100000075,
+          "XREF-ACCT-ID": 10000000075,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 75,
+        "rawLine": "CARD00000000007610000007610000000076              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000076",
+          "XREF-CUST-ID": 100000076,
+          "XREF-ACCT-ID": 10000000076,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 76,
+        "rawLine": "CARD00000000007710000007710000000077              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000077",
+          "XREF-CUST-ID": 100000077,
+          "XREF-ACCT-ID": 10000000077,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 77,
+        "rawLine": "CARD00000000007810000007810000000078              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000078",
+          "XREF-CUST-ID": 100000078,
+          "XREF-ACCT-ID": 10000000078,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 78,
+        "rawLine": "CARD00000000007910000007910000000079              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000079",
+          "XREF-CUST-ID": 100000079,
+          "XREF-ACCT-ID": 10000000079,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 79,
+        "rawLine": "CARD00000000008010000008010000000080              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000080",
+          "XREF-CUST-ID": 100000080,
+          "XREF-ACCT-ID": 10000000080,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 80,
+        "rawLine": "CARD00000000008110000008110000000081              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000081",
+          "XREF-CUST-ID": 100000081,
+          "XREF-ACCT-ID": 10000000081,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 81,
+        "rawLine": "CARD00000000008210000008210000000082              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000082",
+          "XREF-CUST-ID": 100000082,
+          "XREF-ACCT-ID": 10000000082,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 82,
+        "rawLine": "CARD00000000008310000008310000000083              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000083",
+          "XREF-CUST-ID": 100000083,
+          "XREF-ACCT-ID": 10000000083,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 83,
+        "rawLine": "CARD00000000008410000008410000000084              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000084",
+          "XREF-CUST-ID": 100000084,
+          "XREF-ACCT-ID": 10000000084,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 84,
+        "rawLine": "CARD00000000008510000008510000000085              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000085",
+          "XREF-CUST-ID": 100000085,
+          "XREF-ACCT-ID": 10000000085,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 85,
+        "rawLine": "CARD00000000008610000008610000000086              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000086",
+          "XREF-CUST-ID": 100000086,
+          "XREF-ACCT-ID": 10000000086,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 86,
+        "rawLine": "CARD00000000008710000008710000000087              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000087",
+          "XREF-CUST-ID": 100000087,
+          "XREF-ACCT-ID": 10000000087,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 87,
+        "rawLine": "CARD00000000008810000008810000000088              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000088",
+          "XREF-CUST-ID": 100000088,
+          "XREF-ACCT-ID": 10000000088,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 88,
+        "rawLine": "CARD00000000008910000008910000000089              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000089",
+          "XREF-CUST-ID": 100000089,
+          "XREF-ACCT-ID": 10000000089,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 89,
+        "rawLine": "CARD00000000009010000009010000000090              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000090",
+          "XREF-CUST-ID": 100000090,
+          "XREF-ACCT-ID": 10000000090,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 90,
+        "rawLine": "CARD00000000009110000009110000000091              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000091",
+          "XREF-CUST-ID": 100000091,
+          "XREF-ACCT-ID": 10000000091,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 91,
+        "rawLine": "CARD00000000009210000009210000000092              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000092",
+          "XREF-CUST-ID": 100000092,
+          "XREF-ACCT-ID": 10000000092,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 92,
+        "rawLine": "CARD00000000009310000009310000000093              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000093",
+          "XREF-CUST-ID": 100000093,
+          "XREF-ACCT-ID": 10000000093,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 93,
+        "rawLine": "CARD00000000009410000009410000000094              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000094",
+          "XREF-CUST-ID": 100000094,
+          "XREF-ACCT-ID": 10000000094,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 94,
+        "rawLine": "CARD00000000009510000009510000000095              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000095",
+          "XREF-CUST-ID": 100000095,
+          "XREF-ACCT-ID": 10000000095,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 95,
+        "rawLine": "CARD00000000009610000009610000000096              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000096",
+          "XREF-CUST-ID": 100000096,
+          "XREF-ACCT-ID": 10000000096,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 96,
+        "rawLine": "CARD00000000009710000009710000000097              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000097",
+          "XREF-CUST-ID": 100000097,
+          "XREF-ACCT-ID": 10000000097,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 97,
+        "rawLine": "CARD00000000009810000009810000000098              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000098",
+          "XREF-CUST-ID": 100000098,
+          "XREF-ACCT-ID": 10000000098,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 98,
+        "rawLine": "CARD00000000009910000009910000000099              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000099",
+          "XREF-CUST-ID": 100000099,
+          "XREF-ACCT-ID": 10000000099,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 99,
+        "rawLine": "CARD00000000010010000010010000000100              ",
+        "fields": {
+          "XREF-CARD-NUM": "CARD000000000100",
+          "XREF-CUST-ID": 100000100,
+          "XREF-ACCT-ID": 10000000100,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 202,
+    "abend": false
+  }
+}

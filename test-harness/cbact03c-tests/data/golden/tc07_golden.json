@@ -1,0 +1,24 @@
+{
+  "testCaseId": "TC-07",
+  "description": "XREF-CUST-ID at maximum value",
+  "inputFile": "tc07_max_cust_id.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "MAXCUST00000000199999999955555555555              ",
+        "fields": {
+          "XREF-CARD-NUM": "MAXCUST000000001",
+          "XREF-CUST-ID": 999999999,
+          "XREF-ACCT-ID": 55555555555,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 4,
+    "abend": false
+  }
+}

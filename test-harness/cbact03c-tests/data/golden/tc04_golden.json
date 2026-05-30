@@ -1,0 +1,35 @@
+{
+  "testCaseId": "TC-04",
+  "description": "All-zero numeric fields",
+  "inputFile": "tc04_zero_ids.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "ZEROTEST0000000100000000000000000000              ",
+        "fields": {
+          "XREF-CARD-NUM": "ZEROTEST00000001",
+          "XREF-CUST-ID": 0,
+          "XREF-ACCT-ID": 0,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 1,
+        "rawLine": "ZEROTEST0000000200000000000000000000              ",
+        "fields": {
+          "XREF-CARD-NUM": "ZEROTEST00000002",
+          "XREF-CUST-ID": 0,
+          "XREF-ACCT-ID": 0,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 6,
+    "abend": false
+  }
+}

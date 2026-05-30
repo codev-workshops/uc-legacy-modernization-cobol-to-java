@@ -1,0 +1,46 @@
+{
+  "testCaseId": "TC-12",
+  "description": "Typical card numbers",
+  "inputFile": "tc12_typical_cards.dat",
+  "expectedOutput": {
+    "headerLine": "START OF EXECUTION OF PROGRAM CBACT03C",
+    "footerLine": "END OF EXECUTION OF PROGRAM CBACT03C",
+    "records": [
+      {
+        "recordIndex": 0,
+        "rawLine": "378282246310005030000000130000000001              ",
+        "fields": {
+          "XREF-CARD-NUM": "3782822463100050",
+          "XREF-CUST-ID": 300000001,
+          "XREF-ACCT-ID": 30000000001,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 1,
+        "rawLine": "411111111111111140000000140000000001              ",
+        "fields": {
+          "XREF-CARD-NUM": "4111111111111111",
+          "XREF-CUST-ID": 400000001,
+          "XREF-ACCT-ID": 40000000001,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      },
+      {
+        "recordIndex": 2,
+        "rawLine": "550000000000000450000000150000000001              ",
+        "fields": {
+          "XREF-CARD-NUM": "5500000000000004",
+          "XREF-CUST-ID": 500000001,
+          "XREF-ACCT-ID": 50000000001,
+          "FILLER": "              "
+        },
+        "displayCount": 2
+      }
+    ],
+    "totalDisplayLines": 8,
+    "abend": false
+  }
+}
