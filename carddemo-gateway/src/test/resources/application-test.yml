@@ -14,4 +14,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,gateway
+  endpoint:
+    gateway:
+      enabled: true
+
+jwt:
+  secret: ThisIsADefaultSecretKeyForDevelopmentThatIs64BytesLongAtLeast!!
+  access-token-expiration: 900000
+
+gateway:
+  rate-limit:
+    requests-per-minute: 100
+  cors:
+    allowed-origins: http://localhost:3000
