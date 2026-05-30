@@ -14,6 +14,7 @@ import { TransactionList } from './pages/TransactionList';
 import { TransactionDetail } from './pages/TransactionDetail';
 import { TransactionAdd } from './pages/TransactionAdd';
 import { BillPayment } from './pages/BillPayment';
+import { Reports } from './pages/Reports';
 
 function App() {
   return (
@@ -43,7 +44,7 @@ function App() {
           <Route path="/bill-payment" element={<ProtectedRoute><BillPayment /></ProtectedRoute>} />
 
           {/* Remaining stub pages */}
-          <Route path="/transaction-reports" element={<ProtectedRoute><StubPage title="Transaction Reports" /></ProtectedRoute>} />
+          <Route path="/transaction-reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
           <Route path="/pending-auth" element={<ProtectedRoute><StubPage title="Pending Authorization View" /></ProtectedRoute>} />
 
           {/* Admin menu stub pages */}

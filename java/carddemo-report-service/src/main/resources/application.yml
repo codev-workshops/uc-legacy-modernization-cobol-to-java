@@ -13,3 +13,14 @@ spring:
     hibernate:
       ddl-auto: validate
     show-sql: false
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
+
+feign:
+  account-service:
+    url: http://localhost:8082
+  transaction-service:
+    url: http://localhost:8083
