@@ -10,7 +10,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 ```
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
-├── carddemo-batch               — Spring Batch jobs (future)
+├── carddemo-batch               — Spring Batch jobs (CBTRN01C TransactionBackupJob)
 ├── carddemo-online              — Online CICS migration (future)
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
@@ -43,7 +43,7 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
 - Codecs (`ZonedDecimalCodec`, `PackedDecimalCodec`) in `carddemo-common` are ports of
   `test-harness/src/main/java/com/carddemo/harness/codec/`.
 - `DateFormatUtil` replaces the `COBDATFT` assembler; `WaitUtil` replaces `MVSWAIT`.
-- JaCoCo 80% minimum line coverage enforced on `carddemo-common`.
+- JaCoCo 80% minimum line coverage enforced on `carddemo-common` and `carddemo-batch`.
 - Do NOT modify files under `app/` or `test-harness/` — those are the legacy COBOL source
   and its validation harness.
 
