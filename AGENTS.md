@@ -11,7 +11,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
 ├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, InterestCalculationJob, StatementGenerationJob, etc.)
-├── carddemo-online              — Auth, user management, card management, Spring Security + JWT
+├── carddemo-online              — Auth, user management, bill payment, Spring Security + JWT
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
 
@@ -59,18 +59,12 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
 - Roles: `ADMIN` (userType `A`) and `USER` (userType `U`) — mapped from COBOL
   `CSUSR01Y.cpy` SEC-USR-TYPE and `COCOM01Y.cpy` CDEMO-USRTYP-ADMIN/USER.
 - `POST /api/auth/login` is public; `/api/users/**` requires `ROLE_ADMIN`.
-- `/api/cards/**` requires any authenticated user (both ADMIN and USER).
+- `POST /api/bills/pay` requires any authenticated user — processes online bill payments
+  (migrated from `COBIL00C.cbl`). Validates account exists and is active, reduces balance,
+  creates a transaction record with type `02` / category `2`.
 - JWT secret configured via `carddemo.jwt.secret` property (env var `CARDDEMO_JWT_SECRET`).
 - COMMAREA session state (`CDEMO-USER-ID`, `CDEMO-USER-TYPE`) is replaced by JWT claims
   (`sub` = userId, `userType` claim).
-
-## Card Management (carddemo-online)
-
-Migrated from COBOL programs `COCRDLIC`, `COCRDSLC`, `COCRDUPC`.
-
-- `GET /api/cards` — paginated card list (query params: `page`, `size`, `sort`).
-- `GET /api/cards/{cardNum}` — card detail with cross-references (account, customer via `CardXref`).
-- `PUT /api/cards/{cardNum}` — partial update (only non-null fields are applied).
 
 ## CI
 
