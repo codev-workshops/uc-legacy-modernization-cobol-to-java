@@ -25,6 +25,6 @@ class FlywayMigrationTest {
                 .load();
 
         int migrations = flyway.migrate().migrationsExecuted;
-        assertEquals(1, migrations, "Expected exactly 1 migration to be applied");
+        assertEquals(2, migrations, "Expected exactly 2 migrations to be applied");
     }
 }
