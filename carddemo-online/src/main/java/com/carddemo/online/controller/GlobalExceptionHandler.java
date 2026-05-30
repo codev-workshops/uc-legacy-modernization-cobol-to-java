@@ -1,5 +1,6 @@
 package com.carddemo.online.controller;
 
+import com.carddemo.online.service.AccountService;
 import com.carddemo.online.service.AuthService;
 import com.carddemo.online.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserService.UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFound(
             UserService.UserNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(AccountService.AccountNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAccountNotFound(
+            AccountService.AccountNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }

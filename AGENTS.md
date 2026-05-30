@@ -11,7 +11,7 @@ Java 17 / Spring Boot 3.x migration (`carddemo-*` modules).
 carddemo-parent (pom.xml)        — Multi-module parent, JaCoCo 80%, surefire/failsafe
 ├── carddemo-common              — JPA entities, repositories, codecs, utilities
 ├── carddemo-batch               — Spring Batch jobs (CardDataPrinterJob, InterestCalculationJob, StatementGenerationJob, etc.)
-├── carddemo-online              — Auth, user management, Spring Security + JWT
+├── carddemo-online              — Auth, user management, account management, Spring Security + JWT
 └── carddemo-migration           — CLI data loader: ASCII/EBCDIC → DB
 ```
 
@@ -59,9 +59,17 @@ mvn spring-boot:run -pl carddemo-migration -Dspring-boot.run.arguments=app/data/
 - Roles: `ADMIN` (userType `A`) and `USER` (userType `U`) — mapped from COBOL
   `CSUSR01Y.cpy` SEC-USR-TYPE and `COCOM01Y.cpy` CDEMO-USRTYP-ADMIN/USER.
 - `POST /api/auth/login` is public; `/api/users/**` requires `ROLE_ADMIN`.
+- `/api/accounts/**` requires authentication (any role).
 - JWT secret configured via `carddemo.jwt.secret` property (env var `CARDDEMO_JWT_SECRET`).
 - COMMAREA session state (`CDEMO-USER-ID`, `CDEMO-USER-TYPE`) is replaced by JWT claims
   (`sub` = userId, `userType` claim).
+
+## Account Management (carddemo-online)
+
+- Migrated from COBOL programs `COACTVWC` (account view) and `COACTUPC` (account update).
+- `GET /api/accounts/{id}` — view account with related cards + customer (via card_xref join).
+- `PUT /api/accounts/{id}` — update account fields (partial update, null fields unchanged).
+- `GET /api/accounts` — list/search accounts (paginated, filter by `status`, `customerId`).
 
 ## CI
 
