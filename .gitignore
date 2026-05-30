@@ -7,3 +7,7 @@ batch-app/markers/*
 .DS_Store
 **/.DS_Store
 test-harness/target/
+carddemo-common/target/
+carddemo-batch/target/
+carddemo-online/target/
+carddemo-migration/target/
