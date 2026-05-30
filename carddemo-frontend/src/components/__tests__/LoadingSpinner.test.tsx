@@ -1,0 +1,11 @@
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { LoadingSpinner } from '../LoadingSpinner';
+
+describe('LoadingSpinner', () => {
+  it('renders with loading status', () => {
+    render(<LoadingSpinner />);
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
+  });
+});
