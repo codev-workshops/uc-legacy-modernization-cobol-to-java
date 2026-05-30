@@ -1,7 +1,8 @@
 package com.carddemo.online.controller;
 
+import com.carddemo.online.service.AccountService;
 import com.carddemo.online.service.AuthService;
-import com.carddemo.online.service.ReportService;
+import com.carddemo.online.service.BillPaymentService;
 import com.carddemo.online.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,13 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
+    @ExceptionHandler(AccountService.AccountNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAccountNotFound(
+            AccountService.AccountNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(UserService.UserAlreadyExistsException.class)
     public ResponseEntity<Map<String, String>> handleUserAlreadyExists(
             UserService.UserAlreadyExistsException ex) {
@@ -35,17 +43,24 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(ReportService.ReportNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleReportNotFound(
-            ReportService.ReportNotFoundException ex) {
+    @ExceptionHandler(BillPaymentService.AccountNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAccountNotFound(
+            BillPaymentService.AccountNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
     }
 
-    @ExceptionHandler(ReportService.ReportGenerationException.class)
-    public ResponseEntity<Map<String, String>> handleReportGeneration(
-            ReportService.ReportGenerationException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(BillPaymentService.AccountNotActiveException.class)
+    public ResponseEntity<Map<String, String>> handleAccountNotActive(
+            BillPaymentService.AccountNotActiveException ex) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(BillPaymentService.InvalidPaymentException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidPayment(
+            BillPaymentService.InvalidPaymentException ex) {
+        return ResponseEntity.badRequest()
                 .body(Map.of("error", ex.getMessage()));
     }
 
