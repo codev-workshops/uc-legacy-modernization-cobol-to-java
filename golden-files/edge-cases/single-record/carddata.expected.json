@@ -1,0 +1,18 @@
+{
+  "source_file": "carddata.txt",
+  "copybook": "CVACT02Y.cpy",
+  "record_length": 150,
+  "record_count": 1,
+  "records": [
+    {
+      "CARD-NUM": "0500024453765740",
+      "CARD-ACCT-ID": "00000000001",
+      "CARD-ACCT-ID_numeric": 1,
+      "CARD-CVV-CD": "123",
+      "CARD-CVV-CD_numeric": 123,
+      "CARD-EMBOSSED-NAME": "JOHN Q SMITH                                      ",
+      "CARD-EXPIRAION-DATE": "2025-12-31",
+      "CARD-ACTIVE-STATUS": "Y"
+    }
+  ]
+}

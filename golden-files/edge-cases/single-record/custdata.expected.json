@@ -1,0 +1,31 @@
+{
+  "source_file": "custdata.txt",
+  "copybook": "CVCUS01Y.cpy",
+  "record_length": 500,
+  "record_count": 1,
+  "records": [
+    {
+      "CUST-ID": "000000001",
+      "CUST-ID_numeric": 1,
+      "CUST-FIRST-NAME": "John                     ",
+      "CUST-MIDDLE-NAME": "Q                        ",
+      "CUST-LAST-NAME": "Smith                    ",
+      "CUST-ADDR-LINE-1": "123 Main Street                                   ",
+      "CUST-ADDR-LINE-2": "                                                  ",
+      "CUST-ADDR-LINE-3": "                                                  ",
+      "CUST-ADDR-STATE-CD": "NY",
+      "CUST-ADDR-COUNTRY-CD": "USA",
+      "CUST-ADDR-ZIP": "10001     ",
+      "CUST-PHONE-NUM-1": "212-555-1234   ",
+      "CUST-PHONE-NUM-2": "               ",
+      "CUST-SSN": "123456789",
+      "CUST-SSN_numeric": 123456789,
+      "CUST-GOVT-ISSUED-ID": "DL12345678          ",
+      "CUST-DOB-YYYY-MM-DD": "1980-01-15",
+      "CUST-EFT-ACCOUNT-ID": "CHK0000001",
+      "CUST-PRI-CARD-HOLDER-IND": "Y",
+      "CUST-FICO-CREDIT-SCORE": "750",
+      "CUST-FICO-CREDIT-SCORE_numeric": 750
+    }
+  ]
+}

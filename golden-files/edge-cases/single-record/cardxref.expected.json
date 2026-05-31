@@ -1,0 +1,15 @@
+{
+  "source_file": "cardxref.txt",
+  "copybook": "CVACT03Y.cpy",
+  "record_length": 50,
+  "record_count": 1,
+  "records": [
+    {
+      "XREF-CARD-NUM": "0500024453765740",
+      "XREF-CUST-ID": "000000050",
+      "XREF-CUST-ID_numeric": 50,
+      "XREF-ACCT-ID": "00000000050",
+      "XREF-ACCT-ID_numeric": 50
+    }
+  ]
+}

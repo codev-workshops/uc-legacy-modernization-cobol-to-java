@@ -1,0 +1,18 @@
+{
+  "source_file": "carddata.txt",
+  "copybook": "CVACT02Y.cpy",
+  "record_length": 150,
+  "record_count": 1,
+  "records": [
+    {
+      "CARD-NUM": "9999999999999999",
+      "CARD-ACCT-ID": "99999999999",
+      "CARD-ACCT-ID_numeric": 99999999999,
+      "CARD-CVV-CD": "999",
+      "CARD-CVV-CD_numeric": 999,
+      "CARD-EMBOSSED-NAME": "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+      "CARD-EXPIRAION-DATE": "9999-12-31",
+      "CARD-ACTIVE-STATUS": "Y"
+    }
+  ]
+}
