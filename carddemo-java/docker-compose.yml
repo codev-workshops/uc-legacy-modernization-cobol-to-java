@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: carddemo-postgres
+    environment:
+      POSTGRES_USER: ${CARDDEMO_DB_USER:-carddemo}
+      POSTGRES_PASSWORD: ${CARDDEMO_DB_PASSWORD:-carddemo}
+      POSTGRES_DB: carddemo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CARDDEMO_DB_USER:-carddemo}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  carddemo-backend:
+    build:
+      context: .
+      dockerfile: carddemo-backend/Dockerfile
+    container_name: carddemo-backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      CARDDEMO_DB_USER: ${CARDDEMO_DB_USER:-carddemo}
+      CARDDEMO_DB_PASSWORD: ${CARDDEMO_DB_PASSWORD:-carddemo}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  carddemo-batch:
+    build:
+      context: .
+      dockerfile: carddemo-batch/Dockerfile
+    container_name: carddemo-batch
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      CARDDEMO_DB_USER: ${CARDDEMO_DB_USER:-carddemo}
+      CARDDEMO_DB_PASSWORD: ${CARDDEMO_DB_PASSWORD:-carddemo}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carddemo_batch
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
