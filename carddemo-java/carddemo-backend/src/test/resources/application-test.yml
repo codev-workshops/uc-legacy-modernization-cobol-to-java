@@ -13,3 +13,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
+
+app:
+  jwt:
+    secret: CardDemoDefaultSecretKeyForJWTTokenGeneration2024!
+    expiration-ms: 86400000
