@@ -4,20 +4,22 @@ import java.time.LocalDate;
 
 public class CardDto {
 
-    private Long cardNumber;
+    private String cardNumber;
     private Long accountId;
     private Long customerId;
     private String cardStatus;
     private LocalDate expirationDate;
+    private Integer cvvCode;
+    private String embossedName;
 
     public CardDto() {
     }
 
-    public Long getCardNumber() {
+    public String getCardNumber() {
         return cardNumber;
     }
 
-    public void setCardNumber(Long cardNumber) {
+    public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
     }
 
@@ -51,5 +53,21 @@ public class CardDto {
 
     public void setExpirationDate(LocalDate expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public Integer getCvvCode() {
+        return cvvCode;
+    }
+
+    public void setCvvCode(Integer cvvCode) {
+        this.cvvCode = cvvCode;
+    }
+
+    public String getEmbossedName() {
+        return embossedName;
+    }
+
+    public void setEmbossedName(String embossedName) {
+        this.embossedName = embossedName;
     }
 }

@@ -61,17 +61,21 @@ class DtoTest {
     @Test
     void cardDto() {
         CardDto dto = new CardDto();
-        dto.setCardNumber(1234567890L);
+        dto.setCardNumber("1234567890123456");
         dto.setAccountId(1L);
         dto.setCustomerId(100L);
         dto.setCardStatus("ACTIVE");
         dto.setExpirationDate(LocalDate.of(2025, 12, 31));
+        dto.setCvvCode(123);
+        dto.setEmbossedName("John Doe");
 
-        assertEquals(1234567890L, dto.getCardNumber());
+        assertEquals("1234567890123456", dto.getCardNumber());
         assertEquals(1L, dto.getAccountId());
         assertEquals(100L, dto.getCustomerId());
         assertEquals("ACTIVE", dto.getCardStatus());
         assertEquals(LocalDate.of(2025, 12, 31), dto.getExpirationDate());
+        assertEquals(123, dto.getCvvCode());
+        assertEquals("John Doe", dto.getEmbossedName());
     }
 
     @Test
@@ -148,15 +152,15 @@ class DtoTest {
 
     @Test
     void cardXrefDto() {
-        CardXrefDto dto = new CardXrefDto(1234L, 100L, 200L);
-        assertEquals(1234L, dto.getCardNumber());
+        CardXrefDto dto = new CardXrefDto("1234567890123456", 100L, 200L);
+        assertEquals("1234567890123456", dto.getCardNumber());
         assertEquals(100L, dto.getCustomerId());
         assertEquals(200L, dto.getAccountId());
 
-        dto.setCardNumber(5678L);
+        dto.setCardNumber("5678901234567890");
         dto.setCustomerId(300L);
         dto.setAccountId(400L);
-        assertEquals(5678L, dto.getCardNumber());
+        assertEquals("5678901234567890", dto.getCardNumber());
         assertEquals(300L, dto.getCustomerId());
         assertEquals(400L, dto.getAccountId());
 
