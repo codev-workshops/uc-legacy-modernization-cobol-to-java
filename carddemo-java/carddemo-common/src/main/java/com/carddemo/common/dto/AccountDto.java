@@ -14,6 +14,9 @@ public class AccountDto {
     private LocalDate expirationDate;
     private String reissueDate;
     private String groupId;
+    private BigDecimal currCycCredit;
+    private BigDecimal currCycDebit;
+    private String addrZip;
 
     public AccountDto() {
     }
@@ -88,5 +91,29 @@ public class AccountDto {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public BigDecimal getCurrCycCredit() {
+        return currCycCredit;
+    }
+
+    public void setCurrCycCredit(BigDecimal currCycCredit) {
+        this.currCycCredit = currCycCredit;
+    }
+
+    public BigDecimal getCurrCycDebit() {
+        return currCycDebit;
+    }
+
+    public void setCurrCycDebit(BigDecimal currCycDebit) {
+        this.currCycDebit = currCycDebit;
+    }
+
+    public String getAddrZip() {
+        return addrZip;
+    }
+
+    public void setAddrZip(String addrZip) {
+        this.addrZip = addrZip;
     }
 }

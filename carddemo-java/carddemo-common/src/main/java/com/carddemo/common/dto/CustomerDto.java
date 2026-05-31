@@ -16,6 +16,11 @@ public class CustomerDto {
     private String fico;
     private String govtIssuedId;
     private String dateOfBirth;
+    private String countryCd;
+    private String phone2;
+    private String eftAccountId;
+    private String priCardHolderInd;
+    private String addressLine3;
 
     public CustomerDto() {
     }
@@ -130,5 +135,45 @@ public class CustomerDto {
 
     public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getCountryCd() {
+        return countryCd;
+    }
+
+    public void setCountryCd(String countryCd) {
+        this.countryCd = countryCd;
+    }
+
+    public String getPhone2() {
+        return phone2;
+    }
+
+    public void setPhone2(String phone2) {
+        this.phone2 = phone2;
+    }
+
+    public String getEftAccountId() {
+        return eftAccountId;
+    }
+
+    public void setEftAccountId(String eftAccountId) {
+        this.eftAccountId = eftAccountId;
+    }
+
+    public String getPriCardHolderInd() {
+        return priCardHolderInd;
+    }
+
+    public void setPriCardHolderInd(String priCardHolderInd) {
+        this.priCardHolderInd = priCardHolderInd;
+    }
+
+    public String getAddressLine3() {
+        return addressLine3;
+    }
+
+    public void setAddressLine3(String addressLine3) {
+        this.addressLine3 = addressLine3;
     }
 }

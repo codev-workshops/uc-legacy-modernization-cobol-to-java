@@ -2,24 +2,24 @@ package com.carddemo.common.dto;
 
 public class CardXrefDto {
 
-    private Long cardNumber;
+    private String cardNumber;
     private Long customerId;
     private Long accountId;
 
     public CardXrefDto() {
     }
 
-    public CardXrefDto(Long cardNumber, Long customerId, Long accountId) {
+    public CardXrefDto(String cardNumber, Long customerId, Long accountId) {
         this.cardNumber = cardNumber;
         this.customerId = customerId;
         this.accountId = accountId;
     }
 
-    public Long getCardNumber() {
+    public String getCardNumber() {
         return cardNumber;
     }
 
-    public void setCardNumber(Long cardNumber) {
+    public void setCardNumber(String cardNumber) {
         this.cardNumber = cardNumber;
     }
 
