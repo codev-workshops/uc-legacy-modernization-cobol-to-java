@@ -28,3 +28,8 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  jwt:
+    secret: CardDemoDefaultSecretKeyForJWTTokenGeneration2024!
+    expiration-ms: 86400000
