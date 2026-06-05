@@ -405,6 +405,30 @@ mvn exec:java -Dexec.mainClass=com.carddemo.harness.Main \
 
 See [`test-harness/README.md`](test-harness/README.md) for full documentation.
 
+## Java Modernization: CBTRN01C (Spring Batch)
+
+The `cbtrn01c-java/` directory contains a Spring Boot 3 + Spring Batch rewrite of the COBOL batch program `CBTRN01C.cbl` (Daily Transaction Validator). This module demonstrates the "refined plan" approach using Spring Batch for chunk-based processing, restartability, and skip/retry — compared to the plain Java 17 approach used by `cbact01c-java`.
+
+**Key features:**
+- Spring Batch chunk-based processing with configurable chunk size
+- Multi-file cross-lookup via repository pattern (simulates VSAM indexed random access)
+- Pre-loaded lookup maps for card XREF and account data
+- Reusable zoned-decimal parsing from `cbact01c-java`
+- 15 JUnit 5 tests including golden-file integration tests with 300 transactions
+
+**Quick start:**
+```bash
+cd cbtrn01c-java
+mvn clean test                    # Run all 15 tests
+mvn package -DskipTests           # Build JAR
+java -jar target/cbtrn01c-java-1.0.0-SNAPSHOT.jar \
+    --app.files.dalytran=dailytran.txt \
+    --app.files.xreffile=cardxref.txt \
+    --app.files.acctfile=acctdata.txt
+```
+
+See [`cbtrn01c-java/README.md`](cbtrn01c-java/README.md) for full documentation.
+
 ## Project Status
 
 The CardDemo application has been enhanced with optional features that extend its functionality:
