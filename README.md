@@ -418,3 +418,40 @@ These optional features make CardDemo an even more useful resource for customers
 
 Last updated: April 2025
 
+## Java Modernization — CBACT01C
+
+The `java-modernization/` directory contains a Java 17+ rewrite of the COBOL batch program `CBACT01C.cbl`.
+
+### What It Does
+
+Reads an indexed account file (VSAM KSDS equivalent) and writes three output files:
+
+| Output File | Description |
+|---|---|
+| OUT-FILE | Selected account fields with date reformatting (YYYY-MM-DD → YYYYMMDD) |
+| ARRY-FILE | Array-based records with balance entries (OCCURS 5 TIMES) |
+| VBRC-FILE | Two variable-length records per account (status + financial summary) |
+
+### Building & Running
+
+```bash
+cd java-modernization
+mvn clean package
+
+# Run against the sample account data
+java -jar target/cbact01c-modernization-1.0.0.jar \
+  ../app/data/ASCII/acctdata.txt \
+  output/outfile.txt \
+  output/arryfile.txt \
+  output/vbrcfile.txt
+```
+
+### Running Tests
+
+```bash
+cd java-modernization
+mvn test
+```
+
+22 JUnit 5 tests verify parsing, formatting, date conversion, business rules, and end-to-end processing.
+
