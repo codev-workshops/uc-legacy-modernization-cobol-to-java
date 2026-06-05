@@ -19,6 +19,7 @@ CardDemo is a comprehensive mainframe application that simulates a credit card m
   - [Application Screens](#application-screens)
 - [Technical Highlights](#technical-highlights)
 - [Support](#support)
+- [Modernization Planning](#modernization-planning)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
@@ -353,6 +354,10 @@ Admin users can perform the following functions:
 ## Support
 
 For questions, issues, or improvement requests, please raise an issue in the repository with detailed information about your concern. The maintainers will respond according to availability.
+
+## Modernization Planning
+
+- [Cutover Plan](CUTOVER_PLAN.md) — 7-phase migration plan from COBOL/CICS to Java Spring Boot with T-shirt sizing, phase parallelism analysis, and dependency mapping
 
 ## Roadmap
 
