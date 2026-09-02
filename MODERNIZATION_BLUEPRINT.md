@@ -131,16 +131,16 @@ Verified: CBEXPORT (582 lines) reads CUSTFILE/ACCTFILE/XREFFILE/TRANSACT/CARDFIL
 
 Verified locations are `app/app-authorization-ims-db2-mq/cbl` (COPAUS0C 1,032 lines / COPAUS1C 604 / COPAUA0C 1,026 / CBPAUP0C 386, all with `CBLTDLI` IMS calls; COPAUA0C also 3 MQ calls; plus COPAUS2C with 4 `EXEC SQL`, and DBUNLDGS/PAUDBLOD/PAUDBUNL IMS utilities), `app/app-transaction-type-db2/cbl` (COTRTUPC 1,702 lines / COTRTLIC 2,098 / COBTUPDT 237; 7/16/5 `EXEC SQL`), `app/app-vsam-mq/cbl` (CODATE01 524 / COACCT01 620; 12 MQ calls each).
 
-Core-data reads (verified): COPAUA0C reads `DATASET(WS-CCXREF-FILE)` / `WS-ACCTFILENAME` / `WS-CUSTFILENAME` (:478, :526, :574; literals `'ACCTDAT '`, `'CUSTDAT '`, `'CCXREF  '` :35-39); COPAUS0C reads `WS-CARDXREFNAME-ACCT-PATH` (`'CXACAIX '`), `WS-ACCTFILENAME`, `WS-CUSTFILENAME` (:819, :870, :921); COACCT01 reads `LIT-ACCTFILENAME` (`'ACCTDAT '`, :397). All are read-only; none writes a core file. The Transaction Type module (DB2 only) has no VSAM dependency.
+Core-data reads (verified): COPAUA0C reads `DATASET(WS-CCXREF-FILE)` / `WS-ACCTFILENAME` / `WS-CUSTFILENAME` (:478, :526, :574; literals `'ACCTDAT '`, `'CUSTDAT '`, `'CCXREF  '` :35-39); COPAUS0C reads `WS-CARDXREFNAME-ACCT-PATH` (`'CXACAIX '`), `WS-ACCTFILENAME`, `WS-CUSTFILENAME` (:819, :870, :921); COACCT01 reads `LIT-ACCTFILENAME` (`'ACCTDAT '`, :397). All seven reads are read-only; none writes a core file. COPAUA0C is the real-time authorization decision path (`APPROVE-AUTH`/`DECLINE-AUTH` :138-139, `WS-APPROVED-AMT` :65), so its ACCTDAT/CCXREF reads must see current balances and card ownership. The Transaction Type module (DB2 only) has no VSAM dependency.
 
 | Strategy | BLC | DC | TSA | RT | Total | Note |
 |---|---|---|---|---|---|---|
 | Strangler | 2 | 2 | 3 | 3 | 10 | Optional features with no downstream consumers in the core estate |
-| **Replatform** | **4** | **4** | **4** | **5** | **17** | IMS/DB2/MQ have managed equivalents; keep COBOL, swap infrastructure; read-only core dependencies handled by keeping VSAM read replicas current |
+| **Replatform** | **4** | **4** | **4** | **5** | **17** | IMS/DB2/MQ have managed equivalents; keep COBOL, swap infrastructure; read-only core dependencies served by near-real-time CDC replicas or synchronous API calls |
 | Refactor | 2 | 2 | 2 | 3 | 9 | No structural problems found |
 | Rewrite | 2 | 2 | 4 | 2 | 10 | Not worth the parity effort for optional modules |
 
-**Recommendation: Replatform (b).** These modules own no core data but are infrastructure-heavy; run them on managed COBOL with DB2->RDS/Aurora, MQ->Amazon MQ, IMS via the runtime's IMS emulation or a DB2 unload (the module already ships PAUDBUNL/PAUDBLOD unload/load utilities). They are independent of the core *wave order* but not of the core *data*: because COPAUA0C/COPAUS0C/COACCT01 read ACCTDAT, CUSTDAT and CCXREF/CXACAIX directly, each core cutover (2.2, 2.3) must keep those VSAM files populated as read replicas (CDC from the new Account/Customer stores back to VSAM, or a nightly refresh) until the module is either retired or its three read paragraphs are pointed at the Account/Customer/Xref APIs — a small, contained change to make later if the modules survive. Retire or rewrite only if the business asks for them after the core estate has moved.
+**Recommendation: Replatform (b).** These modules own no core data but are infrastructure-heavy; run them on managed COBOL with DB2->RDS/Aurora, MQ->Amazon MQ, IMS via the runtime's IMS emulation or a DB2 unload (the module already ships PAUDBUNL/PAUDBLOD unload/load utilities). They are independent of the core *wave order* but not of the core *data*: because COPAUA0C/COPAUS0C/COACCT01 read ACCTDAT, CUSTDAT and CCXREF/CXACAIX directly, each core cutover (2.2, 2.3) must keep those VSAM files populated by **near-real-time CDC** from the new Account/Customer stores back to VSAM with a defined freshness SLO (seconds, not a batch refresh — COPAUA0C approves/declines against ACCT-CURR-BAL and card ownership, so a stale replica authorizes against obsolete data), until the module is either retired or all seven core-file reads (COPAUA0C :478/:526/:574, COPAUS0C :819/:870/:921, COACCT01 :397) are pointed synchronously at the Account/Customer/Xref APIs. For COPAUA0C specifically, prefer the synchronous API route at the 2.3 cutover; CDC is acceptable for the inquiry-only COPAUS0C and COACCT01. Retire or rewrite only if the business asks for them after the core estate has moved.
 
 ## 3. Summary matrix
 
@@ -154,7 +154,7 @@ Core-data reads (verified): COPAUA0C reads `DATASET(WS-CCXREF-FILE)` / `WS-ACCTF
 | 6 | Bill Payment | 15 | 13 | 9 | **16** | Rewrite (after #5 API) | Client of #3 and #5 |
 | 7 | Interest/Statements/Reporting | 12 | 15 | **17** | 10 | Refactor -> Rewrite | Golden outputs before translation |
 | 8 | Data Export/Import | 11 | 14 | 9 | **17** | Rewrite (last) | Depends on all master files |
-| 10 | Optional IMS/DB2/MQ modules | 10 | **17** | 9 | 10 | Replatform | Independent wave; needs ACCTDAT/CUSTDAT/CCXREF read replicas after #2/#3 cut over |
+| 10 | Optional IMS/DB2/MQ modules | 10 | **17** | 9 | 10 | Replatform | Independent wave; after #2/#3 cut over needs near-real-time CDC replicas (or sync API for COPAUA0C authorization) |
 
 Shared kernel (context 9: COCOM01Y, COMEN01C, CSUTLDPY/CSUTLDWY/CSDAT01Y/CODATECN/CSUTLDTC, CSMSG01Y/02Y, CSSETATY, CSSTRPFY, CSLKPCDY, COTTL01Y) is not a domain and gets no strategy of its own: `COCOM01Y` navigation state is replaced by the new session/JWT model; `CSUTLDPY` date edits (only centuries `19`/`20` valid, CSUTLDPY.cpy:68; 11 `GO TO ... -EXIT` jumps :42-240) become one shared Java validator with parity tests, adopted by whichever context rewrites first.
 
@@ -167,8 +167,8 @@ flowchart LR
   T --> B["6 Bill Payment - Rewrite"]
   T --> I["7 Interest and Statements - Refactor then Rewrite"]
   I --> E["8 Export and Import - Rewrite"]
-  A -. "read replica of ACCTDAT CUSTDAT CCXREF" .-> O["10 Optional IMS DB2 MQ - Replatform"]
-  CU -. "read replica" .-> O
+  A -. "near-real-time CDC or sync API for ACCTDAT CCXREF" .-> O["10 Optional IMS DB2 MQ - Replatform"]
+  CU -. "near-real-time CDC for CUSTDAT" .-> O
 ```
 
 Validation against the expected outcome shape: Transactions => Strangler-then-Rewrite (confirmed, driven by the ACCTDATA/TCATBALF write coupling); Interest/Statements => Refactor-first (confirmed, driven by `ALTER`/control-block constructs and undocumented rules); Security/User admin => Rewrite (confirmed); optional modules => Replatform (confirmed). Account Management is additionally scored Strangler-first rather than direct Rewrite because it owns the hardest write seam.
@@ -193,7 +193,7 @@ Validation against the expected outcome shape: Transactions => Strangler-then-Re
 - `app/cbl/CBEXPORT.cbl` :35-65, :75-96; `CBIMPORT.cbl` :37-68, :84-113, :196-233
 - `app/cpy/CSUTLDPY.cpy` :42-240
 - `app/jcl/POSTTRAN.jcl` :23-42; `INTCALC.jcl` :22-41; `CREASTMT.JCL` :44-96; `TRANREPT.jcl` :59-80; `CBEXPORT.jcl` :43-63; `CBIMPORT.jcl` :22-49
-- `app/app-authorization-ims-db2-mq/cbl/*`, `app/app-transaction-type-db2/cbl/*`, `app/app-vsam-mq/cbl/*` (line counts and `EXEC SQL` / `CBLTDLI` / `MQ*` call counts); `COPAUA0C.cbl` :35-39, :478, :526, :574; `COPAUS0C.cbl` :38-42, :819, :870, :921; `COACCT01.cbl` :116, :397
+- `app/app-authorization-ims-db2-mq/cbl/*`, `app/app-transaction-type-db2/cbl/*`, `app/app-vsam-mq/cbl/*` (line counts and `EXEC SQL` / `CBLTDLI` / `MQ*` call counts); `COPAUA0C.cbl` :35-39, :478, :526, :574; `COPAUS0C.cbl` :38-42, :819, :870, :921; `COACCT01.cbl` :116, :397; `COPAUA0C.cbl` :65, :138-139
 - `README.md` :74, :283-293, :338, :348-351
 
 **Verification commands (run from repo root)**
