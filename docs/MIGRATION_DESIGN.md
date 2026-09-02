@@ -375,6 +375,11 @@ positionally (`20231345`, `ABCDEFGH`) — no calendar validation exists.
 ## 7. Sample data facts (drive test design)
 
 * 50 records, `ACCT-ID` 00000000001..00000000050, all `ACCT-ACTIVE-STATUS='Y'`.
+* Record 1: `ACCT-CURR-BAL` text `00000001940{` = **194.00** under `S9(10)V99`
+  (the `V99` implies two decimals: 0000000194.0+), credit limit 2020.00, cash
+  credit limit 1020.00, open 2014-11-20, expiry 2025-05-20, reissue 2025-05-20.
+* EBCDIC and ASCII sample files differ only in record 49 `ACCT-ADDR-ZIP`
+  (`ZEROAPR   ` vs `A000000000`); zip is not written to any output file.
 * All `ACCT-CURR-CYC-DEBIT = 0` → every OUTFILE record has packed `2525.00`.
 * `ACCT-CURR-CYC-CREDIT = 0`, `ACCT-GROUP-ID` = 10 spaces, `ACCT-ADDR-ZIP = "A000000000"`.
 * All amounts are positive (`{` overpunch); negatives appear only via the
