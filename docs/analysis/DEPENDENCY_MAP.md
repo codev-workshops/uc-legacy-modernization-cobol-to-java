@@ -177,7 +177,7 @@ HLQ `AWS.M2.CARDDEMO.` shown as `…`. "Producer" means the step creates/loads/r
 | `…TRANREPT(+1)` (GDG, `REPTFILE`/`DEFGDGB`) | `TRANREPT`/`CBTRN03C` (TRANREPT) | none in repo |
 | `…DATEPARM` | instream/external | `TRANREPT`/`CBTRN03C` (DATEPARM) |
 | `…TCATBALF.BKUP(+1)`, `…TCATBALF.REPT` | `PRTCATBL` | none |
-| `…EXPORT.DATA` | `CBEXPORT` | `CBIMPORT` → `…CUSTDATA.IMPORT`, `…ACCTDATA.IMPORT`, `…CARDXREF.IMPORT`, `…TRANSACT.IMPORT`, `…IMPORT.ERRORS` |
+| `…EXPORT.DATA` | `CBEXPORT` | `CBIMPORT` → `…CUSTDATA.IMPORT`, `…ACCTDATA.IMPORT`, `…CARDXREF.IMPORT`, `…TRANSACT.IMPORT`, `…IMPORT.ERRORS` (**defect:** `CBIMPORT.jcl` has no `CARDOUT` DD for the program's `CARD-OUTPUT` file, so the job fails at open as checked in) |
 | `…ACCTDATA.PSCOMP`, `.ARRYPS`, `.VBPS` | `READACCT`/`CBACT01C` | none |
 | IMS `PAUTHDB` (`OEM.IMS.IMSP.PAUTHDB`/`PAUTHDBX`) | `LOADPADB`/`PAUDBLOD` (from `…PAUTDB.ROOT.FILEO`, `…PAUTDB.CHILD.FILEO`); online `COPAUA0C` (ISRT), `COPAUS1C` (REPL); `CBPAUP0J`/`CBPAUP0C` (DLET) | `UNLDPADB`/`PAUDBUNL`, `UNLDGSAM`/`DBUNLDGS`, `DBPAUTP0` (DFSURGU0); online `COPAUS0C`, `COPAUS1C` |
 | DB2 `CARDDEMO.TRANSACTION_TYPE`, `…_CATEGORY` | `CREADB21` (create+load from `ctl/`), `MNTTRDB2`/`COBTUPDT`; online `COTRTLIC`, `COTRTUPC` | `TRANEXTR` (DSNTIAUL → `.PS` → `TRANTYPE`/`TRANCATG` VSAM jobs) |
@@ -191,7 +191,29 @@ HLQ `AWS.M2.CARDDEMO.` shown as `…`. "Producer" means the step creates/loads/r
 
 ## 4. Inferred end-to-end batch pipeline
 
-> **Caveat:** the repository contains no scheduler artifact (no Control-M/OPC/CA-7 definitions, no job-net, no `COND`/`JCLLIB` chaining between jobs). The ordering below is **inferred solely from producer→consumer dataset relationships** in the JCL `DD` statements and program `SELECT` clauses. The `SYSTRAN` → `COMBTRAN` link is explicit in the JCL (`SORTIN` concatenates `TRANSACT.BKUP(0)` and `SYSTRAN(0)`, comment "Sort current transaction file and system generated transactions"), but the *sequence* of job submissions is still not encoded anywhere.
+> **Caveat:** the end-to-end order below (file-load → `POSTTRAN` → `INTCALC` → `COMBTRAN` → `CREASTMT`) is **inferred from producer→consumer dataset relationships** in the JCL `DD` statements and program `SELECT` clauses; no single scheduler definition encodes that full chain. The repository *does* contain two scheduler exports under `app/scheduler/` (`CardDemo.controlm`, `CardDemo.ca7`), but they define separate daily/weekly/monthly flows, each bracketed by `CLOSEFIL`/`OPENFIL`, and never link `POSTTRAN` to `INTCALC` or `COMBTRAN` to `CREASTMT` (see §4.1). The `SYSTRAN` → `COMBTRAN` link is explicit in the JCL (`SORTIN` concatenates `TRANSACT.BKUP(0)` and `SYSTRAN(0)`).
+
+### 4.1 What the scheduler artifacts actually encode
+
+`app/scheduler/CardDemo.controlm` (Control-M XML, IN/OUT conditions) — four folders:
+
+| Folder | Job chain (from `INCOND`/`OUTCOND`) |
+|---|---|
+| `DAILY-TransactionBackup` (`DAYS="ALL"`) | `CLOSEFIL` → `TRANBKP` → `WAITSTEP` → `OPENFIL` |
+| `WEEKLY-DisclosureGroupsRefresh` (`DAYS="SA"`) | `CLOSEFIL` → `DISCGRP` → `WAITSTEP` → `OPENFIL` |
+| `WEEKLY-TransactionTypesDBRefresh` (`DAYS="SA"`) | `MNTTRDB2` → `TRANEXTR` |
+| `MONTHLY-InterestCalculation` | `CLOSEFIL` → `INTCALC` → `COMBTRAN` → `WAITSTEP` → `OPENFIL` |
+
+`app/scheduler/CardDemo.ca7` (CA-7 `LJOB` listings, `TRIGGERED JOBS` sections, `JCLLIB=&CARDDEMOPRODJCL`) — trigger chains:
+
+| SCHID | Trigger chain |
+|---|---|
+| 030 | `CLOSEFIL` → `CBPAUP0J` → `POSTTRAN` → `WAITSTEP` → `OPENFIL` |
+| 030/031/032 | `CLOSEFIL` → `TRANTYPE` → `WAITSTEP` → {`CLOSEFIL1` → `TRANCATG`, `CLOSEFIL2` → `TCATBALF`} → `WAITSTEP` → `CLOSEFIL` |
+| 030 | `CLOSEFIL` → `READACCT` → `READCARD` → `READCUST` → `READXREF` → `WAITSTEP` → `OPENFIL` |
+| 030 → 031 | `CLOSEFIL` → `CREASTMT` → `TXT2PDF1` → `WAITSTEP` → `OPENFIL` → `CLOSEFIL` → `PRTCATBL` → `WAITSTEP` → `OPENFIL` |
+
+Corroborations: `INTCALC` → `COMBTRAN` (Control-M monthly) and `CREASTMT` → `TXT2PDF1` (CA-7) are scheduler-confirmed. `POSTTRAN` appears only in CA-7 (daily-style chain with the IMS purge `CBPAUP0J`), `INTCALC` only in Control-M (monthly); the two exports are independent and neither orders `POSTTRAN` before `INTCALC` or `COMBTRAN` before `CREASTMT` — those two links remain dataset-lineage inferences. Every flow closes CICS files first (`CLOSEFIL` = `CEMT SET FIL CLO`) and reopens them last (`OPENFIL`), with `WAITSTEP` (`COBSWAIT`) as a settle delay.
 
 ```mermaid
 flowchart LR
@@ -233,8 +255,8 @@ Ordered narrative (inferred):
 | Copybook | Included by (count) |
 |---|---|
 | `COCOM01Y`, `COTTL01Y` | 21 (every BMS screen program incl. auth and DB2 screens) |
-| `CVACT01Y` | 16 (`CBACT01C`, `CBACT04C`, `CBEXPORT`, `CBIMPORT`, `CBSTM03A`, `CBTRN01C`, `CBTRN02C`, `COACTUPC`, `COACTVWC`, `COBIL00C`, `COCRDSLC`, `COCRDUPC`, `COTRN02C`, `COPAUA0C`, `COPAUS0C`, `COACCT01`) |
-| `CVACT03Y` | 16 |
+| `CVACT01Y` | 14 (`CBACT01C`, `CBACT04C`, `CBEXPORT`, `CBIMPORT`, `CBSTM03A`, `CBTRN01C`, `CBTRN02C`, `COACTUPC`, `COACTVWC`, `COBIL00C`, `COTRN02C`, `COPAUA0C`, `COPAUS0C`, `COACCT01`); `COCRDSLC`/`COCRDUPC` carry it only as commented-out `*COPY` |
+| `CVACT03Y` | 14 (same pattern: commented out in `COCRDSLC`/`COCRDUPC`) |
 | `CSUSR01Y` | 14 |
 | `CVTRA05Y` | 11 |
 | `CVACT02Y`, `CVCUS01Y` | 10 each |
