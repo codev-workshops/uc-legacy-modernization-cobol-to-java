@@ -116,7 +116,7 @@ Verified (CBSTM03A, 924 lines): header lists control-block addressing, ALTER/GO 
 
 ### 2.8 Data Export/Import — CBEXPORT, CBIMPORT; CVEXPORT
 
-Verified: CBEXPORT (582 lines) reads CUSTFILE/ACCTFILE/XREFFILE/TRANSACT/CARDFILE and writes `EXPFILE` (:35-65, `COPY CVEXPORT` :96); CBIMPORT (487 lines) reads `EXPFILE` and writes `CUSTOUT/ACCTOUT/XREFOUT/TRNXOUT/CARDOUT/ERROUT` (:37-68). CBEXPORT.jcl STEP02 / CBIMPORT.jcl STEP01 map to the five KSDS datasets and `AWS.M2.CARDDEMO.EXPORT.DATA` (:43-63 / :22-49). Pure serialisation of a polymorphic record (`CVEXPORT`), no business rules.
+Verified: CBEXPORT (582 lines) reads CUSTFILE/ACCTFILE/XREFFILE/TRANSACT/CARDFILE and writes `EXPFILE` (:35-65, `COPY CVEXPORT` :96); CBIMPORT (487 lines) reads `EXPFILE` and writes `CUSTOUT/ACCTOUT/XREFOUT/TRNXOUT/CARDOUT/ERROUT` (:37-68). CBEXPORT.jcl STEP02 maps the five KSDS datasets and `AWS.M2.CARDDEMO.EXPORT.DATA` (:43-63). CBIMPORT.jcl STEP01 allocates only `EXPFILE/CUSTOUT/ACCTOUT/XREFOUT/TRNXOUT/ERROUT` (:28-57) — there is **no `CARDOUT` DD**, yet CBIMPORT unconditionally `OPEN OUTPUT CARD-OUTPUT` (:233), so the import job as shipped abends at open time. Pure serialisation of a polymorphic record (`CVEXPORT`), no business rules.
 
 | Strategy | BLC | DC | TSA | RT | Total | Note |
 |---|---|---|---|---|---|---|
@@ -125,20 +125,22 @@ Verified: CBEXPORT (582 lines) reads CUSTFILE/ACCTFILE/XREFFILE/TRANSACT/CARDFIL
 | Refactor | 2 | 2 | 2 | 3 | 9 | Nothing to restructure |
 | **Rewrite** | **5** | **3** | **5** | **4** | **17** | Replace with the target platform's bulk export/import over the new APIs; the polymorphic `CVEXPORT` format is retired |
 
-**Recommendation: Rewrite (d), last.** It touches all five master files, so it is rebuilt as an aggregate export over the new services after 2.2-2.5 have moved; during transition keep the COBOL jobs running as-is on the existing runtime.
+**Recommendation: Rewrite (d), last.** It touches all five master files, so it is rebuilt as an aggregate export over the new services after 2.2-2.5 have moved. During transition CBEXPORT can keep running as-is; CBIMPORT cannot be relied upon until the missing `CARDOUT` DD is added to CBIMPORT.jcl and the job is validated end-to-end — treat that JCL repair as a prerequisite in `CUTOVER_PLAN.md`, or accept that no transitional import path exists.
 
 ### 2.9 Optional/extension contexts (context 10)
 
 Verified locations are `app/app-authorization-ims-db2-mq/cbl` (COPAUS0C 1,032 lines / COPAUS1C 604 / COPAUA0C 1,026 / CBPAUP0C 386, all with `CBLTDLI` IMS calls; COPAUA0C also 3 MQ calls; plus COPAUS2C with 4 `EXEC SQL`, and DBUNLDGS/PAUDBLOD/PAUDBUNL IMS utilities), `app/app-transaction-type-db2/cbl` (COTRTUPC 1,702 lines / COTRTLIC 2,098 / COBTUPDT 237; 7/16/5 `EXEC SQL`), `app/app-vsam-mq/cbl` (CODATE01 524 / COACCT01 620; 12 MQ calls each).
 
+Core-data reads (verified): COPAUA0C reads `DATASET(WS-CCXREF-FILE)` / `WS-ACCTFILENAME` / `WS-CUSTFILENAME` (:478, :526, :574; literals `'ACCTDAT '`, `'CUSTDAT '`, `'CCXREF  '` :35-39); COPAUS0C reads `WS-CARDXREFNAME-ACCT-PATH` (`'CXACAIX '`), `WS-ACCTFILENAME`, `WS-CUSTFILENAME` (:819, :870, :921); COACCT01 reads `LIT-ACCTFILENAME` (`'ACCTDAT '`, :397). All are read-only; none writes a core file. The Transaction Type module (DB2 only) has no VSAM dependency.
+
 | Strategy | BLC | DC | TSA | RT | Total | Note |
 |---|---|---|---|---|---|---|
 | Strangler | 2 | 2 | 3 | 3 | 10 | Optional features with no downstream consumers in the core estate |
-| **Replatform** | **4** | **5** | **4** | **5** | **18** | IMS/DB2/MQ have managed equivalents; keep COBOL, swap infrastructure |
+| **Replatform** | **4** | **4** | **4** | **5** | **17** | IMS/DB2/MQ have managed equivalents; keep COBOL, swap infrastructure; read-only core dependencies handled by keeping VSAM read replicas current |
 | Refactor | 2 | 2 | 2 | 3 | 9 | No structural problems found |
 | Rewrite | 2 | 2 | 4 | 2 | 10 | Not worth the parity effort for optional modules |
 
-**Recommendation: Replatform (b).** These modules are self-contained and infrastructure-heavy; run them on managed COBOL with DB2->RDS/Aurora, MQ->Amazon MQ, IMS via the runtime's IMS emulation or a DB2 unload (the module already ships PAUDBUNL/PAUDBLOD unload/load utilities). Retire or rewrite only if the business asks for them after the core estate has moved.
+**Recommendation: Replatform (b).** These modules own no core data but are infrastructure-heavy; run them on managed COBOL with DB2->RDS/Aurora, MQ->Amazon MQ, IMS via the runtime's IMS emulation or a DB2 unload (the module already ships PAUDBUNL/PAUDBLOD unload/load utilities). They are independent of the core *wave order* but not of the core *data*: because COPAUA0C/COPAUS0C/COACCT01 read ACCTDAT, CUSTDAT and CCXREF/CXACAIX directly, each core cutover (2.2, 2.3) must keep those VSAM files populated as read replicas (CDC from the new Account/Customer stores back to VSAM, or a nightly refresh) until the module is either retired or its three read paragraphs are pointed at the Account/Customer/Xref APIs — a small, contained change to make later if the modules survive. Retire or rewrite only if the business asks for them after the core estate has moved.
 
 ## 3. Summary matrix
 
@@ -152,7 +154,7 @@ Verified locations are `app/app-authorization-ims-db2-mq/cbl` (COPAUS0C 1,032 li
 | 6 | Bill Payment | 15 | 13 | 9 | **16** | Rewrite (after #5 API) | Client of #3 and #5 |
 | 7 | Interest/Statements/Reporting | 12 | 15 | **17** | 10 | Refactor -> Rewrite | Golden outputs before translation |
 | 8 | Data Export/Import | 11 | 14 | 9 | **17** | Rewrite (last) | Depends on all master files |
-| 10 | Optional IMS/DB2/MQ modules | 10 | **18** | 9 | 10 | Replatform | Independent of core waves |
+| 10 | Optional IMS/DB2/MQ modules | 10 | **17** | 9 | 10 | Replatform | Independent wave; needs ACCTDAT/CUSTDAT/CCXREF read replicas after #2/#3 cut over |
 
 Shared kernel (context 9: COCOM01Y, COMEN01C, CSUTLDPY/CSUTLDWY/CSDAT01Y/CODATECN/CSUTLDTC, CSMSG01Y/02Y, CSSETATY, CSSTRPFY, CSLKPCDY, COTTL01Y) is not a domain and gets no strategy of its own: `COCOM01Y` navigation state is replaced by the new session/JWT model; `CSUTLDPY` date edits (only centuries `19`/`20` valid, CSUTLDPY.cpy:68; 11 `GO TO ... -EXIT` jumps :42-240) become one shared Java validator with parity tests, adopted by whichever context rewrites first.
 
@@ -165,7 +167,8 @@ flowchart LR
   T --> B["6 Bill Payment - Rewrite"]
   T --> I["7 Interest and Statements - Refactor then Rewrite"]
   I --> E["8 Export and Import - Rewrite"]
-  O["10 Optional IMS DB2 MQ - Replatform"]
+  A -. "read replica of ACCTDAT CUSTDAT CCXREF" .-> O["10 Optional IMS DB2 MQ - Replatform"]
+  CU -. "read replica" .-> O
 ```
 
 Validation against the expected outcome shape: Transactions => Strangler-then-Rewrite (confirmed, driven by the ACCTDATA/TCATBALF write coupling); Interest/Statements => Refactor-first (confirmed, driven by `ALTER`/control-block constructs and undocumented rules); Security/User admin => Rewrite (confirmed); optional modules => Replatform (confirmed). Account Management is additionally scored Strangler-first rather than direct Rewrite because it owns the hardest write seam.
@@ -187,10 +190,10 @@ Validation against the expected outcome shape: Transactions => Strangler-then-Re
 - `app/cbl/CBTRN02C.cbl` :29-57, :181, :208-212, :372-424, :440-441, :467-560; `CBTRN01C.cbl` :29-58, :99-124; `CBTRN03C.cbl` :29-55, :93-113; `COTRN00C.cbl` :594; `COTRN01C.cbl` :270; `COTRN02C.cbl` :41-42, :579, :612, :645
 - `app/cbl/COBIL00C.cbl` :40-42, :80-82, :346, :379, :411, :444, :510-512
 - `app/cbl/CBACT04C.cbl` :28-53, :97-117, :167-170, :194-221, :350-360, :415-465, :482-483, :518-519; `CBSTM03A.CBL` :26-35, :39-40, :51-57, :226-232, :266-268, :300-309, :351; `CBSTM03B.CBL` :31-49; `CORPT00C.cbl` :138-146; `app/cpy/CVTRA01Y.cpy` :4-9; `app/cpy/CVACT03Y.cpy` :5-7
-- `app/cbl/CBEXPORT.cbl` :35-65, :75-96; `CBIMPORT.cbl` :37-68, :84-113
+- `app/cbl/CBEXPORT.cbl` :35-65, :75-96; `CBIMPORT.cbl` :37-68, :84-113, :196-233
 - `app/cpy/CSUTLDPY.cpy` :42-240
 - `app/jcl/POSTTRAN.jcl` :23-42; `INTCALC.jcl` :22-41; `CREASTMT.JCL` :44-96; `TRANREPT.jcl` :59-80; `CBEXPORT.jcl` :43-63; `CBIMPORT.jcl` :22-49
-- `app/app-authorization-ims-db2-mq/cbl/*`, `app/app-transaction-type-db2/cbl/*`, `app/app-vsam-mq/cbl/*` (line counts and `EXEC SQL` / `CBLTDLI` / `MQ*` call counts)
+- `app/app-authorization-ims-db2-mq/cbl/*`, `app/app-transaction-type-db2/cbl/*`, `app/app-vsam-mq/cbl/*` (line counts and `EXEC SQL` / `CBLTDLI` / `MQ*` call counts); `COPAUA0C.cbl` :35-39, :478, :526, :574; `COPAUS0C.cbl` :38-42, :819, :870, :921; `COACCT01.cbl` :116, :397
 - `README.md` :74, :283-293, :338, :348-351
 
 **Verification commands (run from repo root)**
@@ -203,6 +206,8 @@ grep -c -E "ALTER |GO TO" app/cbl/CBSTM03A.CBL ; grep -n "SET ADDRESS\|OCCURS\|A
 grep -n -hE "VALUE '(USRSEC|ACCTDAT|CARDDAT|CXACAIX|CCXREF|TRANSACT|CUSTDAT)" app/cbl/*.cbl
 grep -n -E "EXEC PGM=|DSN=" app/jcl/{POSTTRAN,INTCALC,TRANREPT,CBEXPORT,CBIMPORT}.jcl app/jcl/CREASTMT.JCL
 for f in app/app-*/cbl/*; do grep -c -iE "EXEC SQL" $f; grep -c -E "CBLTDLI|EXEC DLI" $f; grep -c -E "MQOPEN|MQGET|MQPUT" $f; done
+grep -n -hE "VALUE '(ACCTDAT|CUSTDAT|CCXREF|CXACAIX|CARDDAT|TRANSACT)" app/app-*/cbl/*.cbl ; grep -n -E "DATASET" app/app-*/cbl/*.cbl
+grep -n "DD" app/jcl/CBIMPORT.jcl ; grep -n -E "OPEN|CARDOUT" app/cbl/CBIMPORT.cbl
 ```
 
 **Discrepancies versus the shared ground-truth (names kept as given)**
@@ -213,4 +218,6 @@ for f in app/app-*/cbl/*; do grep -c -iE "EXEC SQL" $f; grep -c -E "CBLTDLI|EXEC
 4. CBTRN02C also emits reject reason `101` (:397) in addition to 100/102/103/109.
 5. COACTUPC is 4,236 lines, not "~1800+"; the cited edit range :1664-1705 and change detection are confirmed. The interest formula is at CBACT04C.cbl:464-465 (ground-truth "~462").
 6. CBSTM03A itself declares no VSAM files (only STMTFILE/HTMLFILE :39-40); all KSDS reads are in CBSTM03B. CBACT04C also copies CVTRA02Y (disclosure group) and reads DISCGRP, which the ground-truth lists under Transactions copybooks.
-7. `carddemo-batch/` and `test-harness/` referenced by the environment blueprint are not present on `feature/praveen-java-migration-base` (commit 5c0c7d6); the "comparison harness" referenced in 2.7 is therefore the planned harness, not an existing artifact on this branch.
+7. CBIMPORT.jcl has no `CARDOUT` DD although CBIMPORT.cbl opens `CARD-OUTPUT ASSIGN TO CARDOUT` (:63, :233); the shipped import job cannot run without a JCL fix.
+8. The optional Authorization and MQ-inquiry modules read core files ACCTDAT/CUSTDAT/CCXREF/CXACAIX directly (see 2.9); the ground-truth describes them as extension contexts without listing this coupling.
+9. `carddemo-batch/` and `test-harness/` referenced by the environment blueprint are not present on `feature/praveen-java-migration-base` (commit 5c0c7d6); the "comparison harness" referenced in 2.7 is therefore the planned harness, not an existing artifact on this branch.
