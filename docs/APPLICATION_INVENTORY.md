@@ -175,73 +175,73 @@ Static inventory of the AWS CardDemo mainframe estate: the base COBOL/CICS/VSAM 
 
 ## 4. Copybook catalog
 
-| Copybook | Dir | Record/01 | Length (bytes) | Fields | Used by | Description |
-|---|---|---|---|---|---|---|
-| CCPAUERY | cpy | ERROR-LOG-RECORD | 122 | 12 | COPAUA0C | PENDING AUTHORIZATION ERROR LOGS |
-| CCPAURLY | cpy | - | 55 | 6 | COPAUA0C | PENDING AUTHORIZATION RESPONSE |
-| CCPAURQY | cpy | - | 151 | 18 | COPAUA0C | PENDING AUTHORIZATION REQUEST |
-| CIPAUDTY | cpy | - | 200 | 29 | CBPAUP0C, COPAUA0C, COPAUS0C, COPAUS1C, COPAUS2C, DBUNLDGS, PAUDBLOD, PAUDBUNL | IMS child segment PAUTDTL1 under PAUTSUM0 (200 bytes), one per authorization request, keyed by PA-AUTHORIZATION-KEY (date+time, packed). ISRTed by COPAUA0C 8500; viewed by COPAUS1C; fraud flag set by COPAUS2C (which also inserts the row into DB2 CARDDEMO.AUTHFRDS); DLETed by CBPAUP0C when older than the expiry window. |
-| CIPAUSMY | cpy | - | 100 | 13 | CBPAUP0C, COPAUA0C, COPAUS0C, COPAUS1C, DBUNLDGS, PAUDBLOD, PAUDBUNL | IMS root segment PAUTSUM0 in HIDAM DB DBPAUTP0 (100 bytes), one per account, keyed PA-ACCT-ID. Created/REPLaced by COPAUA0C 8400 on every authorization; displayed by COPAUS0C; deleted by CBPAUP0C when no detail children remain. |
-| IMSFUNCS | cpy | FUNC-CODES | 40 | 11 | DBUNLDGS, PAUDBLOD, PAUDBUNL |  |
-| PADFLPCB | cpy | PADFLPCB | 291 | 10 | DBUNLDGS |  |
-| PASFLPCB | cpy | PASFLPCB | 136 | 10 | DBUNLDGS |  |
-| PAUTBPCB | cpy | PAUTBPCB | 291 | 10 | DBUNLDGS, PAUDBLOD, PAUDBUNL |  |
-| CSDB2RPY | cpy | - | 0 | 0 | COTRTLIC | CardDemo - Common Procedures for Db2 Dummy call to verify connectivity to Db2 |
-| CSDB2RWY | cpy | - | 816 | 14 | COTRTLIC | CardDemo - Common Working Storage for Db2 Db2 Common variables |
-| COADM02Y | cpy | CARDDEMO-ADMIN-MENU-OPTIONS | 407 | 26 | COADM01C | Admin-menu option table (user list/add/update/delete plus the DB2 transaction-type options 5/6 when installed); same dispatch pattern via COADM01C. |
-| COCOM01Y | cpy | CARDDEMO-COMMAREA | 160 | 22 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | CICS COMMAREA (160 bytes) passed on every EXEC CICS RETURN/XCTL between the 21 online programs. Carries navigation context (from/to tranid+program), the signed-on user, and the customer/account/card the user is currently working on. This is the pseudo-conversational session state. |
-| CODATECN | cpy | CODATECN-REC | 80 | 32 | CBACT01C | Parameter/control record for CBACT01C date-format conversion demo (COBDATFT assembler): input date, from/to format codes, and converted output. |
-| COMEN02Y | cpy | CARDDEMO-MAIN-MENU-OPTIONS | 554 | 53 | COMEN01C | Main-menu option table for regular users: option number, text, target program name, and admin-only flag; COMEN01C dispatches by MOVEing the selected CDEMO-MENU-OPT-PGMNAME to CDEMO-TO-PROGRAM and XCTLing. |
-| COSTM01 | cpy | TRNX-RECORD | 350 | 17 | CBSTM03A | Transaction record layout re-declared with TRNX- prefix for CBSTM03A statement generation; byte-identical to CVTRA05Y. |
-| COTTL01Y | cpy | CCDA-SCREEN-TITLE | 120 | 4 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Screen title lines shown at the top of every BMS map. |
-| CSDAT01Y | cpy | WS-DATE-TIME | 58 | 39 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Current date/time work area filled by EXEC CICS ASKTIME/FORMATTIME in every online program; provides YYYYMMDD, HHMMSS, MM/DD/YY, HH:MM:SS and a DB2-format timestamp for screen headers and TRAN-PROC-TS. |
-| CSLKPCDY | cpy | WS-US-PHONE-AREA-CODE-TO-EDIT | 12 | 5 | COACTUPC | Reference lookup tables implemented as 88-level VALUE lists: valid North-American phone area codes, valid US state codes, and valid state + first-2-ZIP-digit combinations. Used only by COACTUPC edits 1260/1270/1280. |
-| CSMSG01Y | cpy | CCDA-COMMON-MESSAGES | 100 | 3 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Two common screen messages (thank-you on exit, invalid key). |
-| CSMSG02Y | cpy | ABEND-DATA | 134 | 5 | COPAUS0C, COPAUS1C, COTRTUPC, COACTUPC, COACTVWC, COCRDSLC, COCRDUPC | Abend work area (code, culprit program, reason, message) used by the CICS abend handler paragraphs (SEND-PLAIN-TEXT / ABEND-ROUTINE) in the account/card programs. |
-| CSSETATY | cpy | - | 0 | 0 | COTRTUPC, COACTUPC | Procedure-division snippet used with COPY ... REPLACING to set BMS field attributes (protected/unprotected, colour, cursor) for one map field; copied ~40 times in COACTUPC and COTRTUPC. |
-| CSSTRPFY | cpy | - | 0 | 0 | COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC | Procedure-division snippet that maps EIBAID to the CCARD-AID 88-level values (ENTER/CLEAR/PA/PF keys). |
-| CSUSR01Y | cpy | SEC-USER-DATA | 80 | 7 | COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, COSGN00C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Application user / security record (80 bytes). VSAM KSDS USRSEC, key SEC-USR-ID. Read at sign-on (COSGN00C) and maintained by COUSR00C-03C (admin only). Passwords are stored in clear text. |
-| CSUTLDPY | cpy | - | 0 | 0 | COACTUPC | Procedure-division copybook: EDIT-DATE-CCYYMMDD validates a date (century 19/20, month 1-12, day within month incl. Feb-29 leap rule) then calls CSUTLDTC (CEEDAYS) for a final Lilian-date check; EDIT-DATE-OF-BIRTH additionally requires the date to be in the past. |
-| CSUTLDWY | cpy | - | 115 | 38 | COTRTUPC, COACTUPC | Working storage for the reusable date-edit routine (CSUTLDPY): the CCYYMMDD input split into parts plus result flags (valid / blank / not numeric / bad century / bad month / bad day / bad leap-day) and the CEEDAYS feedback area. |
-| CUSTREC | cpy | CUSTOMER-RECORD | 500 | 20 | CBSTM03A | Data-structure for Customer entity (RECLN 500) |
-| CVACT01Y | cpy | ACCOUNT-RECORD | 300 | 14 | COPAUA0C, COPAUS0C, COACCT01, CBACT01C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN01C, CBTRN02C, COACTUPC, COACTVWC, COBIL00C, COTRN02C | Account master record (300 bytes). VSAM KSDS AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS (CICS file ACCTDAT), key ACCT-ID. Read online by COACTVWC/COACTUPC/COBIL00C/COTRN02C/COPAUA0C/COPAUS0C/COACCT01; rewritten by COACTUPC (update), COBIL00C (bill pay), CBTRN02C (posting), CBACT04C (interest/cycle reset). |
-| CVACT02Y | cpy | CARD-RECORD | 150 | 8 | COPAUS0C, COTRTLIC, CBACT02C, CBEXPORT, CBIMPORT, CBTRN01C, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC | Credit card master record (150 bytes). VSAM KSDS CARDDATA (CICS CARDDAT), key CARD-NUM, with AIX CARDAIX on CARD-ACCT-ID. Maintained by COCRDLIC/COCRDSLC/COCRDUPC. |
-| CVACT03Y | cpy | CARD-XREF-RECORD | 50 | 5 | COPAUA0C, COPAUS0C, CBACT03C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN01C, CBTRN02C, CBTRN03C, COACTUPC, COACTVWC, COBIL00C, COTRN02C | Card -> customer -> account cross-reference (50 bytes). VSAM KSDS CARDXREF (CICS CCXREF), key XREF-CARD-NUM, with AIX path CXACAIX on XREF-ACCT-ID. This is the join hub of the model: every card-to-account and account-to-customer lookup goes through it. |
-| CVCRD01Y | cpy | CC-WORK-AREAS | 213 | 14 | COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC | Working-storage area shared by the account/card/tran-type screens (COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRTLIC, COTRTUPC): decoded AID key, next program/map, messages, and the raw account/card/customer search keys typed by the user (X with numeric REDEFINES for edit). |
-| CVCUS01Y | cpy | CUSTOMER-RECORD | 500 | 20 | COPAUA0C, COPAUS0C, CBCUS01C, CBEXPORT, CBIMPORT, CBTRN01C, COACTUPC, COACTVWC, COCRDSLC, COCRDUPC | Customer master record (500 bytes). VSAM KSDS CUSTDATA (CICS CUSTDAT), key CUST-ID. Read by COACTVWC/COCRDSLC/COPAUA0C/COPAUS0C; rewritten by COACTUPC (account update screen also edits customer data). CUSTREC is a byte-identical copy used by CBSTM03A. |
-| CVEXPORT | cpy | EXPORT-RECORD | 500 | 72 | CBEXPORT, CBIMPORT | Multi-record export file layout (500 bytes) for CBEXPORT/CBIMPORT branch-migration utilities: a common header (record type C/A/X/T/D, customer id, sequence, timestamp) followed by a REDEFINES union of the customer, account, xref, transaction and card record bodies. |
-| CVTRA01Y | cpy | TRAN-CAT-BAL-RECORD | 50 | 7 | CBACT04C, CBTRN02C | Transaction category balance (50 bytes). VSAM KSDS TCATBALF, composite key (ACCT-ID, TYPE-CD, CAT-CD). Accumulated by CBTRN02C 2700 during posting; read sequentially by CBACT04C to compute interest per category. |
-| CVTRA02Y | cpy | DIS-GROUP-RECORD | 50 | 7 | CBACT04C | Disclosure group / pricing record (50 bytes). VSAM KSDS DISCGRP, composite key (ACCT-GROUP-ID, TRAN-TYPE-CD, TRAN-CAT-CD). Provides the annual interest rate applied by CBACT04C. |
-| CVTRA03Y | cpy | TRAN-TYPE-RECORD | 60 | 4 | CBTRN03C | Transaction type reference (60 bytes). VSAM KSDS TRANTYPE, key TRAN-TYPE. With the DB2 extension the master copy lives in CARDDEMO.TRANSACTION_TYPE and TRANEXTR unloads it to this file. |
-| CVTRA04Y | cpy | TRAN-CAT-RECORD | 60 | 6 | CBTRN03C | Transaction category reference (60 bytes). VSAM KSDS TRANCATG, composite key (TYPE-CD, CAT-CD). DB2 master: CARDDEMO.TRANSACTION_TYPE_CATEGORY. |
-| CVTRA05Y | cpy | TRAN-RECORD | 350 | 15 | CBACT04C, CBEXPORT, CBIMPORT, CBTRN01C, CBTRN02C, CBTRN03C, COBIL00C, CORPT00C, COTRN00C, COTRN01C, COTRN02C | Posted transaction / ledger record (350 bytes). VSAM KSDS TRANSACT (CICS TRANSACT), key TRAN-ID, AIX on TRAN-PROC-TS (TRANIDX job). Written by CBTRN02C 2900 (batch posting), COTRN02C (online add), COBIL00C (bill payment) and CBACT04C 1300-B (system interest transactions via SYSTRAN merge). Same physical layout as CVTRA06Y and COSTM01. |
-| CVTRA06Y | cpy | DALYTRAN-RECORD | 350 | 15 | CBTRN01C, CBTRN02C | Daily incoming transaction feed record (350 bytes), sequential file AWS.M2.CARDDEMO.DALYTRAN.PS. Byte-identical to CVTRA05Y with DALYTRAN- prefix; CBTRN02C copies it field-for-field into TRAN-RECORD after validation. Rejects are written to DALYREJS with an 80-byte trailer (reason code 100/101/102/103 + text). |
-| CVTRA07Y | cpy | REPORT-NAME-HEADER | 808 | 45 | CBTRN03C | Print-line layouts for the daily transaction report produced by CBTRN03C (TRANREPT job): report header with date range, column headers, detail line (tran id, account, type/category with descriptions, source, amount), and page/account/grand total lines. |
-| UNUSED1Y | cpy | UNUSED-DATA | 80 | 7 | - | Intentionally unused copybook (not COPYed by any program) - present to exercise dead-code detection in analysis tooling. |
-| COPAU00 | cpy-bms | COPAU0AI | - | 748 | COPAUS0C | BMS symbolic map for mapset COPAU0AI |
-| COPAU01 | cpy-bms | COPAU1AI | - | 328 | COPAUS1C | BMS symbolic map for mapset COPAU1AI |
-| COTRTLI | cpy-bms | CTRTLIAI | - | 484 | COTRTLIC | BMS symbolic map for mapset CTRTLIAI |
-| COTRTUP | cpy-bms | CTRTUPAI | - | 184 | COTRTUPC | BMS symbolic map for mapset CTRTUPAI |
-| COACTUP | cpy-bms | CACTUPAI | - | 652 | COACTUPC | BMS symbolic map for mapset CACTUPAI |
-| COACTVW | cpy-bms | CACTVWAI | - | 448 | COACTVWC | BMS symbolic map for mapset CACTVWAI |
-| COADM01 | cpy-bms | COADM1AI | - | 244 | COADM01C | BMS symbolic map for mapset COADM1AI |
-| COBIL00 | cpy-bms | COBIL0AI | - | 124 | COBIL00C | BMS symbolic map for mapset COBIL0AI |
-| COCRDLI | cpy-bms | CCRDLIAI | - | 544 | COCRDLIC | BMS symbolic map for mapset CCRDLIAI |
-| COCRDSL | cpy-bms | CCRDSLAI | - | 184 | COCRDSLC | BMS symbolic map for mapset CCRDSLAI |
-| COCRDUP | cpy-bms | CCRDUPAI | - | 208 | COCRDUPC | BMS symbolic map for mapset CCRDUPAI |
-| COMEN01 | cpy-bms | COMEN1AI | - | 244 | COMEN01C | BMS symbolic map for mapset COMEN1AI |
-| CORPT00 | cpy-bms | CORPT0AI | - | 208 | CORPT00C | BMS symbolic map for mapset CORPT0AI |
-| COSGN00 | cpy-bms | COSGN0AI | - | 136 | COSGN00C | BMS symbolic map for mapset COSGN0AI |
-| COTRN00 | cpy-bms | COTRN0AI | - | 712 | COTRN00C | BMS symbolic map for mapset COTRN0AI |
-| COTRN01 | cpy-bms | COTRN1AI | - | 256 | COTRN01C | BMS symbolic map for mapset COTRN1AI |
-| COTRN02 | cpy-bms | COTRN2AI | - | 256 | COTRN02C | BMS symbolic map for mapset COTRN2AI |
-| COUSR00 | cpy-bms | COUSR0AI | - | 712 | COUSR00C | BMS symbolic map for mapset COUSR0AI |
-| COUSR01 | cpy-bms | COUSR1AI | - | 148 | COUSR01C | BMS symbolic map for mapset COUSR1AI |
-| COUSR02 | cpy-bms | COUSR2AI | - | 148 | COUSR02C | BMS symbolic map for mapset COUSR2AI |
-| COUSR03 | cpy-bms | COUSR3AI | - | 136 | COUSR03C | BMS symbolic map for mapset COUSR3AI |
-| AUTHFRDS | dcl | CARDDEMO.AUTHFRDS | - | 26 | COPAUS2C | DCLGEN CARDDEMO.AUTHFRDS |
-| DCLTRCAT | dcl | CARDDEMO.TRANSACTION_TYPE_CATEGORY | - | 3 | COTRTUPC | DCLGEN CARDDEMO.TRANSACTION_TYPE_CATEGORY |
-| DCLTRTYP | dcl | CARDDEMO.TRANSACTION_TYPE | - | 2 | COBTUPDT, COTRTLIC, COTRTUPC | DCLGEN CARDDEMO.TRANSACTION_TYPE |
+| Copybook | Dir | PII | Record/01 | Length (bytes) | Fields | Used by | Description |
+|---|---|---|---|---|---|---|---|
+| CCPAUERY | cpy | N | ERROR-LOG-RECORD | 122 | 12 | COPAUA0C | PENDING AUTHORIZATION ERROR LOGS |
+| CCPAURLY | cpy | Y | - | 55 | 6 | COPAUA0C | PENDING AUTHORIZATION RESPONSE |
+| CCPAURQY | cpy | Y | - | 151 | 18 | COPAUA0C | PENDING AUTHORIZATION REQUEST |
+| CIPAUDTY | cpy | Y | - | 200 | 29 | CBPAUP0C, COPAUA0C, COPAUS0C, COPAUS1C, COPAUS2C, DBUNLDGS, PAUDBLOD, PAUDBUNL | IMS child segment PAUTDTL1 under PAUTSUM0 (200 bytes), one per authorization request, keyed by PA-AUTHORIZATION-KEY (date+time, packed). ISRTed by COPAUA0C 8500; viewed by COPAUS1C; fraud flag set by COPAUS2C (which also inserts the row into DB2 CARDDEMO.AUTHFRDS); DLETed by CBPAUP0C when older than the expiry window. |
+| CIPAUSMY | cpy | Y | - | 100 | 13 | CBPAUP0C, COPAUA0C, COPAUS0C, COPAUS1C, DBUNLDGS, PAUDBLOD, PAUDBUNL | IMS root segment PAUTSUM0 in HIDAM DB DBPAUTP0 (100 bytes), one per account, keyed PA-ACCT-ID. Created/REPLaced by COPAUA0C 8400 on every authorization; displayed by COPAUS0C; deleted by CBPAUP0C when no detail children remain. |
+| IMSFUNCS | cpy | N | FUNC-CODES | 40 | 11 | DBUNLDGS, PAUDBLOD, PAUDBUNL |  |
+| PADFLPCB | cpy | N | PADFLPCB | 291 | 10 | DBUNLDGS |  |
+| PASFLPCB | cpy | N | PASFLPCB | 136 | 10 | DBUNLDGS |  |
+| PAUTBPCB | cpy | N | PAUTBPCB | 291 | 10 | DBUNLDGS, PAUDBLOD, PAUDBUNL |  |
+| CSDB2RPY | cpy | N | - | 0 | 0 | COTRTLIC | CardDemo - Common Procedures for Db2 Dummy call to verify connectivity to Db2 |
+| CSDB2RWY | cpy | N | - | 816 | 14 | COTRTLIC | CardDemo - Common Working Storage for Db2 Db2 Common variables |
+| COADM02Y | cpy | N | CARDDEMO-ADMIN-MENU-OPTIONS | 407 | 26 | COADM01C | Admin-menu option table (user list/add/update/delete plus the DB2 transaction-type options 5/6 when installed); same dispatch pattern via COADM01C. |
+| COCOM01Y | cpy | Y | CARDDEMO-COMMAREA | 160 | 22 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | CICS COMMAREA (160 bytes) passed on every EXEC CICS RETURN/XCTL between the 21 online programs. Carries navigation context (from/to tranid+program), the signed-on user, and the customer/account/card the user is currently working on. This is the pseudo-conversational session state. |
+| CODATECN | cpy | N | CODATECN-REC | 80 | 32 | CBACT01C | Parameter/control record for CBACT01C date-format conversion demo (COBDATFT assembler): input date, from/to format codes, and converted output. |
+| COMEN02Y | cpy | N | CARDDEMO-MAIN-MENU-OPTIONS | 554 | 53 | COMEN01C | Main-menu option table for regular users: option number, text, target program name, and admin-only flag; COMEN01C dispatches by MOVEing the selected CDEMO-MENU-OPT-PGMNAME to CDEMO-TO-PROGRAM and XCTLing. |
+| COSTM01 | cpy | Y | TRNX-RECORD | 350 | 17 | CBSTM03A | Transaction record layout re-declared with TRNX- prefix for CBSTM03A statement generation; byte-identical to CVTRA05Y. |
+| COTTL01Y | cpy | N | CCDA-SCREEN-TITLE | 120 | 4 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Screen title lines shown at the top of every BMS map. |
+| CSDAT01Y | cpy | N | WS-DATE-TIME | 58 | 39 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Current date/time work area filled by EXEC CICS ASKTIME/FORMATTIME in every online program; provides YYYYMMDD, HHMMSS, MM/DD/YY, HH:MM:SS and a DB2-format timestamp for screen headers and TRAN-PROC-TS. |
+| CSLKPCDY | cpy | N | WS-US-PHONE-AREA-CODE-TO-EDIT | 12 | 5 | COACTUPC | Reference lookup tables implemented as 88-level VALUE lists: valid North-American phone area codes, valid US state codes, and valid state + first-2-ZIP-digit combinations. Used only by COACTUPC edits 1260/1270/1280. |
+| CSMSG01Y | cpy | N | CCDA-COMMON-MESSAGES | 100 | 3 | COPAUS0C, COPAUS1C, COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COBIL00C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, CORPT00C, COSGN00C, COTRN00C, COTRN01C, COTRN02C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Two common screen messages (thank-you on exit, invalid key). |
+| CSMSG02Y | cpy | N | ABEND-DATA | 134 | 5 | COPAUS0C, COPAUS1C, COTRTUPC, COACTUPC, COACTVWC, COCRDSLC, COCRDUPC | Abend work area (code, culprit program, reason, message) used by the CICS abend handler paragraphs (SEND-PLAIN-TEXT / ABEND-ROUTINE) in the account/card programs. |
+| CSSETATY | cpy | N | - | 0 | 0 | COTRTUPC, COACTUPC | Procedure-division snippet used with COPY ... REPLACING to set BMS field attributes (protected/unprotected, colour, cursor) for one map field; copied ~40 times in COACTUPC and COTRTUPC. |
+| CSSTRPFY | cpy | N | - | 0 | 0 | COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC | Procedure-division snippet that maps EIBAID to the CCARD-AID 88-level values (ENTER/CLEAR/PA/PF keys). |
+| CSUSR01Y | cpy | Y | SEC-USER-DATA | 80 | 7 | COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COADM01C, COCRDLIC, COCRDSLC, COCRDUPC, COMEN01C, COSGN00C, COUSR00C, COUSR01C, COUSR02C, COUSR03C | Application user / security record (80 bytes). VSAM KSDS USRSEC, key SEC-USR-ID. Read at sign-on (COSGN00C) and maintained by COUSR00C-03C (admin only). Passwords are stored in clear text. |
+| CSUTLDPY | cpy | N | - | 0 | 0 | COACTUPC | Procedure-division copybook: EDIT-DATE-CCYYMMDD validates a date (century 19/20, month 1-12, day within month incl. Feb-29 leap rule) then calls CSUTLDTC (CEEDAYS) for a final Lilian-date check; EDIT-DATE-OF-BIRTH additionally requires the date to be in the past. |
+| CSUTLDWY | cpy | N | - | 115 | 38 | COTRTUPC, COACTUPC | Working storage for the reusable date-edit routine (CSUTLDPY): the CCYYMMDD input split into parts plus result flags (valid / blank / not numeric / bad century / bad month / bad day / bad leap-day) and the CEEDAYS feedback area. |
+| CUSTREC | cpy | Y | CUSTOMER-RECORD | 500 | 20 | CBSTM03A | Data-structure for Customer entity (RECLN 500) |
+| CVACT01Y | cpy | Y | ACCOUNT-RECORD | 300 | 14 | COPAUA0C, COPAUS0C, COACCT01, CBACT01C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN01C, CBTRN02C, COACTUPC, COACTVWC, COBIL00C, COTRN02C | Account master record (300 bytes). VSAM KSDS AWS.M2.CARDDEMO.ACCTDATA.VSAM.KSDS (CICS file ACCTDAT), key ACCT-ID. Read online by COACTVWC/COACTUPC/COBIL00C/COTRN02C/COPAUA0C/COPAUS0C/COACCT01; rewritten by COACTUPC (update), COBIL00C (bill pay), CBTRN02C (posting), CBACT04C (interest/cycle reset). |
+| CVACT02Y | cpy | Y | CARD-RECORD | 150 | 8 | COPAUS0C, COTRTLIC, CBACT02C, CBEXPORT, CBIMPORT, CBTRN01C, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC | Credit card master record (150 bytes). VSAM KSDS CARDDATA (CICS CARDDAT), key CARD-NUM, with AIX CARDAIX on CARD-ACCT-ID. Maintained by COCRDLIC/COCRDSLC/COCRDUPC. |
+| CVACT03Y | cpy | Y | CARD-XREF-RECORD | 50 | 5 | COPAUA0C, COPAUS0C, CBACT03C, CBACT04C, CBEXPORT, CBIMPORT, CBSTM03A, CBTRN01C, CBTRN02C, CBTRN03C, COACTUPC, COACTVWC, COBIL00C, COTRN02C | Card -> customer -> account cross-reference (50 bytes). VSAM KSDS CARDXREF (CICS CCXREF), key XREF-CARD-NUM, with AIX path CXACAIX on XREF-ACCT-ID. This is the join hub of the model: every card-to-account and account-to-customer lookup goes through it. |
+| CVCRD01Y | cpy | Y | CC-WORK-AREAS | 213 | 14 | COTRTLIC, COTRTUPC, COACTUPC, COACTVWC, COCRDLIC, COCRDSLC, COCRDUPC | Working-storage area shared by the account/card/tran-type screens (COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRTLIC, COTRTUPC): decoded AID key, next program/map, messages, and the raw account/card/customer search keys typed by the user (X with numeric REDEFINES for edit). |
+| CVCUS01Y | cpy | Y | CUSTOMER-RECORD | 500 | 20 | COPAUA0C, COPAUS0C, CBCUS01C, CBEXPORT, CBIMPORT, CBTRN01C, COACTUPC, COACTVWC, COCRDSLC, COCRDUPC | Customer master record (500 bytes). VSAM KSDS CUSTDATA (CICS CUSTDAT), key CUST-ID. Read by COACTVWC/COCRDSLC/COPAUA0C/COPAUS0C; rewritten by COACTUPC (account update screen also edits customer data). CUSTREC is a byte-identical copy used by CBSTM03A. |
+| CVEXPORT | cpy | Y | EXPORT-RECORD | 500 | 72 | CBEXPORT, CBIMPORT | Multi-record export file layout (500 bytes) for CBEXPORT/CBIMPORT branch-migration utilities: a common header (record type C/A/X/T/D, customer id, sequence, timestamp) followed by a REDEFINES union of the customer, account, xref, transaction and card record bodies. |
+| CVTRA01Y | cpy | Y | TRAN-CAT-BAL-RECORD | 50 | 7 | CBACT04C, CBTRN02C | Transaction category balance (50 bytes). VSAM KSDS TCATBALF, composite key (ACCT-ID, TYPE-CD, CAT-CD). Accumulated by CBTRN02C 2700 during posting; read sequentially by CBACT04C to compute interest per category. |
+| CVTRA02Y | cpy | N | DIS-GROUP-RECORD | 50 | 7 | CBACT04C | Disclosure group / pricing record (50 bytes). VSAM KSDS DISCGRP, composite key (ACCT-GROUP-ID, TRAN-TYPE-CD, TRAN-CAT-CD). Provides the annual interest rate applied by CBACT04C. |
+| CVTRA03Y | cpy | N | TRAN-TYPE-RECORD | 60 | 4 | CBTRN03C | Transaction type reference (60 bytes). VSAM KSDS TRANTYPE, key TRAN-TYPE. With the DB2 extension the master copy lives in CARDDEMO.TRANSACTION_TYPE and TRANEXTR unloads it to this file. |
+| CVTRA04Y | cpy | N | TRAN-CAT-RECORD | 60 | 6 | CBTRN03C | Transaction category reference (60 bytes). VSAM KSDS TRANCATG, composite key (TYPE-CD, CAT-CD). DB2 master: CARDDEMO.TRANSACTION_TYPE_CATEGORY. |
+| CVTRA05Y | cpy | Y | TRAN-RECORD | 350 | 15 | CBACT04C, CBEXPORT, CBIMPORT, CBTRN01C, CBTRN02C, CBTRN03C, COBIL00C, CORPT00C, COTRN00C, COTRN01C, COTRN02C | Posted transaction / ledger record (350 bytes). VSAM KSDS TRANSACT (CICS TRANSACT), key TRAN-ID, AIX on TRAN-PROC-TS (TRANIDX job). Written by CBTRN02C 2900 (batch posting), COTRN02C (online add), COBIL00C (bill payment) and CBACT04C 1300-B (system interest transactions via SYSTRAN merge). Same physical layout as CVTRA06Y and COSTM01. |
+| CVTRA06Y | cpy | Y | DALYTRAN-RECORD | 350 | 15 | CBTRN01C, CBTRN02C | Daily incoming transaction feed record (350 bytes), sequential file AWS.M2.CARDDEMO.DALYTRAN.PS. Byte-identical to CVTRA05Y with DALYTRAN- prefix; CBTRN02C copies it field-for-field into TRAN-RECORD after validation. Rejects are written to DALYREJS with an 80-byte trailer (reason code 100/101/102/103 + text). |
+| CVTRA07Y | cpy | Y | REPORT-NAME-HEADER | 808 | 45 | CBTRN03C | Print-line layouts for the daily transaction report produced by CBTRN03C (TRANREPT job): report header with date range, column headers, detail line (tran id, account, type/category with descriptions, source, amount), and page/account/grand total lines. |
+| UNUSED1Y | cpy | N | UNUSED-DATA | 80 | 7 | - | Intentionally unused copybook (not COPYed by any program) - present to exercise dead-code detection in analysis tooling. |
+| COPAU00 | cpy-bms | Y | COPAU0AI | - | 748 | COPAUS0C | BMS symbolic map for mapset COPAU0AI |
+| COPAU01 | cpy-bms | Y | COPAU1AI | - | 328 | COPAUS1C | BMS symbolic map for mapset COPAU1AI |
+| COTRTLI | cpy-bms | N | CTRTLIAI | - | 484 | COTRTLIC | BMS symbolic map for mapset CTRTLIAI |
+| COTRTUP | cpy-bms | N | CTRTUPAI | - | 184 | COTRTUPC | BMS symbolic map for mapset CTRTUPAI |
+| COACTUP | cpy-bms | Y | CACTUPAI | - | 652 | COACTUPC | BMS symbolic map for mapset CACTUPAI |
+| COACTVW | cpy-bms | Y | CACTVWAI | - | 448 | COACTVWC | BMS symbolic map for mapset CACTVWAI |
+| COADM01 | cpy-bms | Y | COADM1AI | - | 244 | COADM01C | BMS symbolic map for mapset COADM1AI |
+| COBIL00 | cpy-bms | Y | COBIL0AI | - | 124 | COBIL00C | BMS symbolic map for mapset COBIL0AI |
+| COCRDLI | cpy-bms | Y | CCRDLIAI | - | 544 | COCRDLIC | BMS symbolic map for mapset CCRDLIAI |
+| COCRDSL | cpy-bms | Y | CCRDSLAI | - | 184 | COCRDSLC | BMS symbolic map for mapset CCRDSLAI |
+| COCRDUP | cpy-bms | Y | CCRDUPAI | - | 208 | COCRDUPC | BMS symbolic map for mapset CCRDUPAI |
+| COMEN01 | cpy-bms | Y | COMEN1AI | - | 244 | COMEN01C | BMS symbolic map for mapset COMEN1AI |
+| CORPT00 | cpy-bms | Y | CORPT0AI | - | 208 | CORPT00C | BMS symbolic map for mapset CORPT0AI |
+| COSGN00 | cpy-bms | Y | COSGN0AI | - | 136 | COSGN00C | BMS symbolic map for mapset COSGN0AI |
+| COTRN00 | cpy-bms | Y | COTRN0AI | - | 712 | COTRN00C | BMS symbolic map for mapset COTRN0AI |
+| COTRN01 | cpy-bms | Y | COTRN1AI | - | 256 | COTRN01C | BMS symbolic map for mapset COTRN1AI |
+| COTRN02 | cpy-bms | Y | COTRN2AI | - | 256 | COTRN02C | BMS symbolic map for mapset COTRN2AI |
+| COUSR00 | cpy-bms | Y | COUSR0AI | - | 712 | COUSR00C | BMS symbolic map for mapset COUSR0AI |
+| COUSR01 | cpy-bms | Y | COUSR1AI | - | 148 | COUSR01C | BMS symbolic map for mapset COUSR1AI |
+| COUSR02 | cpy-bms | Y | COUSR2AI | - | 148 | COUSR02C | BMS symbolic map for mapset COUSR2AI |
+| COUSR03 | cpy-bms | Y | COUSR3AI | - | 136 | COUSR03C | BMS symbolic map for mapset COUSR3AI |
+| AUTHFRDS | dcl | Y | CARDDEMO.AUTHFRDS | - | 26 | COPAUS2C | DCLGEN CARDDEMO.AUTHFRDS |
+| DCLTRCAT | dcl | N | CARDDEMO.TRANSACTION_TYPE_CATEGORY | - | 3 | COTRTUPC | DCLGEN CARDDEMO.TRANSACTION_TYPE_CATEGORY |
+| DCLTRTYP | dcl | N | CARDDEMO.TRANSACTION_TYPE | - | 2 | COBTUPDT, COTRTLIC, COTRTUPC | DCLGEN CARDDEMO.TRANSACTION_TYPE |
 
 ## 5. Other artifacts
 

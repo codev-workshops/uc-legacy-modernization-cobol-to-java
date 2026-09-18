@@ -4,7 +4,7 @@ Related documents: [APPLICATION_INVENTORY](./APPLICATION_INVENTORY.md), [DEPENDE
 
 Generated from static analysis of `app/` on branch develop-asiri; extraction rules are described in HOTSPOT_REPORT.md §1.
 
-Field-level dictionary for every copybook in `app/cpy/`, grouped by business entity. Byte lengths honor OCCURS; REDEFINES show 0 bytes; 88-levels render as condition rows under their parent. Type is derived from PIC+USAGE.
+Field-level dictionary for every copybook in `app/cpy/`, grouped by business entity. Byte lengths honor OCCURS; REDEFINES show 0 bytes; 88-levels render as condition rows under their parent. Type is derived from PIC+USAGE. Section *PII and sensitive-data inventory* classifies every copybook holding personal, payment-card or credential data.
 
 ## Entity relationship
 
@@ -25,6 +25,55 @@ erDiagram
     PENDING_AUTH_SUMMARY ||--o{ PENDING_AUTH_DETAIL : "IMS parent/child"
     PENDING_AUTH_DETAIL ||--o| AUTHFRDS : "fraud copy (DB2)"
 ```
+
+## PII and sensitive-data inventory
+
+CardDemo carries real-world categories of personal and payment data in plain, unencrypted fixed-length records. The table below classifies every copybook that holds such fields so that a modernization team can decide masking, encryption-at-rest, tokenisation and access-logging per entity before any data is migrated or copied into lower environments. Classification used:
+
+- **Direct identifier** — identifies a natural person on its own (name, SSN, government ID, DOB).
+- **Payment card data (PCI-DSS)** — PAN, CVV, expiry, cardholder name. CVV must never be stored post-authorisation under PCI-DSS; the estate stores it in `CARD-CVV-CD`.
+- **Financial account data** — account numbers, balances, credit limits, FICO score, EFT bank account.
+- **Contact data** — address, phone.
+- **Credentials** — user id + plaintext password.
+- **Indirect / quasi-identifier** — internal keys (CUST-ID, ACCT-ID) and merchant/location data that become identifying when joined.
+
+### By copybook
+
+| Copybook | Record | PII / sensitive fields | Category | Where it flows (programs / datasets) |
+|---|---|---|---|---|
+| **CVCUS01Y**, **CUSTREC** (identical) | CUSTOMER-RECORD | CUST-FIRST/MIDDLE/LAST-NAME, CUST-ADDR-LINE-1/2/3, CUST-ADDR-STATE-CD, CUST-ADDR-COUNTRY-CD, CUST-ADDR-ZIP, CUST-PHONE-NUM-1/2, **CUST-SSN**, **CUST-GOVT-ISSUED-ID**, **CUST-DOB-YYYY-MM-DD**, CUST-EFT-ACCOUNT-ID, CUST-FICO-CREDIT-SCORE, CUST-ID | Direct identifier, contact, financial | `CUSTDATA.VSAM.KSDS` / `CUSTDATA.PS` (+ `app/data/ASCII/custdata.txt`, `EBCDIC/…CUSTDATA.PS` sample files in the repo); read by COACTVWC, COACTUPC, COCRDSLC, COCRDUPC, COPAUA0C, COPAUS0C, CBCUS01C, CBTRN01C, CBEXPORT, CBSTM03A; rewritten by COACTUPC. Highest-sensitivity record in the estate. |
+| **CVACT02Y** | CARD-RECORD | **CARD-NUM** (16-digit PAN), **CARD-CVV-CD**, CARD-EMBOSSED-NAME, CARD-EXPIRAION-DATE, CARD-ACCT-ID | Payment card (PCI) | `CARDDATA.VSAM.KSDS` / `.PS` (+ `carddata.txt` sample); COCRDLIC, COCRDSLC, COCRDUPC, COACTVWC, COPAUS0C, CBACT02C, CBTRN01C, CBEXPORT/CBIMPORT. PAN is displayed unmasked on the card list/detail screens (COCRDLI/COCRDSL maps). |
+| **CVACT03Y** | CARD-XREF-RECORD | XREF-CARD-NUM (PAN), XREF-CUST-ID, XREF-ACCT-ID | Payment card + quasi-identifier | `CARDXREF.VSAM.KSDS` (+AIX path); read by 14 programs — this is the join that turns a PAN into a person. |
+| **CVACT01Y** | ACCOUNT-RECORD | ACCT-ID, ACCT-CURR-BAL, ACCT-CREDIT-LIMIT, ACCT-CASH-CREDIT-LIMIT, ACCT-CURR-CYC-CREDIT/DEBIT, ACCT-ADDR-ZIP | Financial account, contact (ZIP) | `ACCTDATA.VSAM.KSDS` / `.PS` / `.ARRYPS` / `.VBPS` / `.PSCOMP` (+ `acctdata.txt`); 14 programs; balances shown on COACTVW/COACTUP/COBIL00 screens and on statements. |
+| **CVTRA05Y**, **CVTRA06Y**, **COSTM01** (identical layouts) | TRAN-RECORD / DALYTRAN-RECORD / TRNX-RECORD | TRAN-CARD-NUM (PAN), TRAN-MERCHANT-NAME/CITY/ZIP, TRAN-AMT, TRAN-ORIG-TS, TRAN-DESC | Payment card + behavioural/location | `TRANSACT.VSAM.KSDS`, `DALYTRAN.PS`, `DALYREJS(+1)`, `SYSTRAN(+1)`, `TRANSACT.BKUP/COMBINED/DALY(+1)`, `TRXFL.*`, `TRANSACT.IMPORT`, `EXPORT.DATA`; every GDG generation is a PAN-bearing copy. CREASTMT sorts the whole ledger by PAN into `TRXFL`. |
+| **CVTRA01Y** | TRAN-CAT-BAL-RECORD | TRANCAT-ACCT-ID, TRAN-CAT-BAL | Financial (spend profile per account/category) | `TCATBALF.VSAM.KSDS`, `TCATBALF.REPT`, `TCATBALF.BKUP`. |
+| **CSUSR01Y** | SEC-USER-DATA | SEC-USR-ID, SEC-USR-FNAME, SEC-USR-LNAME, **SEC-USR-PWD (plaintext)**, SEC-USR-TYPE | Credentials, direct identifier | `USRSEC.VSAM.KSDS` / `.PS` (+ `EBCDIC/…USRSEC.PS` sample with default credentials ADMIN001/PASSWORD, USER0001/PASSWORD); COSGN00C compares password byte-for-byte; COUSR00C lists users with passwords on screen. |
+| **COCOM01Y** | CARDDEMO-COMMAREA | CDEMO-USER-ID, CDEMO-CUST-ID, CDEMO-CUST-FNAME/MNAME/LNAME, CDEMO-ACCT-ID, CDEMO-CARD-NUM | Direct identifier, payment card, financial | In-flight only: CICS COMMAREA carried on every RETURN/XCTL across all 21 online programs; appears in CICS dumps/traces. |
+| **CVCRD01Y** | CC-WORK-AREAS | CC-ACCT-ID, CC-CARD-NUM, CC-CUST-ID | Payment card, quasi-identifier | Working storage of 7 screen programs (COACTVWC, COACTUPC, COCRDLIC, COCRDSLC, COCRDUPC, COTRTLIC, COTRTUPC). |
+| **CVEXPORT** | EXPORT-RECORD | Union of *all* of the above: EXP-CUST-* (names, address, phones, **SSN**, **GOVT-ISSUED-ID**, **DOB**, EFT account, FICO), EXP-ACCT-* (balances, limits), EXP-CARD-* (**PAN, CVV**, embossed name, expiry), EXP-XREF-*, EXP-TRAN-* (PAN, merchant) | All categories | `EXPORT.DATA` sequential file written by CBEXPORT and read by CBIMPORT; a single flat file containing the complete customer + card + account + transaction profile — the highest-risk artifact to leave lying in a dataset or in `app/data/EBCDIC/…EXPORT.DATA.PS`. |
+| **CIPAUSMY** (IMS PAUTSUM0) | pending-auth summary | PA-ACCT-ID, PA-CUST-ID, PA-CREDIT-LIMIT, PA-CASH-LIMIT, PA-CREDIT-BALANCE, PA-CASH-BALANCE, approved/declined counts+amounts | Financial, quasi-identifier | IMS DB `DBPAUTP0`; COPAUA0C, COPAUS0C/1C, CBPAUP0C; unload files `PAUTDB.ROOT.*`, `IMSDATA.DBPAUTP0` (sample in repo). |
+| **CIPAUDTY** (IMS PAUTDTL1) | pending-auth detail | **PA-CARD-NUM** (PAN), PA-CARD-EXPIRY-DATE, PA-TRANSACTION-AMT, PA-APPROVED-AMT, PA-MERCHANT-ID/NAME/CITY/STATE/ZIP, PA-POS-ENTRY-MODE, PA-ACQR-COUNTRY-CODE, PA-AUTH-FRAUD | Payment card + behavioural/location | IMS DB `DBPAUTP0`; unload `PAUTDB.CHILD.*`; copied to DB2 `CARDDEMO.AUTHFRDS` by COPAUS2C. |
+| **CCPAURQY** / **CCPAURLY** | MQ auth request / reply | PA-RQ-CARD-NUM, PA-RQ-CARD-EXPIRY-DATE, PA-RQ-TRANSACTION-AMT, PA-RQ-MERCHANT-NAME/CITY/STATE/ZIP; PA-RL-CARD-NUM, PA-RL-APPROVED-AMT | Payment card | Clear-text CSV messages on MQ queues `AWS.M2.CARDDEMO.PAUTH.REQUEST` / `.REPLY` (COPAUA0C). PAN is echoed back in the reply. |
+| **AUTHFRDS** (DCLGEN) | DB2 CARDDEMO.AUTHFRDS | CARD_NUM (PAN), CARD_EXPIRY_DATE, ACCT_ID, CUST_ID, MERCHANT_*, TRANSACTION_AMT, APPROVED_AMT, AUTH_FRAUD | Payment card, quasi-identifier | DB2 table; primary key is (CARD_NUM, AUTH_TS) so the PAN is also in the index `XAUTHFRD`. |
+| **CVTRA07Y** | transaction report lines | TRAN-REPORT-ACCOUNT-ID, TRAN-REPORT-TRANS-ID, TRAN-REPORT-AMT | Financial | `TRANREPT(+1)` print dataset (CBTRN03C). |
+| BMS symbolic maps **COACTUP**, **COACTVW**, **COCRDLI**, **COCRDSL**, **COCRDUP**, **COTRN00/01/02**, **COBIL00**, **COSGN00**, **COUSR00–03**, **COPAU00/01** | screen I/O areas | Screen mirrors of the fields above: names, full address, phones, **SSN**, **DOB**, government id, FICO, PAN, CVV-free but expiry, balances, and for COSGN00/COUSR0x the **password** field | All categories | 3270 data streams; COUSR00 map lists user ids **with passwords**; COSGN00 password field should be DRK-attribute but the record it lands in is plaintext. |
+
+### Copybooks with *no* PII
+
+`CVTRA02Y` (disclosure group rates), `CVTRA03Y`/`CVTRA04Y` (transaction type/category reference), `CSDAT01Y`, `COTTL01Y`, `CSMSG01Y`, `CSMSG02Y`, `CODATECN`, `CSLKPCDY` (public state/ZIP/area-code lists), `CSSETATY`, `CSSTRPFY`, `CSUTLDPY`, `CSUTLDWY`, `COMEN02Y`, `COADM02Y`, `UNUSED1Y`, `IMSFUNCS`, `*PCB`, `CSDB2RPY`, `CSDB2RWY`, `CCPAUERY` (error log — carries MQ/IMS return codes only), `DCLTRTYP`, `DCLTRCAT`, `COTRTLI`/`COTRTUP` maps.
+
+### Sample data shipped in the repository
+
+`app/data/ASCII/*.txt` and `app/data/EBCDIC/AWS.M2.CARDDEMO.*` contain populated instances of every PII-bearing record above (customers with SSNs and DOBs, 16-digit card numbers with CVVs, user ids with passwords). They are synthetic test data, but any pipeline that treats the repo as a data source — or copies these files into a cloud bucket — should apply the same controls as production.
+
+### Implications for the Java target
+
+1. **Tokenise the PAN at the boundary.** `CARD-NUM` is the join key across CARD, XREF, TRANSACTION, AUTH and the MQ messages, and is the physical sort key for statements. Replace it with a token/surrogate id in the relational model and keep the PAN only in a vaulted card service.
+2. **Do not carry CVV forward.** `CARD-CVV-CD` (and `EXP-CARD-CVV-CD`) must be dropped at migration; PCI-DSS 3.2 prohibits storing it.
+3. **Hash credentials.** `SEC-USR-PWD` is plaintext and displayed on the user-list screen; wave 2 of the modernization order replaces `USRSEC` with a proper identity store.
+4. **Split the customer aggregate.** `CVCUS01Y` mixes contact data with SSN/DOB/government id/FICO. Model regulated identifiers as a separate, access-logged entity so that account-servicing screens (COACTVW-equivalents) can be built without SSN read access.
+5. **Kill the flat-file copies.** The GDGs (`TRANSACT.BKUP`, `SYSTRAN`, `COMBINED`, `DALYREJS`, `TRXFL`, `EXPORT.DATA`) and the `.PS` seed files are un-encrypted PAN-bearing copies with no retention policy in the JCL; they disappear when posting/interest/statements become database transactions.
+6. **Session state.** `COCOM01Y` puts customer name, account id and PAN in the CICS COMMAREA on every interaction. The Java session/JWT should carry opaque ids only and re-read display data server-side.
 
 ## Account
 
