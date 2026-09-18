@@ -1109,6 +1109,76 @@ Used by: **no program references it**
 | UNUSED-TYPE | 05 | X(01) | Alphanumeric | Unused field (no program references this layout). | none in code |
 | UNUSED-FILLER | 05 | X(23) | Alphanumeric | Unused padding to record length. | none in code |
 
+## PII and sensitive-data inventory
+
+Fields that identify or could be used to harm a natural person, or that are regulated payment data, grouped by
+sensitivity class. Classes: **Direct identifier** (name, SSN, government id), **Contact** (address, phone),
+**Demographic / financial profile** (DOB, credit score, EFT account), **PAN / PCI** (card number, expiry, CVV —
+PCI-DSS cardholder and sensitive-authentication data), **Account / customer key** (indirect identifier — links to a person
+via CCXREF/CUSTDAT), **Credential** (passwords). Persistence column says where the field is *stored at rest*, not just
+carried in memory.
+
+### PII by copybook
+
+| Copybook | Store / role | Direct identifier | Contact | Demographic / financial | PAN / PCI | Account / customer key | Credential |
+|---|---|---|---|---|---|---|---|
+| **CVCUS01Y** | CUSTDAT KSDS record | CUST-FIRST-NAME, CUST-MIDDLE-NAME, CUST-LAST-NAME, **CUST-SSN 9(09)**, CUST-GOVT-ISSUED-ID | CUST-ADDR-LINE-1/2/3, CUST-ADDR-STATE-CD, CUST-ADDR-COUNTRY-CD, CUST-ADDR-ZIP, CUST-PHONE-NUM-1/2 | CUST-DOB-YYYY-MM-DD, CUST-FICO-CREDIT-SCORE, CUST-EFT-ACCOUNT-ID (external bank account) | — | CUST-ID | — |
+| **CUSTREC** | duplicate of CVCUS01Y (CBSTM03A) | same as CVCUS01Y | same | CUST-DOB-YYYYMMDD, FICO, EFT | — | CUST-ID | — |
+| **CVACT02Y** | CARDDAT KSDS record | CARD-EMBOSSED-NAME | — | — | **CARD-NUM X(16)** (full PAN), **CARD-CVV-CD 9(03)**, CARD-EXPIRAION-DATE | CARD-ACCT-ID | — |
+| **CVACT01Y** | ACCTDAT KSDS record | — | ACCT-ADDR-ZIP | balances / limits (financial, not PII per se) | — | ACCT-ID | — |
+| **CVACT03Y** | CCXREF KSDS record | — | — | — | XREF-CARD-NUM (PAN) | XREF-CUST-ID, XREF-ACCT-ID | — |
+| **CVTRA05Y** | TRANSACT KSDS record | — | — | purchase history (merchant name/city/zip, amount, timestamps) | TRAN-CARD-NUM (PAN) | — | — |
+| **CVTRA06Y** | DALYTRAN.PS feed | — | — | same as CVTRA05Y | DALYTRAN-CARD-NUM (PAN) | — | — |
+| **COSTM01** | TRXFL KSDS (statement temp) | — | — | purchase history | TRNX-CARD-NUM (PAN) | — | — |
+| **CVTRA01Y** | TCATBALF KSDS | — | — | per-category balances | — | TRANCAT-ACCT-ID | — |
+| **CVTRA07Y** | TRANREPT print lines | — | — | purchase detail lines (type/category, amount) | — (CBTRN03C breaks on TRAN-CARD-NUM but does not print it) | TRAN-REPORT-ACCOUNT-ID, TRAN-REPORT-TRANS-ID | — |
+| **CVEXPORT** | EXPORT.DATA KSDS (multi-entity) | EXP-CUST-FIRST/MIDDLE/LAST-NAME, **EXP-CUST-SSN**, EXP-CUST-GOVT-ISSUED-ID, EXP-CARD-EMBOSSED-NAME | EXP-CUST-ADDR-LINE (×3), STATE, COUNTRY, ZIP, EXP-CUST-PHONE-NUM (×2), EXP-ACCT-ADDR-ZIP | EXP-CUST-DOB-YYYY-MM-DD, EXP-CUST-FICO-CREDIT-SCORE, EXP-CUST-EFT-ACCOUNT-ID | **EXP-CARD-NUM, EXP-CARD-CVV-CD, EXP-CARD-EXPIRAION-DATE**, EXP-XREF-CARD-NUM, EXP-TRAN-CARD-NUM | EXP-CUST-ID, EXP-ACCT-ID, EXP-XREF-*, EXP-CARD-ACCT-ID | — |
+| **CSUSR01Y** | USRSEC KSDS record | SEC-USR-FNAME, SEC-USR-LNAME | — | — | — | SEC-USR-ID | **SEC-USR-PWD X(08) plaintext** |
+| **UNUSED1Y** | (unreferenced) | UNUSED-FNAME, UNUSED-LNAME | — | — | — | UNUSED-ID | UNUSED-PWD |
+| **COCOM01Y** | CICS COMMAREA (in flight between every screen) | CDEMO-CUST-FNAME/MNAME/LNAME | — | — | CDEMO-CARD-NUM 9(16) (PAN) | CDEMO-USER-ID, CDEMO-CUST-ID, CDEMO-ACCT-ID | — |
+| **CVCRD01Y** | screen work area | — | — | — | CC-CARD-NUM / CC-CARD-NUM-N (PAN) | CC-ACCT-ID(-N), CC-CUST-ID(-N) | — |
+| **CIPAUSMY** | IMS PAUTSUM0 root segment | — | — | credit/cash limits & balances | — | PA-ACCT-ID (COMP-3), PA-CUST-ID | — |
+| **CIPAUDTY** | IMS PAUTDTL1 child segment | — | — | merchant / amount detail | **PA-CARD-NUM (PAN)**, PA-CARD-EXPIRY-DATE | — | — |
+| **CCPAURQY** | MQ request (PAUTH.REQUEST) | — | — | merchant / amount | **PA-RQ-CARD-NUM (PAN)**, PA-RQ-CARD-EXPIRY-DATE | — | — |
+| **CCPAURLY** | MQ reply (PAUTH.REPLY) | — | — | approved amount | PA-RL-CARD-NUM (PAN) | — | — |
+| **CCPAUERY** | error log record | — | — | — | ERR-EVENT-KEY X(20) — loaded with `PA-CARD-NUM` / `XREF-CARD-NUM` in COPAUA0C 3100/5100 (PAN leaks into error logging) | — | — |
+
+Copybooks with **no PII**: COTTL01Y, CSDAT01Y, CSMSG01Y, CSMSG02Y, CODATECN, CSUTLDWY, CSLKPCDY (reference lists only),
+CSDB2RWY, IMSFUNCS, PAUTBPCB, PASFLPCB, PADFLPCB, COMEN02Y, COADM02Y, CVTRA02Y, CVTRA03Y, CVTRA04Y, and the four procedural
+copybooks.
+
+### PII outside the `cpy/` copybooks
+
+| Asset | PII present |
+|---|---|
+| BMS symbolic maps `cpy-bms/COACTUP`, `COACTVW` | Customer name, SSN (split `ACTSSN1I/2I/3I`), DOB, address, phones, FICO, account id, card number rendered on 3270 screens |
+| `cpy-bms/COCRDLI`, `COCRDSL`, `COCRDUP` | Full card number, embossed name, expiry; CVV displayed/edited in card view/update (`CARD-CVV-CD-X` in COCRDSLC/COCRDUPC) |
+| `cpy-bms/COUSR00/01/02/03`, `COSGN00` | User ids, names, **password field** |
+| `cpy-bms/COTRN00/01/02`, `COBIL00`, `CORPT00`, `COPAU00/01` | Card number, account id, transaction detail |
+| DB2 `CARDDEMO.AUTHFRDS` (`ddl/AUTHFRDS.ddl`, `dcl/AUTHFRDS.dcl`) | CARD_NUM CHAR(16) (PAN, also in PK and index XAUTHFRD), CARD_EXPIRY_DATE, ACCT_ID, CUST_ID, merchant detail |
+| IMS `DBPAUTP0` / `DBPAUTX0` | PAUTSUM0 keyed on account id; PAUTDTL1 carries full PAN + expiry |
+| MQ queues `AWS.M2.CARDDEMO.PAUTH.REQUEST/REPLY`, `CARDDEMO.REQUEST/RESPONSE.QUEUE` | PAN and expiry in clear-text CSV (auth); COACCT01 reply carries account id, status, balance, credit/cash limits as labelled text |
+| Sample data `app/data/EBCDIC/*`, `app/data/ASCII/*` | CUSTDATA (names, SSN, DOB, addresses), CARDDATA (PAN + CVV), USRSEC (plaintext passwords), EXPORT.DATA, IMSDATA.DBPAUTP0 — synthetic demo data, but the same shapes as production |
+| JCL `DUSRSECJ.jcl`, `ESDSRRDS.jcl` | In-stream user records including plaintext passwords |
+| Batch outputs | `STATEMNT.PS/.HTML/.PDF` (name, full address, account id, FICO score, card-level transaction list), `TRANREPT(+1)` (account id + transaction id per line), `DALYREJS(+1)` (rejected transactions with PAN), `ACCTDATA.PSCOMP/ARRYPS/VBPS`, `*.IMPORT` files, `PAUTDB.ROOT/CHILD.*` unloads |
+| SYSOUT | CBACT02C, CBACT03C, CBCUS01C `DISPLAY` whole card / xref / customer records (PAN, CVV, SSN) to the job log; CBTRN02C logs TCATBAL keys; CBPAUP0C debug mode displays account ids |
+
+### Observations for the Java target
+
+1. **Full PAN is stored in six places** (CARDDAT, CCXREF, TRANSACT, TRXFL, IMS PAUTDTL1, DB2 AUTHFRDS) plus the export
+   file, statement and report outputs, and is the *primary key* of CARDDAT/CCXREF and half the PK of AUTHFRDS. Tokenising or
+   surrogate-keying the card is a schema decision that must be made before the domain model is fixed (Wave 1 of the hotspot plan).
+2. **CVV is persisted** (`CARD-CVV-CD` in CARDDAT and CVEXPORT, displayed by COCRDSLC/COCRDUPC). PCI-DSS Req. 3.2 prohibits
+   storing sensitive authentication data after authorisation — this field should be dropped, not migrated.
+3. **SSN and DOB are stored unmasked** in CUSTDAT and its export copy and are shown on COACTUP/COACTVW screens; the Java model
+   needs field-level encryption / masked display and audited access.
+4. **Plaintext credentials**: `SEC-USR-PWD` in USRSEC, in `DUSRSECJ` JCL, and echoed through the COUSR* screens. Replace with an
+   identity provider; never migrate the field.
+5. **Leakage paths to fix in code, not just storage**: PAN in `ERR-EVENT-KEY` error records, PAN/SSN/CVV in batch `DISPLAY`
+   output, PAN in the `DALYREJS` reject GDG, account balances/limits over MQ in clear text in `COACCT01`.
+6. `CDEMO-CARD-NUM 9(16)` / `CC-CARD-NUM-N` treat the PAN as numeric — a leading-zero or non-numeric token would break these;
+   another reason to introduce a surrogate card id early.
+
 ## Cross-entity keys
 
 | Key field | PIC / type | Appears in |
