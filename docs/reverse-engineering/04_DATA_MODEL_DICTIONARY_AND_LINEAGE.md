@@ -1,5 +1,7 @@
 # 04 — Data model, record dictionary and lineage
 
+[Artifact index and shared conventions](README.md)
+
 ## Purpose and evidence boundary
 
 **Question answered:** What data does the current CardDemo source store or exchange, how are its bytes and keys arranged, and which programs move or change it?

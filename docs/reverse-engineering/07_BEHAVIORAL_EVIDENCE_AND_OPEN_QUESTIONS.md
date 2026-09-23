@@ -1,4 +1,6 @@
-# Behavioral evidence and open questions
+# 07 — Behavioral examples, evidence and open questions
+
+[Artifact index and shared conventions](README.md)
 
 ## Purpose, scope and evidence status
 
@@ -25,7 +27,7 @@ Related documents, owned by other contributors:
 - [Input, output and interface contracts](05_INTERFACE_CONTRACTS.md)
 - [Runtime, state and failure semantics](06_RUNTIME_STATE_AND_FAILURE_SEMANTICS.md)
 
-Navigation: [coverage matrix](#evidence-and-coverage-matrix), [financial examples](#financial-examples), [maintenance](#online-maintenance-examples), [batch and interchange](#batch-report-and-interchange-examples), [optional modules](#optional-module-examples), [fixtures](#fixture-inventory-and-its-limits), [questions](#stable-questions-register), [future capture](#future-legacy-evidence-capture-procedure), [gaps](#explicit-gaps-and-parent-reconciliation).
+Navigation: [coverage matrix](#evidence-and-coverage-matrix), [financial examples](#financial-examples), [maintenance](#online-maintenance-examples), [batch and interchange](#batch-report-and-interchange-examples), [optional modules](#optional-module-examples), [fixtures](#fixture-inventory-and-its-limits), [questions](#stable-questions-register), [future capture](#future-legacy-evidence-capture-procedure), [gaps](#explicit-gaps-and-cross-document-boundaries).
 
 ## Evidence and coverage matrix
 
@@ -236,13 +238,13 @@ This is a procedure for an authorized legacy-environment owner. It was **not exe
 8. **Keep raw and normalized evidence side by side.** Raw bytes and hashes are immutable. Allowed normalization must be case-specific and logged: for example, map a recorded JES job ID to a token, or mask a documented display-clock field while retaining its raw bytes. Preserve widths, signs, amounts, keys, record order, duplicate rows, reject precedence, return codes, MQMD semantics and trailing spaces in the raw oracle. Do not normalize away suspected bugs, differing business dates, encoding changes or extra EOF totals. Sorting outputs is permitted only if the verified contract says order is irrelevant.
 9. **Publish a restricted evidence manifest.** One entry per scenario records its ID, starting snapshot hashes, inputs, date sources, exact commands/jobs/transactions, expected derivation, observed raw artifacts/hashes, typed changes, statuses, normalization recipe and unresolved question IDs. Promote I to R only for observed fields and explicitly record source/runtime disagreements. Obtain domain-owner decisions for corrections separately from parity evidence.
 
-## Explicit gaps and parent reconciliation
+## Explicit gaps and cross-document boundaries
 
 - **No runtime evidence:** CICS region/terminal/maps, JES/SORT/IDCAMS/SDSF, VSAM/AIX datasets, COBOL/LE and date services, DB2 catalogs/packages/binds, IMS segments/PSBs, MQ queues and CA7/Control-M installation were not available as verified execution evidence. This analysis did not install or request any of them. README prerequisites and sample JCL are source artifacts only. [Prerequisites][readme-prereqs], [build][build-sample], [IMS runtime references][ims-runtime].
 - **Source families inspected:** core `cbl/cpy`, representative `bms/cpy-bms`, `jcl/proc`, `csd`, `scheduler`, `catlg`, `asm/maclib`, `data`, `samples`, `scripts`, and the three named optional module trees. COBOL paragraphs and selected physical/interface artifacts were traced; this is not every-program or every-screen branch coverage. BMS and generated map copybooks show field contracts, not a captured terminal rendering. The wait assembler/macro and date-layout helper show external execution dependencies, not tested timing/date equivalence. [Representative map][bms], [map copybook][bms-copy], [wait][asm-wait], [date layout][asm-date-layout].
 - **Physical evidence limitations:** checked-in catalog metadata and JCL definitions do not establish today's allocation, dataset contents, secondary indexes, recovery behavior or copybook compatibility. No binary fixture decode was used as a behavior oracle. [Catalog][catalog], [CSD][csd], [export JCL][export-jcl].
 - **Not exhausted:** account/card field validators, paging/navigation, all DB2 list/filter paths, IMS authorization-list/detail UI, every MQ error branch, statement in-memory limits, all load/refresh/backup jobs, concurrency scheduling, numeric extremes and every missing-resource combination. These require additional scenario rows/evidence, not assumptions of success.
-- **Reconcile across siblings:** documents 02/03 should explicitly compare I2, B3 and D2 against any simplified “flush at EOF,” “stop on screen error,” or “abend on SQL error” descriptions. Documents 04/05 should reconcile export sizes/key offsets, fixture lengths, date/ID formats and optional MQ differences. Document 06 should own installed recovery/restart conclusions and distinguish NO-SYNCPOINT authorization from syncpoint inquiry. All should preserve current-source quirks until an owner makes a separate correction decision.
+- **Cross-document boundaries:** [the consolidated index](README.md#reconciled-behavior-that-must-stay-consistent) connects I2, B3 and D2 with the flow/rule/runtime analysis of final-group handling, payment continuation and DB2 error continuation. Documents 04/05 own export sizes/key offsets, fixture representation and MQ contracts; document 06 owns recovery/restart analysis. These synthetic examples retain source quirks; decisions to correct them need a separate record.
 - **Acceptance boundary:** this document provides source-confirmed predicates and writes, synthetic derived scenarios, static fixture observations, open decisions and a future capture method. It does not certify financial correctness, operational safety, runtime availability or modernization parity.
 
 ## Pinned source references

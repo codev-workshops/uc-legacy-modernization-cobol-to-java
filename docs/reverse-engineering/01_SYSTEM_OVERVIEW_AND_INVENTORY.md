@@ -1,4 +1,6 @@
-# System overview and component inventory
+# 01 — System overview and component inventory
+
+[Artifact index and shared conventions](README.md)
 
 ## Purpose, evidence and navigation
 

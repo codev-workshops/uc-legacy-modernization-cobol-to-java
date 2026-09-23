@@ -1,4 +1,6 @@
-# Business rules catalog
+# 03 — Business rules catalog
+
+[Artifact index and shared conventions](README.md)
 
 ## Purpose, revision, and evidence
 

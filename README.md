@@ -8,6 +8,7 @@ CardDemo is a comprehensive mainframe application that simulates a credit card m
 
 ## Table of Contents
 - [Description](#description)
+- [Reverse-engineering artifacts](docs/reverse-engineering/README.md)
 - [Technologies](#technologies)
 - [Optional Features](#optional-features)
 - [Installation](#installation)

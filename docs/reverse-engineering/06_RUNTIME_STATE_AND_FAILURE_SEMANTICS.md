@@ -1,4 +1,6 @@
-# Runtime, state and failure semantics
+# 06 — Runtime, state and failure semantics
+
+[Artifact index and shared conventions](README.md)
 
 ## Purpose and evidence boundary
 
@@ -209,6 +211,8 @@ flowchart TD
 
 **Source-confirmed:** `CBACT04C` groups category-balance input by account, accumulates interest, writes system transaction records during calculation and rewrites account balances in `1050-UPDATE-ACCOUNT`, also resetting both cycle totals to zero. It uses file-status checks rather than a visible multi-file commit protocol. [Loop][interest-loop]; [account rewrite][interest-account]; [transaction output][interest-write]. **Inferred:** generated transaction output and master balances can diverge after interruption; regenerating output does not by itself restore account values, and repeating calculation can add interest again.
 
+**Control-flow inference:** that account rewrite occurs when a new account group is encountered. The apparent final rewrite is in the outer ELSE of a test-before loop; the normal EOF read causes the next loop test to exit before that ELSE can run. Consequently the last account can have generated interest transactions without its balance/cycle update even when no I/O failure occurs. See [BR-INTEREST-FINAL-GROUP](03_BUSINESS_RULES_CATALOG.md#3-interest-and-cycle-processing), scenario I2 and `Q-INTEREST-EOF`. [Loop][interest-loop].
+
 **Source-confirmed:** `CBIMPORT.1100-OPEN-FILES` opens an export input and customer/account/cross-reference/transaction/card/error outputs. It abends on checked open errors and entity-output write failures; `4000-FINALIZE` closes the files. `9999-ABEND-PROGRAM` calls `CEE3ABD`. In contrast, `2750-WRITE-ERROR` merely displays an error-output failure and still increments its written counter; `3000-VALIDATE-IMPORT` unconditionally displays “No validation errors detected.” These messages/counters therefore are not independent verification of successful import. [Open sequence][import-open]; [dispatch and writes][import-write]; [error sink and validation][import-error]; [finalization][import-end]. **Inferred:** an interrupted import can leave differing output prefixes; the cited flow has no persisted restart position or cross-output rollback. Actual dataset retention depends on its job allocation and termination outcome.
 
 ## 8. Optional subsystem errors and recovery
@@ -323,7 +327,7 @@ All **handling** and **prior writes** below are source-confirmed for the cited p
 | Multi-output import | Open/entity-output write/interrupt | Earlier outputs or earlier type-specific rows | Checked open/entity-write failures call `CEE3ABD`; error-output failure only displays and continues | Different output prefixes; error count can overstate successful error writes | [Open][import-open], [writes][import-write], [error sink][import-error], [finalization][import-end]; no saved restart key |
 | Db2 online update/delete | SQL error, including `-911` / `-532` | Earlier independently syncpointed operations may exist | Lock/failure flags and SQL diagnostics | Current SQL outcome depends on SQLCODE and attachment; no universal retry | [Db2 handlers][db2-update], [delete][db2-insert-delete] |
 | Db2 batch maintenance | Negative SQLCODE | Earlier SQL operations | Named abend paragraph sets RC 4 and `EXIT`s | Further input can be processed; overall commit outcome unknown | [Loop][db2-batch-loop], [SQL/tail][db2-batch-sql]; no explicit commit/rollback in program |
-| Fraud tagging | Linked program result or IMS `REPL` failure | Linked Db2 operation may have run | Caller requests rollback | Coordinated Db2/IMS backout depends on installed attachments | [Link][fraud-link], [rollback][fraud-update], [CSD][auth-csd] |
+| Fraud tagging | Linked program result or IMS `REPL` failure | Linked Db2 operation may have run | Caller requests rollback | Coordinated Db2/IMS backout depends on installed attachments | [Fraud program call][fraud-link], [rollback][fraud-update], [CSD][auth-csd] |
 | Authorization MQ | Reply failure or later IMS failure | Request consumed; reply may already have been emitted; summary may have changed | Critical log to `CSSL`, cleanup, CICS `RETURN` | Lost work/reply disagreement or summary/detail mismatch possible | [Order][auth-order], [NO-SYNCPOINT get][auth-get], [reply][auth-reply], [termination][auth-log] |
 | VSAM/MQ account service | Get/read/put failure | Request may be under syncpoint; reply/error put may have occurred | Error queue/display and termination | Cannot infer automatic redelivery from error logging alone | [Get][mq-get], [reply/error/return][mq-put]; resource coordination unknown |
 | IMS purge | Delete/checkpoint failure | Earlier deletes and checkpoints | Diagnostic output; RC 16 and `GOBACK` | Prior checkpointed work may remain; restart position unproven | [Purge loop][purge-loop], [checkpoint][purge-checkpoint], [BMP allocations][purge-jcl] |
