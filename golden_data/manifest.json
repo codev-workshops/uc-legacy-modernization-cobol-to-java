@@ -1,0 +1,1723 @@
+{
+  "schemaVersion": 1,
+  "generator": "golden_data/tools/generate_golden.py",
+  "conventions": {
+    "fileShape": "JSON array, one object per record, keys in copybook order",
+    "alphanumeric": "PIC X decoded verbatim, never trimmed (dates/timestamps stay raw strings)",
+    "numeric": "canonical decimal string: optional '-', no leading zeros, exactly <scale> fraction digits",
+    "groups": "non-OCCURS groups are flattened to their elementary fields",
+    "occurs": "array with one element (value or object) per occurrence",
+    "redefines": "discriminated REDEFINES decoded as a nested object named after the selected branch; non-discriminated alternate views (e.g. EXPORT-TIMESTAMP-R) are omitted, primary kept",
+    "filler": "FILLER kept verbatim under key FILLER so re-encoding is byte-exact",
+    "undecodable": "{\"$type\": ZONED|PACKED|BINARY|ALPHANUMERIC|..._NEGATIVE_ZERO|UNKNOWN_BRANCH, \"hex\": source bytes}",
+    "asciiZonedSign": "trailing overpunch: '{' A-I = +0..+9, '}' J-R = -0..-9",
+    "ebcdicZonedSign": "zone nibble of last byte: C=+, D=-, F=unsigned",
+    "shortRecords": "ASCII lines shorter than LRECL are right-padded with spaces (trailing blanks were trimmed in the seed)"
+  },
+  "datasets": {
+    "acctdata": {
+      "goldenFile": "golden_data/acctdata.json",
+      "sourceFile": "app/data/ASCII/acctdata.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "c2a97b6a32dc4a87a7aafdf7f72e6712e560412d30b00c5526cca80fc9dfd260",
+      "sourceBytes": 15050,
+      "lineTerminators": {
+        "LF": 50
+      },
+      "copybook": "app/cpy/CVACT01Y.cpy",
+      "recordName": "ACCOUNT-RECORD",
+      "recordLength": 300,
+      "recordCount": 50,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "ACCT-ID"
+      ],
+      "keyMin": "00000000001",
+      "keyMax": "00000000050",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {
+        "ACCT-CURR-BAL": "12269.00",
+        "ACCT-CREDIT-LIMIT": "233711.00",
+        "ACCT-CASH-CREDIT-LIMIT": "122148.00",
+        "ACCT-CURR-CYC-CREDIT": "0.00",
+        "ACCT-CURR-CYC-DEBIT": "0.00"
+      },
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.ACCTDATA.PS",
+        "sha256": "23167cdff65ca6dfa2e5bccee89112e3e83a80247a38e251f3981377ab098ec9",
+        "recordCount": 50,
+        "trailingBytes": 0,
+        "divergentRecords": [
+          {
+            "recordIndex": 48,
+            "key": "49",
+            "fields": [
+              "ACCT-ADDR-ZIP"
+            ],
+            "ascii": {
+              "ACCT-ADDR-ZIP": "A000000000"
+            },
+            "ebcdic": {
+              "ACCT-ADDR-ZIP": "ZEROAPR   "
+            }
+          }
+        ]
+      },
+      "layout": [
+        {
+          "name": "ACCT-ID",
+          "level": 5,
+          "offset": 1,
+          "length": 11,
+          "pic": "9(11)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-ACTIVE-STATUS",
+          "level": 5,
+          "offset": 12,
+          "length": 1,
+          "pic": "X(01)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-CURR-BAL",
+          "level": 5,
+          "offset": 13,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-CREDIT-LIMIT",
+          "level": 5,
+          "offset": 25,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-CASH-CREDIT-LIMIT",
+          "level": 5,
+          "offset": 37,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-OPEN-DATE",
+          "level": 5,
+          "offset": 49,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-EXPIRAION-DATE",
+          "level": 5,
+          "offset": 59,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-REISSUE-DATE",
+          "level": 5,
+          "offset": 69,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-CURR-CYC-CREDIT",
+          "level": 5,
+          "offset": 79,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-CURR-CYC-DEBIT",
+          "level": 5,
+          "offset": 91,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-ADDR-ZIP",
+          "level": 5,
+          "offset": 103,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "ACCT-GROUP-ID",
+          "level": 5,
+          "offset": 113,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 123,
+          "length": 178,
+          "pic": "X(178)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "08d6b0d56ad8ae66c0528f5949e89c91dc59fbc0911f8d88bae68def2635e1fa"
+    },
+    "carddata": {
+      "goldenFile": "golden_data/carddata.json",
+      "sourceFile": "app/data/ASCII/carddata.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "da217240d2567c85f84b571aeb465171c683cfd21dad1754046f6bbb10e76c1d",
+      "sourceBytes": 7550,
+      "lineTerminators": {
+        "LF": 50
+      },
+      "copybook": "app/cpy/CVACT02Y.cpy",
+      "recordName": "CARD-RECORD",
+      "recordLength": 150,
+      "recordCount": 50,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "CARD-NUM"
+      ],
+      "keyMin": "0500024453765740",
+      "keyMax": "9805583408996588",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {},
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.CARDDATA.PS",
+        "sha256": "b5d968b6865bd48fb45928ef6cacce9b6aacdaec7b51cfcc9819b9fafcaed3e5",
+        "recordCount": 50,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "CARD-NUM",
+          "level": 5,
+          "offset": 1,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CARD-ACCT-ID",
+          "level": 5,
+          "offset": 17,
+          "length": 11,
+          "pic": "9(11)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CARD-CVV-CD",
+          "level": 5,
+          "offset": 28,
+          "length": 3,
+          "pic": "9(03)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CARD-EMBOSSED-NAME",
+          "level": 5,
+          "offset": 31,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CARD-EXPIRAION-DATE",
+          "level": 5,
+          "offset": 81,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CARD-ACTIVE-STATUS",
+          "level": 5,
+          "offset": 91,
+          "length": 1,
+          "pic": "X(01)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 92,
+          "length": 59,
+          "pic": "X(59)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "db8a2b7cdc7236f74d532bc9e5929ae0e7dec05d2897be6d065616446ea38ea1"
+    },
+    "cardxref": {
+      "goldenFile": "golden_data/cardxref.json",
+      "sourceFile": "app/data/ASCII/cardxref.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "efec3825ec0d5b791cf54f815bf688abfcc9db832c1600371ed2209df4e97764",
+      "sourceBytes": 1850,
+      "lineTerminators": {
+        "LF": 50
+      },
+      "copybook": "app/cpy/CVACT03Y.cpy",
+      "recordName": "CARD-XREF-RECORD",
+      "recordLength": 50,
+      "recordCount": 50,
+      "paddedRecordCount": 50,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "XREF-CARD-NUM"
+      ],
+      "keyMin": "0500024453765740",
+      "keyMax": "9805583408996588",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {},
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.CARDXREF.PS",
+        "sha256": "b07ab2e5fa2500501c1dcaffe478ee74c4562a290174020a093dfa6f0e6325d3",
+        "recordCount": 50,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "XREF-CARD-NUM",
+          "level": 5,
+          "offset": 1,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "XREF-CUST-ID",
+          "level": 5,
+          "offset": 17,
+          "length": 9,
+          "pic": "9(09)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "XREF-ACCT-ID",
+          "level": 5,
+          "offset": 26,
+          "length": 11,
+          "pic": "9(11)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 37,
+          "length": 14,
+          "pic": "X(14)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "014dfd9a55c10688163531c1906e4ac207e276bdb9805ec89c6f00d41d3fb3ad"
+    },
+    "custdata": {
+      "goldenFile": "golden_data/custdata.json",
+      "sourceFile": "app/data/ASCII/custdata.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "d8cfa5b77fa61614329e73ebde9052367ea31cc1b08f9056fa869f949fef9991",
+      "sourceBytes": 25050,
+      "lineTerminators": {
+        "LF": 50
+      },
+      "copybook": "app/cpy/CVCUS01Y.cpy",
+      "recordName": "CUSTOMER-RECORD",
+      "recordLength": 500,
+      "recordCount": 50,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "CUST-ID"
+      ],
+      "keyMin": "000000001",
+      "keyMax": "000000050",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {},
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.CUSTDATA.PS",
+        "sha256": "0435915cd35ea3077bad9d391fea1520bc7f30ec06d6e29fbe68290f3d6f27f3",
+        "recordCount": 50,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "CUST-ID",
+          "level": 5,
+          "offset": 1,
+          "length": 9,
+          "pic": "9(09)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-FIRST-NAME",
+          "level": 5,
+          "offset": 10,
+          "length": 25,
+          "pic": "X(25)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-MIDDLE-NAME",
+          "level": 5,
+          "offset": 35,
+          "length": 25,
+          "pic": "X(25)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-LAST-NAME",
+          "level": 5,
+          "offset": 60,
+          "length": 25,
+          "pic": "X(25)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-ADDR-LINE-1",
+          "level": 5,
+          "offset": 85,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-ADDR-LINE-2",
+          "level": 5,
+          "offset": 135,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-ADDR-LINE-3",
+          "level": 5,
+          "offset": 185,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-ADDR-STATE-CD",
+          "level": 5,
+          "offset": 235,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-ADDR-COUNTRY-CD",
+          "level": 5,
+          "offset": 237,
+          "length": 3,
+          "pic": "X(03)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-ADDR-ZIP",
+          "level": 5,
+          "offset": 240,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-PHONE-NUM-1",
+          "level": 5,
+          "offset": 250,
+          "length": 15,
+          "pic": "X(15)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-PHONE-NUM-2",
+          "level": 5,
+          "offset": 265,
+          "length": 15,
+          "pic": "X(15)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-SSN",
+          "level": 5,
+          "offset": 280,
+          "length": 9,
+          "pic": "9(09)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-GOVT-ISSUED-ID",
+          "level": 5,
+          "offset": 289,
+          "length": 20,
+          "pic": "X(20)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-DOB-YYYY-MM-DD",
+          "level": 5,
+          "offset": 309,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-EFT-ACCOUNT-ID",
+          "level": 5,
+          "offset": 319,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-PRI-CARD-HOLDER-IND",
+          "level": 5,
+          "offset": 329,
+          "length": 1,
+          "pic": "X(01)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "CUST-FICO-CREDIT-SCORE",
+          "level": 5,
+          "offset": 330,
+          "length": 3,
+          "pic": "9(03)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 333,
+          "length": 168,
+          "pic": "X(168)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "48f07de7226272d3a78ff0c262595e815eb3253e3cdf46de1caa3353c5e8224c"
+    },
+    "dailytran": {
+      "goldenFile": "golden_data/dailytran.json",
+      "sourceFile": "app/data/ASCII/dailytran.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "1605206de7009cba771a921bf13f4dfcd1673fc13f1b844150355e9a95fa8da3",
+      "sourceBytes": 105300,
+      "lineTerminators": {
+        "LF": 300
+      },
+      "copybook": "app/cpy/CVTRA06Y.cpy",
+      "recordName": "DALYTRAN-RECORD",
+      "recordLength": 350,
+      "recordCount": 300,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "DALYTRAN-ID"
+      ],
+      "keyMin": "0000000000683580",
+      "keyMax": "0000000996722787",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {
+        "DALYTRAN-AMT": "104801.54"
+      },
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.DALYTRAN.PS",
+        "sha256": "479b1f99cb7adcd9b79e94708f04c8bde0a010ba87f2ed69ba8af1effe57d076",
+        "recordCount": 300,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "DALYTRAN-ID",
+          "level": 5,
+          "offset": 1,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-TYPE-CD",
+          "level": 5,
+          "offset": 17,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-CAT-CD",
+          "level": 5,
+          "offset": 19,
+          "length": 4,
+          "pic": "9(04)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-SOURCE",
+          "level": 5,
+          "offset": 23,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-DESC",
+          "level": 5,
+          "offset": 33,
+          "length": 100,
+          "pic": "X(100)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-AMT",
+          "level": 5,
+          "offset": 133,
+          "length": 11,
+          "pic": "S9(09)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-MERCHANT-ID",
+          "level": 5,
+          "offset": 144,
+          "length": 9,
+          "pic": "9(09)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-MERCHANT-NAME",
+          "level": 5,
+          "offset": 153,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-MERCHANT-CITY",
+          "level": 5,
+          "offset": 203,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-MERCHANT-ZIP",
+          "level": 5,
+          "offset": 253,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-CARD-NUM",
+          "level": 5,
+          "offset": 263,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-ORIG-TS",
+          "level": 5,
+          "offset": 279,
+          "length": 26,
+          "pic": "X(26)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DALYTRAN-PROC-TS",
+          "level": 5,
+          "offset": 305,
+          "length": 26,
+          "pic": "X(26)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 331,
+          "length": 20,
+          "pic": "X(20)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "9d682c094d8714b5b513cb0cc1a265d3465f0db17687d6d37180032abdb68fb5"
+    },
+    "discgrp": {
+      "goldenFile": "golden_data/discgrp.json",
+      "sourceFile": "app/data/ASCII/discgrp.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "dfdd3832805e3a4bf1d811ea2340ee8f6bf8e9fdf8d040fbd50e3c7b45b0ce2b",
+      "sourceBytes": 2601,
+      "lineTerminators": {
+        "LF": 51
+      },
+      "copybook": "app/cpy/CVTRA02Y.cpy",
+      "recordName": "DIS-GROUP-RECORD",
+      "recordLength": 50,
+      "recordCount": 51,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "DIS-ACCT-GROUP-ID",
+        "DIS-TRAN-TYPE-CD",
+        "DIS-TRAN-CAT-CD"
+      ],
+      "keyMin": "A000000000010001",
+      "keyMax": "ZEROAPR   070001",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {
+        "DIS-INT-RATE": "375.00"
+      },
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.DISCGRP.PS",
+        "sha256": "722df78926c1ac01ed8e1138d2bba72593ac21046c994685c64fc7c87a5851d3",
+        "recordCount": 51,
+        "trailingBytes": 0,
+        "divergentRecords": [
+          {
+            "recordIndex": 33,
+            "key": "DEFAULT   |07|1",
+            "fields": [
+              "DIS-INT-RATE"
+            ],
+            "ascii": {
+              "DIS-INT-RATE": "0.00"
+            },
+            "ebcdic": {
+              "DIS-INT-RATE": "15.00"
+            }
+          }
+        ]
+      },
+      "layout": [
+        {
+          "name": "DIS-GROUP-KEY",
+          "level": 5,
+          "offset": 1,
+          "length": 16
+        },
+        {
+          "name": "DIS-ACCT-GROUP-ID",
+          "level": 10,
+          "offset": 1,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DIS-TRAN-TYPE-CD",
+          "level": 10,
+          "offset": 11,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DIS-TRAN-CAT-CD",
+          "level": 10,
+          "offset": 13,
+          "length": 4,
+          "pic": "9(04)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "DIS-INT-RATE",
+          "level": 5,
+          "offset": 17,
+          "length": 6,
+          "pic": "S9(04)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 23,
+          "length": 28,
+          "pic": "X(28)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "8dbe9dda10a308cbb14514b4298e63c3e7c08df43de49981efe5b71eaa46b9e5"
+    },
+    "tcatbal": {
+      "goldenFile": "golden_data/tcatbal.json",
+      "sourceFile": "app/data/ASCII/tcatbal.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "a33eda6c526646e738164fd036ffdf525780466ade7141039bf72d4e25237afd",
+      "sourceBytes": 2599,
+      "lineTerminators": {
+        "CRLF": 49,
+        "LF": 1
+      },
+      "copybook": "app/cpy/CVTRA01Y.cpy",
+      "recordName": "TRAN-CAT-BAL-RECORD",
+      "recordLength": 50,
+      "recordCount": 50,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "TRANCAT-ACCT-ID",
+        "TRANCAT-TYPE-CD",
+        "TRANCAT-CD"
+      ],
+      "keyMin": "00000000001010001",
+      "keyMax": "00000000050010001",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {
+        "TRAN-CAT-BAL": "0.00"
+      },
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.TCATBALF.PS",
+        "sha256": "725dbe47d34d67053090efde8819af686ce424ed9dc0c8fd3f33cd1bf786b68a",
+        "recordCount": 50,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "TRAN-CAT-KEY",
+          "level": 5,
+          "offset": 1,
+          "length": 17
+        },
+        {
+          "name": "TRANCAT-ACCT-ID",
+          "level": 10,
+          "offset": 1,
+          "length": 11,
+          "pic": "9(11)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "TRANCAT-TYPE-CD",
+          "level": 10,
+          "offset": 12,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "TRANCAT-CD",
+          "level": 10,
+          "offset": 14,
+          "length": 4,
+          "pic": "9(04)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "TRAN-CAT-BAL",
+          "level": 5,
+          "offset": 18,
+          "length": 11,
+          "pic": "S9(09)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 29,
+          "length": 22,
+          "pic": "X(22)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "bf0a3ce05c14a68b31d2f143361c75d70da0e0579f723a7af15025689b4e9bfb"
+    },
+    "trancatg": {
+      "goldenFile": "golden_data/trancatg.json",
+      "sourceFile": "app/data/ASCII/trancatg.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "314ee34680b039e4712ae4ad45de09d351e8279ed7a491237daaa844075492fe",
+      "sourceBytes": 1116,
+      "lineTerminators": {
+        "CRLF": 18
+      },
+      "copybook": "app/cpy/CVTRA04Y.cpy",
+      "recordName": "TRAN-CAT-RECORD",
+      "recordLength": 60,
+      "recordCount": 18,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "TRAN-TYPE-CD",
+        "TRAN-CAT-CD"
+      ],
+      "keyMin": "010001",
+      "keyMax": "070001",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {},
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.TRANCATG.PS",
+        "sha256": "3c171c53c0b90ec7b0c267305cf5ba051825dfff78021425c601141f2f3c99e2",
+        "recordCount": 18,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "TRAN-CAT-KEY",
+          "level": 5,
+          "offset": 1,
+          "length": 6
+        },
+        {
+          "name": "TRAN-TYPE-CD",
+          "level": 10,
+          "offset": 1,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "TRAN-CAT-CD",
+          "level": 10,
+          "offset": 3,
+          "length": 4,
+          "pic": "9(04)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "TRAN-CAT-TYPE-DESC",
+          "level": 5,
+          "offset": 7,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 57,
+          "length": 4,
+          "pic": "X(04)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "bd7c3e959fe78056d2369344d5f4170875e6e5600d71637434c451b430d1cdaf"
+    },
+    "trantype": {
+      "goldenFile": "golden_data/trantype.json",
+      "sourceFile": "app/data/ASCII/trantype.txt",
+      "sourceEncoding": "ASCII",
+      "sourceSha256": "a7e07744af401faf17868861601829f46b2430a06a8b1984a7858025e125fb68",
+      "sourceBytes": 433,
+      "lineTerminators": {
+        "CRLF": 6,
+        "LF": 1
+      },
+      "copybook": "app/cpy/CVTRA03Y.cpy",
+      "recordName": "TRAN-TYPE-RECORD",
+      "recordLength": 60,
+      "recordCount": 7,
+      "paddedRecordCount": 0,
+      "undecodableFieldCount": 0,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "TRAN-TYPE"
+      ],
+      "keyMin": "01",
+      "keyMax": "07",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sortedAscendingAsciiCollation": true,
+      "sortedAscendingEbcdicCollation": true,
+      "controlTotals": {},
+      "ebcdicCounterpart": {
+        "file": "app/data/EBCDIC/AWS.M2.CARDDEMO.TRANTYPE.PS",
+        "sha256": "97735eb6979387143a98947a0681aed745a63c6a1f7dfbea1667dd4a6d567cf2",
+        "recordCount": 7,
+        "trailingBytes": 0,
+        "divergentRecords": []
+      },
+      "layout": [
+        {
+          "name": "TRAN-TYPE",
+          "level": 5,
+          "offset": 1,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "TRAN-TYPE-DESC",
+          "level": 5,
+          "offset": 3,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 5,
+          "offset": 53,
+          "length": 8,
+          "pic": "X(08)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "6b623a52d287b5ef7a4369603fe2ed6a68e8f662ab26fe7d48c8ce0888860fd5"
+    },
+    "export": {
+      "goldenFile": "golden_data/export.json",
+      "sourceFile": "app/data/EBCDIC/AWS.M2.CARDDEMO.EXPORT.DATA.PS",
+      "sourceEncoding": "EBCDIC-CP037",
+      "sourceSha256": "e1d6cfbe62a77b5c7e3bd78d920813a76ca7bf18280a17f988221ddeda19b3ba",
+      "sourceBytes": 250000,
+      "copybook": "app/cpy/CVEXPORT.cpy",
+      "recordName": "EXPORT-RECORD",
+      "recordLength": 500,
+      "recordCount": 500,
+      "recordCountByType": {
+        "A": 50,
+        "C": 50,
+        "D": 50,
+        "T": 300,
+        "X": 50
+      },
+      "discriminator": {
+        "field": "EXPORT-REC-TYPE",
+        "branches": {
+          "C": "EXPORT-CUSTOMER-DATA",
+          "A": "EXPORT-ACCOUNT-DATA",
+          "X": "EXPORT-CARD-XREF-DATA",
+          "T": "EXPORT-TRANSACTION-DATA",
+          "D": "EXPORT-CARD-DATA"
+        },
+        "source": "app/cbl/CBEXPORT.cbl (MOVE 'x' TO EXPORT-REC-TYPE), app/cbl/CBIMPORT.cbl EVALUATE"
+      },
+      "undecodableFieldCount": 4,
+      "nonPreferredSignCount": 0,
+      "keyFields": [
+        "EXPORT-SEQUENCE-NUM"
+      ],
+      "keyMin": "1",
+      "keyMax": "509",
+      "keyUnique": true,
+      "duplicateKeyCount": 0,
+      "sequenceGaps": 9,
+      "controlTotals": {
+        "EXP-ACCT-CURR-BAL": "11583.00",
+        "EXP-ACCT-CREDIT-LIMIT": "233711.00",
+        "EXP-ACCT-CASH-CREDIT-LIMIT": "122148.00",
+        "EXP-ACCT-CURR-CYC-CREDIT": "0.00",
+        "EXP-ACCT-CURR-CYC-DEBIT": "0.00",
+        "EXP-TRAN-AMT": "104801.54"
+      },
+      "layout": [
+        {
+          "name": "EXPORT-REC-TYPE",
+          "level": 5,
+          "offset": 1,
+          "length": 1,
+          "pic": "X(1)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-TIMESTAMP",
+          "level": 5,
+          "offset": 2,
+          "length": 26,
+          "pic": "X(26)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-TIMESTAMP-R",
+          "level": 5,
+          "offset": 2,
+          "length": 26,
+          "redefines": "EXPORT-TIMESTAMP"
+        },
+        {
+          "name": "EXPORT-DATE",
+          "level": 10,
+          "offset": 2,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-DATE-TIME-SEP",
+          "level": 10,
+          "offset": 12,
+          "length": 1,
+          "pic": "X(1)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-TIME",
+          "level": 10,
+          "offset": 13,
+          "length": 15,
+          "pic": "X(15)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-SEQUENCE-NUM",
+          "level": 5,
+          "offset": 28,
+          "length": 4,
+          "pic": "9(9)",
+          "usage": "COMP"
+        },
+        {
+          "name": "EXPORT-BRANCH-ID",
+          "level": 5,
+          "offset": 32,
+          "length": 4,
+          "pic": "X(4)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-REGION-CODE",
+          "level": 5,
+          "offset": 36,
+          "length": 5,
+          "pic": "X(5)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-RECORD-DATA",
+          "level": 5,
+          "offset": 41,
+          "length": 460,
+          "pic": "X(460)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-CUSTOMER-DATA",
+          "level": 5,
+          "offset": 41,
+          "length": 460,
+          "redefines": "EXPORT-RECORD-DATA"
+        },
+        {
+          "name": "EXP-CUST-ID",
+          "level": 10,
+          "offset": 41,
+          "length": 4,
+          "pic": "9(09)",
+          "usage": "COMP"
+        },
+        {
+          "name": "EXP-CUST-FIRST-NAME",
+          "level": 10,
+          "offset": 45,
+          "length": 25,
+          "pic": "X(25)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-MIDDLE-NAME",
+          "level": 10,
+          "offset": 70,
+          "length": 25,
+          "pic": "X(25)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-LAST-NAME",
+          "level": 10,
+          "offset": 95,
+          "length": 25,
+          "pic": "X(25)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-ADDR-LINES",
+          "level": 10,
+          "offset": 120,
+          "length": 50,
+          "occurs": 3,
+          "occursLayout": [
+            {
+              "name": "EXP-CUST-ADDR-LINE",
+              "level": 15,
+              "offset": 120,
+              "length": 50,
+              "pic": "X(50)",
+              "usage": "DISPLAY"
+            }
+          ]
+        },
+        {
+          "name": "EXP-CUST-ADDR-STATE-CD",
+          "level": 10,
+          "offset": 270,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-ADDR-COUNTRY-CD",
+          "level": 10,
+          "offset": 272,
+          "length": 3,
+          "pic": "X(03)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-ADDR-ZIP",
+          "level": 10,
+          "offset": 275,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-PHONE-NUMS",
+          "level": 10,
+          "offset": 285,
+          "length": 15,
+          "occurs": 2,
+          "occursLayout": [
+            {
+              "name": "EXP-CUST-PHONE-NUM",
+              "level": 15,
+              "offset": 285,
+              "length": 15,
+              "pic": "X(15)",
+              "usage": "DISPLAY"
+            }
+          ]
+        },
+        {
+          "name": "EXP-CUST-SSN",
+          "level": 10,
+          "offset": 315,
+          "length": 9,
+          "pic": "9(09)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-GOVT-ISSUED-ID",
+          "level": 10,
+          "offset": 324,
+          "length": 20,
+          "pic": "X(20)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-DOB-YYYY-MM-DD",
+          "level": 10,
+          "offset": 344,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-EFT-ACCOUNT-ID",
+          "level": 10,
+          "offset": 354,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-PRI-CARD-HOLDER-IND",
+          "level": 10,
+          "offset": 364,
+          "length": 1,
+          "pic": "X(01)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CUST-FICO-CREDIT-SCORE",
+          "level": 10,
+          "offset": 365,
+          "length": 2,
+          "pic": "9(03)",
+          "usage": "COMP-3"
+        },
+        {
+          "name": "FILLER",
+          "level": 10,
+          "offset": 367,
+          "length": 134,
+          "pic": "X(134)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-ACCOUNT-DATA",
+          "level": 5,
+          "offset": 41,
+          "length": 460,
+          "redefines": "EXPORT-RECORD-DATA"
+        },
+        {
+          "name": "EXP-ACCT-ID",
+          "level": 10,
+          "offset": 41,
+          "length": 11,
+          "pic": "9(11)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-ACTIVE-STATUS",
+          "level": 10,
+          "offset": 52,
+          "length": 1,
+          "pic": "X(01)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-CURR-BAL",
+          "level": 10,
+          "offset": 53,
+          "length": 7,
+          "pic": "S9(10)V99",
+          "usage": "COMP-3"
+        },
+        {
+          "name": "EXP-ACCT-CREDIT-LIMIT",
+          "level": 10,
+          "offset": 60,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-CASH-CREDIT-LIMIT",
+          "level": 10,
+          "offset": 72,
+          "length": 7,
+          "pic": "S9(10)V99",
+          "usage": "COMP-3"
+        },
+        {
+          "name": "EXP-ACCT-OPEN-DATE",
+          "level": 10,
+          "offset": 79,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-EXPIRAION-DATE",
+          "level": 10,
+          "offset": 89,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-REISSUE-DATE",
+          "level": 10,
+          "offset": 99,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-CURR-CYC-CREDIT",
+          "level": 10,
+          "offset": 109,
+          "length": 12,
+          "pic": "S9(10)V99",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-CURR-CYC-DEBIT",
+          "level": 10,
+          "offset": 121,
+          "length": 8,
+          "pic": "S9(10)V99",
+          "usage": "COMP"
+        },
+        {
+          "name": "EXP-ACCT-ADDR-ZIP",
+          "level": 10,
+          "offset": 129,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-ACCT-GROUP-ID",
+          "level": 10,
+          "offset": 139,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 10,
+          "offset": 149,
+          "length": 352,
+          "pic": "X(352)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-TRANSACTION-DATA",
+          "level": 5,
+          "offset": 41,
+          "length": 460,
+          "redefines": "EXPORT-RECORD-DATA"
+        },
+        {
+          "name": "EXP-TRAN-ID",
+          "level": 10,
+          "offset": 41,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-TYPE-CD",
+          "level": 10,
+          "offset": 57,
+          "length": 2,
+          "pic": "X(02)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-CAT-CD",
+          "level": 10,
+          "offset": 59,
+          "length": 4,
+          "pic": "9(04)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-SOURCE",
+          "level": 10,
+          "offset": 63,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-DESC",
+          "level": 10,
+          "offset": 73,
+          "length": 100,
+          "pic": "X(100)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-AMT",
+          "level": 10,
+          "offset": 173,
+          "length": 6,
+          "pic": "S9(09)V99",
+          "usage": "COMP-3"
+        },
+        {
+          "name": "EXP-TRAN-MERCHANT-ID",
+          "level": 10,
+          "offset": 179,
+          "length": 4,
+          "pic": "9(09)",
+          "usage": "COMP"
+        },
+        {
+          "name": "EXP-TRAN-MERCHANT-NAME",
+          "level": 10,
+          "offset": 183,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-MERCHANT-CITY",
+          "level": 10,
+          "offset": 233,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-MERCHANT-ZIP",
+          "level": 10,
+          "offset": 283,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-CARD-NUM",
+          "level": 10,
+          "offset": 293,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-ORIG-TS",
+          "level": 10,
+          "offset": 309,
+          "length": 26,
+          "pic": "X(26)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-TRAN-PROC-TS",
+          "level": 10,
+          "offset": 335,
+          "length": 26,
+          "pic": "X(26)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 10,
+          "offset": 361,
+          "length": 140,
+          "pic": "X(140)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-CARD-XREF-DATA",
+          "level": 5,
+          "offset": 41,
+          "length": 460,
+          "redefines": "EXPORT-RECORD-DATA"
+        },
+        {
+          "name": "EXP-XREF-CARD-NUM",
+          "level": 10,
+          "offset": 41,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-XREF-CUST-ID",
+          "level": 10,
+          "offset": 57,
+          "length": 9,
+          "pic": "9(09)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-XREF-ACCT-ID",
+          "level": 10,
+          "offset": 66,
+          "length": 8,
+          "pic": "9(11)",
+          "usage": "COMP"
+        },
+        {
+          "name": "FILLER",
+          "level": 10,
+          "offset": 74,
+          "length": 427,
+          "pic": "X(427)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXPORT-CARD-DATA",
+          "level": 5,
+          "offset": 41,
+          "length": 460,
+          "redefines": "EXPORT-RECORD-DATA"
+        },
+        {
+          "name": "EXP-CARD-NUM",
+          "level": 10,
+          "offset": 41,
+          "length": 16,
+          "pic": "X(16)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CARD-ACCT-ID",
+          "level": 10,
+          "offset": 57,
+          "length": 8,
+          "pic": "9(11)",
+          "usage": "COMP"
+        },
+        {
+          "name": "EXP-CARD-CVV-CD",
+          "level": 10,
+          "offset": 65,
+          "length": 2,
+          "pic": "9(03)",
+          "usage": "COMP"
+        },
+        {
+          "name": "EXP-CARD-EMBOSSED-NAME",
+          "level": 10,
+          "offset": 67,
+          "length": 50,
+          "pic": "X(50)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CARD-EXPIRAION-DATE",
+          "level": 10,
+          "offset": 117,
+          "length": 10,
+          "pic": "X(10)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "EXP-CARD-ACTIVE-STATUS",
+          "level": 10,
+          "offset": 127,
+          "length": 1,
+          "pic": "X(01)",
+          "usage": "DISPLAY"
+        },
+        {
+          "name": "FILLER",
+          "level": 10,
+          "offset": 128,
+          "length": 373,
+          "pic": "X(373)",
+          "usage": "DISPLAY"
+        }
+      ],
+      "goldenSha256": "f573ca9368e1a1f8c2c6c212544c9d5d7cf0fbe5fac06106b89125e927d90494"
+    }
+  },
+  "referentialIntegrity": [
+    {
+      "check": "cardxref.XREF-ACCT-ID -> acctdata.ACCT-ID",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "cardxref.XREF-CUST-ID -> custdata.CUST-ID",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "cardxref.XREF-CARD-NUM -> carddata.CARD-NUM",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "carddata.CARD-NUM -> cardxref.XREF-CARD-NUM",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "carddata.CARD-ACCT-ID -> acctdata.ACCT-ID",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "dailytran.DALYTRAN-CARD-NUM -> cardxref.XREF-CARD-NUM",
+      "childRecords": 300,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "dailytran.DALYTRAN-TYPE-CD -> trantype.TRAN-TYPE",
+      "childRecords": 300,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "dailytran.(TYPE-CD,CAT-CD) -> trancatg",
+      "childRecords": 300,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "trancatg.TRAN-TYPE-CD -> trantype.TRAN-TYPE",
+      "childRecords": 18,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "tcatbal.TRANCAT-ACCT-ID -> acctdata.ACCT-ID",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "tcatbal.(TYPE-CD,CD) -> trancatg",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "discgrp.(TYPE-CD,CAT-CD) -> trancatg",
+      "childRecords": 51,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "acctdata.ACCT-GROUP-ID -> discgrp.DIS-ACCT-GROUP-ID",
+      "childRecords": 50,
+      "orphanRecords": 50,
+      "distinctOrphanKeys": [
+        "          "
+      ]
+    },
+    {
+      "check": "acctdata.ACCT-ADDR-ZIP -> discgrp.DIS-ACCT-GROUP-ID (seed-data quirk probe)",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "acctdata.ACCT-ID -> cardxref.XREF-ACCT-ID",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    },
+    {
+      "check": "custdata.CUST-ID -> cardxref.XREF-CUST-ID",
+      "childRecords": 50,
+      "orphanRecords": 0,
+      "distinctOrphanKeys": []
+    }
+  ]
+}

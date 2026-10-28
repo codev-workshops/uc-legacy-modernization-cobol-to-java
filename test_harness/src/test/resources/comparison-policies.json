@@ -1,0 +1,13 @@
+{
+  "CBTRN02C-posted-transactions": [
+    "TRAN-PROC-TS"
+  ],
+  "CBACT04C-interest-transactions": [
+    "TRAN-ID",
+    "TRAN-ORIG-TS",
+    "TRAN-PROC-TS"
+  ],
+  "CBEXPORT-export": [
+    "EXPORT-TIMESTAMP"
+  ]
+}
