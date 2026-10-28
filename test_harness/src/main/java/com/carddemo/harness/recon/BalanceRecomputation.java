@@ -55,7 +55,7 @@ public final class BalanceRecomputation {
 
   private void compare(List<BalanceDifference> result, String account, String field,
       BigDecimal expected, BigDecimal actual) {
-    if (expected.compareTo(actual) != 0) {
+    if (!expected.equals(actual)) {
       result.add(new BalanceDifference(account, field, expected.toPlainString(), actual.toPlainString()));
     }
   }

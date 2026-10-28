@@ -45,3 +45,13 @@ python3 golden_data/tools/generate_golden.py --check
 The Java harness only reads these artifacts. A mismatch is reported as a decoder or
 reference-data disagreement; neither the golden data nor its generator should be edited to
 make the Java implementation pass.
+
+## Rule inventory
+
+`traceability/rule_inventory.csv` is the rule-to-test traceability matrix extracted from
+every program in `app/cbl` (see `../test_strategy.md` §2):
+
+```bash
+python3 test_harness/scripts/extract_rules.py           # regenerate
+python3 test_harness/scripts/extract_rules.py --check   # fail if stale
+```
