@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "customer (CVCUS01Y.cpy)",
+  "type": "object",
+  "properties": {
+    "CUST-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 0
+    },
+    "CUST-FIRST-NAME": {
+      "type": "string",
+      "maxLength": 25,
+      "x-cobol-pic": "X(25)",
+      "x-cobol-offset": 9
+    },
+    "CUST-MIDDLE-NAME": {
+      "type": "string",
+      "maxLength": 25,
+      "x-cobol-pic": "X(25)",
+      "x-cobol-offset": 34
+    },
+    "CUST-LAST-NAME": {
+      "type": "string",
+      "maxLength": 25,
+      "x-cobol-pic": "X(25)",
+      "x-cobol-offset": 59
+    },
+    "CUST-ADDR-LINE-1": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 84
+    },
+    "CUST-ADDR-LINE-2": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 134
+    },
+    "CUST-ADDR-LINE-3": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 184
+    },
+    "CUST-ADDR-STATE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 234
+    },
+    "CUST-ADDR-COUNTRY-CD": {
+      "type": "string",
+      "maxLength": 3,
+      "x-cobol-pic": "X(03)",
+      "x-cobol-offset": 236
+    },
+    "CUST-ADDR-ZIP": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 239
+    },
+    "CUST-PHONE-NUM-1": {
+      "type": "string",
+      "maxLength": 15,
+      "x-cobol-pic": "X(15)",
+      "x-cobol-offset": 249
+    },
+    "CUST-PHONE-NUM-2": {
+      "type": "string",
+      "maxLength": 15,
+      "x-cobol-pic": "X(15)",
+      "x-cobol-offset": 264
+    },
+    "CUST-SSN": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 279
+    },
+    "CUST-GOVT-ISSUED-ID": {
+      "type": "string",
+      "maxLength": 20,
+      "x-cobol-pic": "X(20)",
+      "x-cobol-offset": 288
+    },
+    "CUST-DOB-YYYY-MM-DD": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 308
+    },
+    "CUST-EFT-ACCOUNT-ID": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 318
+    },
+    "CUST-PRI-CARD-HOLDER-IND": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(01)",
+      "x-cobol-offset": 328
+    },
+    "CUST-FICO-CREDIT-SCORE": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999,
+      "x-cobol-pic": "9(03)",
+      "x-cobol-offset": 329
+    }
+  },
+  "required": [
+    "CUST-ADDR-COUNTRY-CD",
+    "CUST-ADDR-LINE-1",
+    "CUST-ADDR-LINE-2",
+    "CUST-ADDR-LINE-3",
+    "CUST-ADDR-STATE-CD",
+    "CUST-ADDR-ZIP",
+    "CUST-DOB-YYYY-MM-DD",
+    "CUST-EFT-ACCOUNT-ID",
+    "CUST-FICO-CREDIT-SCORE",
+    "CUST-FIRST-NAME",
+    "CUST-GOVT-ISSUED-ID",
+    "CUST-ID",
+    "CUST-LAST-NAME",
+    "CUST-MIDDLE-NAME",
+    "CUST-PHONE-NUM-1",
+    "CUST-PHONE-NUM-2",
+    "CUST-PRI-CARD-HOLDER-IND",
+    "CUST-SSN"
+  ],
+  "additionalProperties": false
+}

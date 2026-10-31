@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "category_balance (CVTRA01Y.cpy)",
+  "type": "object",
+  "properties": {
+    "TRANCAT-ACCT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 99999999999,
+      "x-cobol-pic": "9(11)",
+      "x-cobol-offset": 0
+    },
+    "TRANCAT-TYPE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 11
+    },
+    "TRANCAT-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9999,
+      "x-cobol-pic": "9(04)",
+      "x-cobol-offset": 13
+    },
+    "TRAN-CAT-BAL": {
+      "type": "string",
+      "pattern": "^-?\\d{1,9}\\.\\d{2}$",
+      "x-cobol-pic": "S9(09)V99",
+      "x-cobol-offset": 17
+    }
+  },
+  "required": [
+    "TRAN-CAT-BAL",
+    "TRANCAT-ACCT-ID",
+    "TRANCAT-CD",
+    "TRANCAT-TYPE-CD"
+  ],
+  "additionalProperties": false
+}

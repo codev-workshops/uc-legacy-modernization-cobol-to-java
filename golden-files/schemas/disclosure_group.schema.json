@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "disclosure_group (CVTRA02Y.cpy)",
+  "type": "object",
+  "properties": {
+    "DIS-ACCT-GROUP-ID": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 0
+    },
+    "DIS-TRAN-TYPE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 10
+    },
+    "DIS-TRAN-CAT-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9999,
+      "x-cobol-pic": "9(04)",
+      "x-cobol-offset": 12
+    },
+    "DIS-INT-RATE": {
+      "type": "string",
+      "pattern": "^-?\\d{1,4}\\.\\d{2}$",
+      "x-cobol-pic": "S9(04)V99",
+      "x-cobol-offset": 16
+    }
+  },
+  "required": [
+    "DIS-ACCT-GROUP-ID",
+    "DIS-INT-RATE",
+    "DIS-TRAN-CAT-CD",
+    "DIS-TRAN-TYPE-CD"
+  ],
+  "additionalProperties": false
+}

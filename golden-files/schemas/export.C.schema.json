@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "export C (customer, CVEXPORT.cpy)",
+  "type": "object",
+  "properties": {
+    "EXPORT-REC-TYPE": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(1)",
+      "x-cobol-offset": 0
+    },
+    "EXPORT-TIMESTAMP": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 1
+    },
+    "EXPORT-SEQUENCE-NUM": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(9)",
+      "x-cobol-offset": 27
+    },
+    "EXPORT-BRANCH-ID": {
+      "type": "string",
+      "maxLength": 4,
+      "x-cobol-pic": "X(4)",
+      "x-cobol-offset": 31
+    },
+    "EXPORT-REGION-CODE": {
+      "type": "string",
+      "maxLength": 5,
+      "x-cobol-pic": "X(5)",
+      "x-cobol-offset": 35
+    },
+    "EXP-CUST-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 40
+    },
+    "EXP-CUST-FIRST-NAME": {
+      "type": "string",
+      "maxLength": 25,
+      "x-cobol-pic": "X(25)",
+      "x-cobol-offset": 44
+    },
+    "EXP-CUST-MIDDLE-NAME": {
+      "type": "string",
+      "maxLength": 25,
+      "x-cobol-pic": "X(25)",
+      "x-cobol-offset": 69
+    },
+    "EXP-CUST-LAST-NAME": {
+      "type": "string",
+      "maxLength": 25,
+      "x-cobol-pic": "X(25)",
+      "x-cobol-offset": 94
+    },
+    "EXP-CUST-ADDR-LINE(1)": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 119
+    },
+    "EXP-CUST-ADDR-LINE(2)": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 169
+    },
+    "EXP-CUST-ADDR-LINE(3)": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 219
+    },
+    "EXP-CUST-ADDR-STATE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 269
+    },
+    "EXP-CUST-ADDR-COUNTRY-CD": {
+      "type": "string",
+      "maxLength": 3,
+      "x-cobol-pic": "X(03)",
+      "x-cobol-offset": 271
+    },
+    "EXP-CUST-ADDR-ZIP": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 274
+    },
+    "EXP-CUST-PHONE-NUM(1)": {
+      "type": "string",
+      "maxLength": 15,
+      "x-cobol-pic": "X(15)",
+      "x-cobol-offset": 284
+    },
+    "EXP-CUST-PHONE-NUM(2)": {
+      "type": "string",
+      "maxLength": 15,
+      "x-cobol-pic": "X(15)",
+      "x-cobol-offset": 299
+    },
+    "EXP-CUST-SSN": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 314
+    },
+    "EXP-CUST-GOVT-ISSUED-ID": {
+      "type": "string",
+      "maxLength": 20,
+      "x-cobol-pic": "X(20)",
+      "x-cobol-offset": 323
+    },
+    "EXP-CUST-DOB-YYYY-MM-DD": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 343
+    },
+    "EXP-CUST-EFT-ACCOUNT-ID": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 353
+    },
+    "EXP-CUST-PRI-CARD-HOLDER-IND": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(01)",
+      "x-cobol-offset": 363
+    },
+    "EXP-CUST-FICO-CREDIT-SCORE": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999,
+      "x-cobol-pic": "9(03)",
+      "x-cobol-offset": 364
+    }
+  },
+  "required": [
+    "EXP-CUST-ADDR-COUNTRY-CD",
+    "EXP-CUST-ADDR-LINE(1)",
+    "EXP-CUST-ADDR-LINE(2)",
+    "EXP-CUST-ADDR-LINE(3)",
+    "EXP-CUST-ADDR-STATE-CD",
+    "EXP-CUST-ADDR-ZIP",
+    "EXP-CUST-DOB-YYYY-MM-DD",
+    "EXP-CUST-EFT-ACCOUNT-ID",
+    "EXP-CUST-FICO-CREDIT-SCORE",
+    "EXP-CUST-FIRST-NAME",
+    "EXP-CUST-GOVT-ISSUED-ID",
+    "EXP-CUST-ID",
+    "EXP-CUST-LAST-NAME",
+    "EXP-CUST-MIDDLE-NAME",
+    "EXP-CUST-PHONE-NUM(1)",
+    "EXP-CUST-PHONE-NUM(2)",
+    "EXP-CUST-PRI-CARD-HOLDER-IND",
+    "EXP-CUST-SSN",
+    "EXPORT-BRANCH-ID",
+    "EXPORT-REC-TYPE",
+    "EXPORT-REGION-CODE",
+    "EXPORT-SEQUENCE-NUM",
+    "EXPORT-TIMESTAMP"
+  ],
+  "additionalProperties": false
+}

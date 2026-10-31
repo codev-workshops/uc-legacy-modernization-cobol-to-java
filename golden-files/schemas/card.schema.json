@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "card (CVACT02Y.cpy)",
+  "type": "object",
+  "properties": {
+    "CARD-NUM": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 0
+    },
+    "CARD-ACCT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 99999999999,
+      "x-cobol-pic": "9(11)",
+      "x-cobol-offset": 16
+    },
+    "CARD-CVV-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999,
+      "x-cobol-pic": "9(03)",
+      "x-cobol-offset": 27
+    },
+    "CARD-EMBOSSED-NAME": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 30
+    },
+    "CARD-EXPIRAION-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 80
+    },
+    "CARD-ACTIVE-STATUS": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(01)",
+      "x-cobol-offset": 90
+    }
+  },
+  "required": [
+    "CARD-ACCT-ID",
+    "CARD-ACTIVE-STATUS",
+    "CARD-CVV-CD",
+    "CARD-EMBOSSED-NAME",
+    "CARD-EXPIRAION-DATE",
+    "CARD-NUM"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "account (CVACT01Y.cpy)",
+  "type": "object",
+  "properties": {
+    "ACCT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 99999999999,
+      "x-cobol-pic": "9(11)",
+      "x-cobol-offset": 0
+    },
+    "ACCT-ACTIVE-STATUS": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(01)",
+      "x-cobol-offset": 11
+    },
+    "ACCT-CURR-BAL": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 12
+    },
+    "ACCT-CREDIT-LIMIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 24
+    },
+    "ACCT-CASH-CREDIT-LIMIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 36
+    },
+    "ACCT-OPEN-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 48
+    },
+    "ACCT-EXPIRAION-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 58
+    },
+    "ACCT-REISSUE-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 68
+    },
+    "ACCT-CURR-CYC-CREDIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 78
+    },
+    "ACCT-CURR-CYC-DEBIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 90
+    },
+    "ACCT-ADDR-ZIP": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 102
+    },
+    "ACCT-GROUP-ID": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 112
+    }
+  },
+  "required": [
+    "ACCT-ACTIVE-STATUS",
+    "ACCT-ADDR-ZIP",
+    "ACCT-CASH-CREDIT-LIMIT",
+    "ACCT-CREDIT-LIMIT",
+    "ACCT-CURR-BAL",
+    "ACCT-CURR-CYC-CREDIT",
+    "ACCT-CURR-CYC-DEBIT",
+    "ACCT-EXPIRAION-DATE",
+    "ACCT-GROUP-ID",
+    "ACCT-ID",
+    "ACCT-OPEN-DATE",
+    "ACCT-REISSUE-DATE"
+  ],
+  "additionalProperties": false
+}

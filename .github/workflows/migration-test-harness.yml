@@ -1,0 +1,30 @@
+name: migration-test-harness
+
+on:
+  pull_request:
+    paths: ["test-harness/**", "golden-files/**", "app/data/ASCII/**", "app/data/EBCDIC/**", "app/cpy/**", ".github/workflows/migration-test-harness.yml"]
+  push:
+    branches: [main, develop-asiri]
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: test-harness
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: "pip install --only-binary :all: --require-hashes -r requirements-ci.lock"
+      - run: ruff check . && ruff format --check .
+      - run: ./run_tests.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: migration-test-harness-reports
+          path: test-harness/reports/
