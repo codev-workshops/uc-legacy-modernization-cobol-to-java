@@ -16,8 +16,17 @@ from .reconcile import summarize
 from .records import load_layout
 
 
+def _safe_path(path: str) -> Path:
+    """Resolve a CLI path, refusing anything outside the current working directory."""
+    base = Path.cwd().resolve()
+    resolved = (base / path).resolve()
+    if not resolved.is_relative_to(base):
+        raise SystemExit(f"error: {path} is outside the working directory {base}")
+    return resolved
+
+
 def _records(path: str) -> list[dict]:
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    data = json.loads(_safe_path(path).read_text(encoding="utf-8"))
     return data["records"] if isinstance(data, dict) and "records" in data else data
 
 
@@ -47,7 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{'PASS' if ch.passed else 'FAIL'}  {ch.check_id}  expected={ch.expected} actual={ch.actual}")
         print(f"{s['passed']}/{s['total']} checks passed")
         if a.report:
-            Path(a.report).write_text(
+            _safe_path(a.report).write_text(
                 json.dumps({"summary": s, "checks": [x.as_dict() for x in checks]}, indent=2, default=str) + "\n"
             )
         return 0 if not s["failed"] else 1

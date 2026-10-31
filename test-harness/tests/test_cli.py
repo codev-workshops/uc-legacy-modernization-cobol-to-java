@@ -1,7 +1,21 @@
 import json
 
+import pytest
+
 from carddemo_harness.__main__ import main
 from carddemo_harness.golden import load_golden
+
+
+@pytest.fixture(autouse=True)
+def _in_tmp(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+
+
+def test_paths_outside_working_directory_are_refused(tmp_path):
+    with pytest.raises(SystemExit, match="outside the working directory"):
+        main(["contract", "card", "../outside.json"])
+    with pytest.raises(SystemExit, match="outside the working directory"):
+        main(["reconcile", "--report", "/etc/report.json"])
 
 
 def test_reconcile_cli(tmp_path, capsys):

@@ -80,6 +80,19 @@ def _statements(text: str) -> list[str]:
     return [s.strip() for s in re.split(r"\.(?:\s|$)", joined) if s.strip()]
 
 
+_NAME = re.compile(r"[A-Z0-9][A-Z0-9-]*", re.I)
+
+
+def _value_clause(rest: str) -> str | None:
+    """Return the literal list of a VALUE/VALUES [IS|ARE] clause, whitespace-normalised."""
+    toks = rest.split()
+    for i, tok in enumerate(toks):
+        if tok.upper() in ("VALUE", "VALUES"):
+            j = i + 1 if i + 1 < len(toks) and toks[i + 1].upper() in ("IS", "ARE") else i
+            return " ".join(toks[j + 1 :]) or None
+    return None
+
+
 def parse_copybook(source: str | Path) -> Field:
     """Parse a copybook into a root group Field with computed offsets and lengths."""
     text = source.read_text(encoding="latin-1") if isinstance(source, Path) else source
@@ -87,16 +100,18 @@ def parse_copybook(source: str | Path) -> Field:
     stack = [root]
     last: Field | None = None
     for st in _statements(text):
-        m = re.match(r"^(\d{1,2})\s+([A-Z0-9][A-Z0-9-]*)?\s*(.*)$", st, re.I)
-        if not m:
+        parts = st.split(None, 2)
+        if not parts or not parts[0].isdigit() or len(parts[0]) > 2:
             continue
-        level, name, rest = int(m.group(1)), (m.group(2) or "FILLER").upper(), m.group(3)
-        if name in ("PIC", "PICTURE"):
-            name, rest = "FILLER", f"PIC {rest}"
+        level = int(parts[0])
+        if len(parts) > 1 and _NAME.fullmatch(parts[1]) and parts[1].upper() not in ("PIC", "PICTURE"):
+            name, rest = parts[1].upper(), parts[2] if len(parts) > 2 else ""
+        else:
+            name, rest = "FILLER", " ".join(parts[1:])
         if level == 88:
-            vm = re.search(r"VALUES?\s+(?:ARE\s+|IS\s+)?(.+)$", rest, re.I)
-            if last is not None and vm:
-                last.values[name] = re.sub(r"\s+", " ", vm.group(1)).strip()
+            value = _value_clause(rest)
+            if last is not None and value:
+                last.values[name] = value
             continue
         pic = re.search(r"\bPIC(?:TURE)?\s+(?:IS\s+)?(\S+)", rest, re.I)
         usage = _USAGE.search(rest.upper())

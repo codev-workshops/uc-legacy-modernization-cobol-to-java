@@ -81,3 +81,18 @@ def test_real_copybook_88_levels():
     root = parse_copybook(CPY_DIR / "COCOM01Y.cpy")
     names = {f.name: f for f in elementary_fields(root)}
     assert "CDEMO-USRTYP-ADMIN" in names["CDEMO-USER-TYPE"].values
+
+
+def test_value_clause_forms():
+    from carddemo_harness.copybook import _value_clause
+
+    assert _value_clause("VALUE 'Y'") == "'Y'"
+    assert _value_clause("VALUES ARE 'A'   'B'") == "'A' 'B'"
+    assert _value_clause("VALUE IS 0 THRU 9") == "0 THRU 9"
+    assert _value_clause("PIC X") is None
+
+
+def test_unnamed_and_filler_entries():
+    src = "".join(" " * 7 + ln + "\n" for ln in ["01 REC.", "   05 PIC X(3).", "   05 FILLER PIC 9(2).", "   05 NAME-A PIC X."])
+    root = parse_copybook(src)
+    assert [(c.name, c.length) for c in root.children[0].children] == [("FILLER", 3), ("FILLER", 2), ("NAME-A", 1)]

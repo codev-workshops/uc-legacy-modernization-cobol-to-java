@@ -30,4 +30,4 @@ python3 -m carddemo_harness contract account path/to/java-extract.json
 
 `compare` and `contract` accept either a JSON array of records or an object with a `records` array, using the field
 names from the copybook (for example `ACCT-CURR-BAL`). Decimals are strings (`"194.00"`), so no precision is lost.
-Exit code 0 means pass, 1 means at least one difference or violation.
+Exit code 0 means pass, 1 means at least one difference or violation. File arguments (`actual`, `--report`) must resolve inside the current working directory. CI installs pinned, hash-locked wheels from `requirements-ci.lock` (regenerate with `uv pip compile requirements-ci.in --generate-hashes --only-binary :all: -o requirements-ci.lock`).
