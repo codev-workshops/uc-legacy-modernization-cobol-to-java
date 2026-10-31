@@ -34,7 +34,7 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -y -q gnucobol3
       - name: Check google-java-format
         run: |
-          curl -sSLf -o /tmp/gjf.jar \
+          curl --proto '=https' --tlsv1.2 -sSLf -o /tmp/gjf.jar \
             https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar
           echo "16b2a1ee938686c8b1d88abf19eb83dfd0d623cee9de6fc6d09980214f816d3f  /tmp/gjf.jar" | sha256sum -c -
           java -jar /tmp/gjf.jar --dry-run --set-exit-if-changed $(find src -name '*.java')
