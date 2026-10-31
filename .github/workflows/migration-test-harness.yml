@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install --only-binary :all: --require-hashes -r requirements-ci.lock
+      - run: "pip install --only-binary :all: --require-hashes -r requirements-ci.lock"
       - run: ruff check . && ruff format --check .
       - run: ./run_tests.sh
       - uses: actions/upload-artifact@v4
