@@ -1,0 +1,42 @@
+name: CBACT01C Java port
+
+on:
+  pull_request:
+    paths:
+      - "java/cbact01c/**"
+      - "app/cbl/CBACT01C.cbl"
+      - "app/cpy/CVACT01Y.cpy"
+      - "app/cpy/CODATECN.cpy"
+      - "app/data/ASCII/acctdata.txt"
+      - ".github/workflows/cbact01c-java.yml"
+  push:
+    branches: [develop-asiri]
+    paths:
+      - "java/cbact01c/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: java/cbact01c
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+      - name: Install GnuCOBOL (live COBOL oracle)
+        run: sudo apt-get update -q && sudo apt-get install -y -q gnucobol3
+      - name: Check google-java-format
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSLf -o /tmp/gjf.jar \
+            https://github.com/google/google-java-format/releases/download/v1.22.0/google-java-format-1.22.0-all-deps.jar
+          echo "16b2a1ee938686c8b1d88abf19eb83dfd0d623cee9de6fc6d09980214f816d3f  /tmp/gjf.jar" | sha256sum -c -
+          java -jar /tmp/gjf.jar --dry-run --set-exit-if-changed $(find src -name '*.java')
+      - name: Build and test
+        run: mvn -B verify
