@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "export T (transaction, CVEXPORT.cpy)",
+  "type": "object",
+  "properties": {
+    "EXPORT-REC-TYPE": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(1)",
+      "x-cobol-offset": 0
+    },
+    "EXPORT-TIMESTAMP": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 1
+    },
+    "EXPORT-SEQUENCE-NUM": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(9)",
+      "x-cobol-offset": 27
+    },
+    "EXPORT-BRANCH-ID": {
+      "type": "string",
+      "maxLength": 4,
+      "x-cobol-pic": "X(4)",
+      "x-cobol-offset": 31
+    },
+    "EXPORT-REGION-CODE": {
+      "type": "string",
+      "maxLength": 5,
+      "x-cobol-pic": "X(5)",
+      "x-cobol-offset": 35
+    },
+    "EXP-TRAN-ID": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 40
+    },
+    "EXP-TRAN-TYPE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 56
+    },
+    "EXP-TRAN-CAT-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9999,
+      "x-cobol-pic": "9(04)",
+      "x-cobol-offset": 58
+    },
+    "EXP-TRAN-SOURCE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 62
+    },
+    "EXP-TRAN-DESC": {
+      "type": "string",
+      "maxLength": 100,
+      "x-cobol-pic": "X(100)",
+      "x-cobol-offset": 72
+    },
+    "EXP-TRAN-AMT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,9}\\.\\d{2}$",
+      "x-cobol-pic": "S9(09)V99",
+      "x-cobol-offset": 172
+    },
+    "EXP-TRAN-MERCHANT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 178
+    },
+    "EXP-TRAN-MERCHANT-NAME": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 182
+    },
+    "EXP-TRAN-MERCHANT-CITY": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 232
+    },
+    "EXP-TRAN-MERCHANT-ZIP": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 282
+    },
+    "EXP-TRAN-CARD-NUM": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 292
+    },
+    "EXP-TRAN-ORIG-TS": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 308
+    },
+    "EXP-TRAN-PROC-TS": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 334
+    }
+  },
+  "required": [
+    "EXP-TRAN-AMT",
+    "EXP-TRAN-CARD-NUM",
+    "EXP-TRAN-CAT-CD",
+    "EXP-TRAN-DESC",
+    "EXP-TRAN-ID",
+    "EXP-TRAN-MERCHANT-CITY",
+    "EXP-TRAN-MERCHANT-ID",
+    "EXP-TRAN-MERCHANT-NAME",
+    "EXP-TRAN-MERCHANT-ZIP",
+    "EXP-TRAN-ORIG-TS",
+    "EXP-TRAN-PROC-TS",
+    "EXP-TRAN-SOURCE",
+    "EXP-TRAN-TYPE-CD",
+    "EXPORT-BRANCH-ID",
+    "EXPORT-REC-TYPE",
+    "EXPORT-REGION-CODE",
+    "EXPORT-SEQUENCE-NUM",
+    "EXPORT-TIMESTAMP"
+  ],
+  "additionalProperties": false
+}

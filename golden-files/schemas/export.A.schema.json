@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "export A (account, CVEXPORT.cpy)",
+  "type": "object",
+  "properties": {
+    "EXPORT-REC-TYPE": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(1)",
+      "x-cobol-offset": 0
+    },
+    "EXPORT-TIMESTAMP": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 1
+    },
+    "EXPORT-SEQUENCE-NUM": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(9)",
+      "x-cobol-offset": 27
+    },
+    "EXPORT-BRANCH-ID": {
+      "type": "string",
+      "maxLength": 4,
+      "x-cobol-pic": "X(4)",
+      "x-cobol-offset": 31
+    },
+    "EXPORT-REGION-CODE": {
+      "type": "string",
+      "maxLength": 5,
+      "x-cobol-pic": "X(5)",
+      "x-cobol-offset": 35
+    },
+    "EXP-ACCT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 99999999999,
+      "x-cobol-pic": "9(11)",
+      "x-cobol-offset": 40
+    },
+    "EXP-ACCT-ACTIVE-STATUS": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(01)",
+      "x-cobol-offset": 51
+    },
+    "EXP-ACCT-CURR-BAL": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 52
+    },
+    "EXP-ACCT-CREDIT-LIMIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 59
+    },
+    "EXP-ACCT-CASH-CREDIT-LIMIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 71
+    },
+    "EXP-ACCT-OPEN-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 78
+    },
+    "EXP-ACCT-EXPIRAION-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 88
+    },
+    "EXP-ACCT-REISSUE-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 98
+    },
+    "EXP-ACCT-CURR-CYC-CREDIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 108
+    },
+    "EXP-ACCT-CURR-CYC-DEBIT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,10}\\.\\d{2}$",
+      "x-cobol-pic": "S9(10)V99",
+      "x-cobol-offset": 120
+    },
+    "EXP-ACCT-ADDR-ZIP": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 128
+    },
+    "EXP-ACCT-GROUP-ID": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 138
+    }
+  },
+  "required": [
+    "EXP-ACCT-ACTIVE-STATUS",
+    "EXP-ACCT-ADDR-ZIP",
+    "EXP-ACCT-CASH-CREDIT-LIMIT",
+    "EXP-ACCT-CREDIT-LIMIT",
+    "EXP-ACCT-CURR-BAL",
+    "EXP-ACCT-CURR-CYC-CREDIT",
+    "EXP-ACCT-CURR-CYC-DEBIT",
+    "EXP-ACCT-EXPIRAION-DATE",
+    "EXP-ACCT-GROUP-ID",
+    "EXP-ACCT-ID",
+    "EXP-ACCT-OPEN-DATE",
+    "EXP-ACCT-REISSUE-DATE",
+    "EXPORT-BRANCH-ID",
+    "EXPORT-REC-TYPE",
+    "EXPORT-REGION-CODE",
+    "EXPORT-SEQUENCE-NUM",
+    "EXPORT-TIMESTAMP"
+  ],
+  "additionalProperties": false
+}

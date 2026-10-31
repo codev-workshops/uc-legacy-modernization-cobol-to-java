@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 _USAGE = re.compile(r"\b(COMP-3|COMPUTATIONAL-3|PACKED-DECIMAL|COMP-5|COMP|BINARY|COMPUTATIONAL)\b")
@@ -167,3 +167,39 @@ def elementary_fields(root: Field, include_redefines: bool = False) -> list[Fiel
 
     walk(root)
     return out
+
+
+def occurrence_fields(group: Field, include_redefines: bool = False) -> list[Field]:
+    """Elementary fields of a group with every OCCURS occurrence laid out separately.
+
+    Occurrences are named with COBOL subscripts, e.g. ``EXP-CUST-ADDR-LINE(2)``.
+    """
+    out: list[Field] = []
+
+    def walk(f: Field, base: int, suffix: str) -> None:
+        for c in f.children:
+            if c.redefines and not include_redefines:
+                continue
+            size = c.length // c.occurs
+            for i in range(c.occurs):
+                sub = f"{suffix}{',' if suffix else ''}{i + 1}" if c.occurs > 1 else suffix
+                start = c.offset + base + i * size
+                if c.is_group:
+                    walk(c, start - c.offset, sub)
+                else:
+                    name = f"{c.name}({sub})" if sub else c.name
+                    out.append(replace(c, name=name, offset=start, length=size, occurs=1, children=[]))
+
+    walk(group, 0, "")
+    return out
+
+
+def find_field(root: Field, name: str) -> Field:
+    """Depth-first lookup of a (group or elementary) field by name."""
+    stack = [root]
+    while stack:
+        f = stack.pop()
+        if f.name == name.upper():
+            return f
+        stack.extend(reversed(f.children))
+    raise KeyError(name)

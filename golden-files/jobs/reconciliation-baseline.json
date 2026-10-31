@@ -1,7 +1,7 @@
 {
   "summary": {
-    "total": 51,
-    "passed": 51,
+    "total": 76,
+    "passed": 76,
     "failed": []
   },
   "checks": [
@@ -84,6 +84,228 @@
       "passed": true,
       "expected": [],
       "actual": []
+    },
+    {
+      "check_id": "EBCDIC.account.parity",
+      "job": "EBCDIC",
+      "description": "account records match by ACCT-ID",
+      "passed": true,
+      "expected": [
+        "49"
+      ],
+      "actual": [
+        "49"
+      ]
+    },
+    {
+      "check_id": "EBCDIC.card.parity",
+      "job": "EBCDIC",
+      "description": "card records match by CARD-NUM",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "EBCDIC.card_xref.parity",
+      "job": "EBCDIC",
+      "description": "card_xref records match by XREF-CARD-NUM",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "EBCDIC.customer.parity",
+      "job": "EBCDIC",
+      "description": "customer records match by CUST-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "EBCDIC.daily_transaction.parity",
+      "job": "EBCDIC",
+      "description": "daily_transaction records match by DALYTRAN-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "EBCDIC.disclosure_group.parity",
+      "job": "EBCDIC",
+      "description": "disclosure_group records match by DIS-ACCT-GROUP-ID+DIS-TRAN-TYPE-CD+DIS-TRAN-CAT-CD",
+      "passed": true,
+      "expected": [
+        "DEFAULT|07|1"
+      ],
+      "actual": [
+        "DEFAULT|07|1"
+      ]
+    },
+    {
+      "check_id": "EBCDIC.category_balance.parity",
+      "job": "EBCDIC",
+      "description": "category_balance records match by TRANCAT-ACCT-ID+TRANCAT-TYPE-CD+TRANCAT-CD",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "EBCDIC.transaction_category.parity",
+      "job": "EBCDIC",
+      "description": "transaction_category records match by TRAN-TYPE-CD+TRAN-CAT-CD",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "EBCDIC.transaction_type.parity",
+      "job": "EBCDIC",
+      "description": "transaction_type records match by TRAN-TYPE",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBEXPORT.export.domain.EXPORT-REC-TYPE",
+      "job": "CBEXPORT",
+      "description": "EXPORT-REC-TYPE within allowed values",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBEXPORT.export.unique-key",
+      "job": "CBEXPORT",
+      "description": "export key EXPORT-SEQUENCE-NUM is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBEXPORT.export.sequence-ascending",
+      "job": "CBEXPORT",
+      "description": "EXPORT-SEQUENCE-NUM strictly ascending in file order",
+      "passed": true,
+      "expected": true,
+      "actual": true
+    },
+    {
+      "check_id": "CBEXPORT.count-by-type.C",
+      "job": "CBEXPORT",
+      "description": "type C records = customer source records",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "CBEXPORT.count-by-type.A",
+      "job": "CBEXPORT",
+      "description": "type A records = account source records",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "CBEXPORT.count-by-type.X",
+      "job": "CBEXPORT",
+      "description": "type X records = card_xref source records",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "CBEXPORT.count-by-type.T",
+      "job": "CBEXPORT",
+      "description": "type T records = transaction source records",
+      "passed": true,
+      "expected": 300,
+      "actual": 300
+    },
+    {
+      "check_id": "CBEXPORT.count-by-type.D",
+      "job": "CBEXPORT",
+      "description": "type D records = card source records",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "CBEXPORT.sum.TRAN-AMT",
+      "job": "CBEXPORT",
+      "description": "sum of exported TRAN-AMT (COMP-3) = sum of source amounts",
+      "passed": true,
+      "expected": "104801.54",
+      "actual": "104801.54"
+    },
+    {
+      "check_id": "CBEXPORT.customer.parity",
+      "job": "CBEXPORT",
+      "description": "customer records match by CUST-ID",
+      "passed": true,
+      "expected": [
+        "1",
+        "50"
+      ],
+      "actual": [
+        "1",
+        "50"
+      ]
+    },
+    {
+      "check_id": "CBEXPORT.account.parity",
+      "job": "CBEXPORT",
+      "description": "account records match by ACCT-ID",
+      "passed": true,
+      "expected": [
+        "1",
+        "49",
+        "50"
+      ],
+      "actual": [
+        "1",
+        "49",
+        "50"
+      ]
+    },
+    {
+      "check_id": "CBEXPORT.card_xref.parity",
+      "job": "CBEXPORT",
+      "description": "card_xref records match by XREF-CARD-NUM",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBEXPORT.card.parity",
+      "job": "CBEXPORT",
+      "description": "card records match by CARD-NUM",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBEXPORT.transaction.parity",
+      "job": "CBEXPORT",
+      "description": "transaction records match by TRAN-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBIMPORT.round-trip",
+      "job": "CBIMPORT",
+      "description": "decode then re-encode reproduces every export record byte for byte",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CBIMPORT.errors",
+      "job": "CBIMPORT",
+      "description": "records with an unknown EXPORT-REC-TYPE (ERROUT)",
+      "passed": true,
+      "expected": 0,
+      "actual": 0
     },
     {
       "check_id": "ACCTFILE.account.count",

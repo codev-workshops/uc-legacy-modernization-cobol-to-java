@@ -73,5 +73,18 @@
     "source_sha256": "a7e07744af401faf17868861601829f46b2430a06a8b1984a7858025e125fb68",
     "sums": {},
     "parse_issues": 0
+  },
+  "export": {
+    "file": "export.json",
+    "records": 500,
+    "source_sha256": "e1d6cfbe62a77b5c7e3bd78d920813a76ca7bf18280a17f988221ddeda19b3ba",
+    "sums": {
+      "EXP-ACCT-CURR-BAL": "11583.00",
+      "EXP-ACCT-CREDIT-LIMIT": "233711.00",
+      "EXP-ACCT-CASH-CREDIT-LIMIT": "122148.00",
+      "EXP-ACCT-CURR-CYC-DEBIT": "0.00",
+      "EXP-TRAN-AMT": "104801.54"
+    },
+    "parse_issues": 0
   }
 }

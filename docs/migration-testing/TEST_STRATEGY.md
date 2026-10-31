@@ -46,7 +46,12 @@ of the [cutover plan](../migration-blueprint/CUTOVER_PLAN.md). It is backed by e
 2. Java's writers must reproduce the source bytes from the JSON. This round-trip is what makes rollback to VSAM possible.
 3. For production volumes, golden files are replaced by control-total manifests (`manifest.json` style) plus sampled records, because full-volume JSON is not practical.
 
-**EBCDIC extension.** The binary files in `app/data/EBCDIC/` add COMP-3 and code page 037 conversion. The layout engine already computes COMP and COMP-3 lengths; a packed decoder and a cp037 transcoder are the next additions (gap G-1 in section 7).
+**EBCDIC, packed decimal (COMP-3) and binary (COMP).** The mainframe unloads in `app/data/EBCDIC/` (code page 037, RECFM=FB, no line delimiters) are decoded with the same copybooks:
+- `decode_packed` / `encode_packed`: two BCD digits per byte, sign in the last nibble. C, A, E are positive, F unsigned, D, B negative; signed fields are written with C/D and unsigned with F. Bad digit or sign nibbles (for example spaces, `X'40'`) are reported as parse issues, never silently turned into zero.
+- `decode_binary` / `encode_binary`: big-endian, two's complement when signed, with the PIC digit limit enforced on encode (TRUNC(STD)).
+- Zoned EBCDIC fields need no extra code: cp037 maps the overpunch zones `X'C0'`-`X'C9'` / `X'D0'`-`X'D9'` to the same `{`, `A`-`I`, `}`, `J`-`R` characters as the ASCII files.
+- What is proven: the EBCDIC twins of all 9 master files decode to the ASCII golden records (two known data differences, finding F-6); the CBEXPORT file (`AWS.M2.CARDDEMO.EXPORT.DATA.PS`, CVEXPORT.cpy, 5 record types over REDEFINES with COMP and COMP-3 fields) parses all 500 records with zero issues and re-encodes byte for byte; its golden is `golden-files/export.json`.
+- `python -m carddemo_harness decode <dataset|export> <unload.bin>` turns a mainframe or Java-written binary file into the canonical JSON that `compare` and `contract` accept.
 
 ### 2.2 Differential testing
 
@@ -98,7 +103,7 @@ of the [cutover plan](../migration-blueprint/CUTOVER_PLAN.md). It is backed by e
 - **Domain:** status flags, transaction type codes.
 - **Return code.**
 
-**Baseline.** `golden-files/jobs/reconciliation-baseline.json` holds 51 checks over the sample data, all passing.
+**Baseline.** `golden-files/jobs/reconciliation-baseline.json` holds 76 checks over the sample data, all passing (51 for the ASCII masters and jobs, 9 EBCDIC twin parity checks, 16 CBEXPORT/CBIMPORT checks).
 
 **Mutation tests prove the checks bite.** The tests inject one fault each and assert the right check fails:
 - a dropped posting
@@ -173,9 +178,10 @@ The parallel-run thresholds (20 posting cycles, 2 interest cycles, 2 weeks of sh
 
 ```bash
 cd test-harness && pip install -r requirements.txt
-./run_tests.sh                    # 186 tests + 51 reconciliation checks; JUnit XML and JSON in reports/
+./run_tests.sh                    # 263 tests + 76 reconciliation checks; JUnit XML and JSON in reports/
 python3 -m carddemo_harness compare daily_transaction java-out.json
 python3 -m carddemo_harness contract account java-accounts.json
+python3 -m carddemo_harness decode export unloads/EXPORT.DATA.PS --out unloads/export.json
 ```
 
 CI: `.github/workflows/migration-test-harness.yml` runs ruff and `run_tests.sh` on changes to the harness, golden files, copybooks or sample data, and uploads `reports/` as an artifact.
@@ -191,13 +197,16 @@ These come from reading the code and running the reference models on the sample 
 | F-3 | Sample TCATBALF balances are all zero, so INTCALC on raw samples produces only zero-amount interest | `golden-files/category_balance.json` | The golden INTCALC run is chained after POSTTRAN, the realistic daily-then-monthly order |
 | F-4 | On the sample data, 38 of 300 daily transactions are rejected, all with code 102 (over limit) | `POSTTRAN.expected.json` | Codes 100, 101 and 103 are covered only by synthetic unit tests; add sample records for them |
 | F-5 | When a transaction fails both checks, reason 103 overwrites 102 | CBTRN02C lines 403-420 | Java must keep this order, or DALYREJS reason distributions will differ |
+| F-6 | The EBCDIC and ASCII sample masters are not identical: account 49 has `ACCT-ADDR-ZIP` `ZEROAPR` (ASCII `A000000000`), and the `DEFAULT`/07/0001 disclosure rate is 15.00 (ASCII 0.00) | `EBCDIC.account.parity`, `EBCDIC.disclosure_group.parity`; `KNOWN_EBCDIC_DIFFS` in `datasets.py` | The codec is not at fault (every other field of all 626 records matches). Pick one rendition as the oracle per test; any new difference fails the parity check |
+| F-7 | The export file was taken from a slightly different snapshot than the ASCII masters: customers 1 and 50 and accounts 1, 49 and 50 differ (upper-cased names and addresses, balance and dates), and the exported accounts 1 and 50 carry low-values (`X'00'`) in `EXP-ACCT-ADDR-ZIP` and `EXP-ACCT-GROUP-ID`. Cards, xrefs and all 300 transactions match exactly | `CBEXPORT.*.parity`; `KNOWN_SNAPSHOT_DIFFS` in `export.py` | Low-values are legal COBOL but not valid text for many Java/DB targets; the Java import must decide how to map them |
+| F-8 | `EXPORT-SEQUENCE-NUM` jumps from 450 (last transaction) to 460 (first card); numbers stay unique and ascending | `golden-files/export.json` | CBIMPORT must not assume contiguous sequence numbers; the checks only require unique and ascending |
 
 ## 7. Gaps and next steps
 
 | ID | Gap | Plan |
 |---|---|---|
-| G-1 | EBCDIC/COMP-3 files are not yet decoded | Add a packed-decimal decoder and cp037 transcoder; golden-test against `app/data/EBCDIC/` |
-| G-2 | Reference models cover POSTTRAN and INTCALC only | Add CBTRN03C (TRANREPT totals), CBSTM03A (statement totals), CBPAUP0C (purge) and CBEXPORT/CBIMPORT round-trip as those phases start |
+| G-1 | Done: COMP-3, COMP and cp037 decoding, golden-tested against `app/data/EBCDIC/` | Extend to other code pages (for example cp1140 for the euro sign) only if a source system uses them |
+| G-2 | Reference models cover POSTTRAN and INTCALC only | Add CBTRN03C (TRANREPT totals), CBSTM03A (statement totals), CBPAUP0C (purge) as those phases start (CBEXPORT/CBIMPORT round-trip is automated) |
 | G-3 | No mainframe-produced expected outputs yet | Capture DALYREJS, TRANSACT, ACCTDATA and TCATBALF after a real POSTTRAN/INTCALC run on the sample data and diff against `jobs/*.expected.json` to validate the model |
 | G-4 | Online (CICS) differential testing | Record 3270 screen and COMMAREA traces per transaction and replay them against the Java UI/API (Phase 2 onward) |
 | G-5 | MQ and IMS contracts are specified but not automated | Add CCPAURQY/CCPAURLY and IMS segment layouts to `datasets.py` when Phase 6 starts |

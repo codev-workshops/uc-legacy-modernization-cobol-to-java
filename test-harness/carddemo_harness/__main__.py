@@ -1,4 +1,4 @@
-"""CLI: python -m carddemo_harness {golden|reconcile|compare|contract}."""
+"""CLI: python -m carddemo_harness {golden|reconcile|compare|contract|decode}."""
 
 from __future__ import annotations
 
@@ -10,10 +10,11 @@ from pathlib import Path
 from .compare import compare_records
 from .contract import validate
 from .datasets import DATASETS, GOLDEN_DIR
+from .export import parse_export
 from .golden import load_golden
 from .jobs import all_checks, golden_records, regenerate
 from .reconcile import summarize
-from .records import load_layout
+from .records import load_layout, parse_binary_dataset
 
 
 def _safe_path(path: str) -> Path:
@@ -43,6 +44,10 @@ def main(argv: list[str] | None = None) -> int:
     k = sub.add_parser("contract", help="validate a migrated JSON extract against the copybook contract")
     k.add_argument("dataset", choices=sorted(DATASETS))
     k.add_argument("actual")
+    e = sub.add_parser("decode", help="decode an EBCDIC (cp037, RECFM=FB) unload into canonical JSON")
+    e.add_argument("dataset", choices=sorted(DATASETS) + ["export"])
+    e.add_argument("binary")
+    e.add_argument("--out", help="write the JSON here instead of stdout")
     a = ap.parse_args(argv)
 
     if a.cmd == "golden":
@@ -76,6 +81,21 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"record {i}: {e}")
         print(f"{bad} contract violation(s)")
         return 0 if bad == 0 else 1
+    if a.cmd == "decode":
+        src = _safe_path(a.binary)
+        res = parse_export(src) if a.dataset == "export" else parse_binary_dataset(DATASETS[a.dataset], src)
+        out = json.dumps(
+            {"dataset": a.dataset, "records": res.records, "parse_issues": [vars(i) for i in res.issues]},
+            indent=2,
+            ensure_ascii=False,
+        )
+        if a.out:
+            _safe_path(a.out).write_text(out + "\n", encoding="utf-8")
+        else:
+            print(out)
+        for i in res.issues[:50]:
+            print(f"record {i.line} {i.field}: {i.message}", file=sys.stderr)
+        return 0 if not res.issues else 1
     return 2
 
 

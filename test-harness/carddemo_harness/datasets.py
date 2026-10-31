@@ -7,6 +7,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO_ROOT / "app" / "data" / "ASCII"
+EBCDIC_DIR = REPO_ROOT / "app" / "data" / "EBCDIC"
 CPY_DIR = REPO_ROOT / "app" / "cpy"
 GOLDEN_DIR = REPO_ROOT / "golden-files"
 
@@ -21,6 +22,26 @@ class Dataset:
     vsam: str
     money_fields: tuple[str, ...] = ()
 
+
+# EBCDIC (RECFM=FB, code page 037) twin of each ASCII sample file, as unloaded from the mainframe.
+EBCDIC_FILES: dict[str, str] = {
+    "account": "AWS.M2.CARDDEMO.ACCTDATA.PS",
+    "card": "AWS.M2.CARDDEMO.CARDDATA.PS",
+    "card_xref": "AWS.M2.CARDDEMO.CARDXREF.PS",
+    "customer": "AWS.M2.CARDDEMO.CUSTDATA.PS",
+    "daily_transaction": "AWS.M2.CARDDEMO.DALYTRAN.PS",
+    "disclosure_group": "AWS.M2.CARDDEMO.DISCGRP.PS",
+    "category_balance": "AWS.M2.CARDDEMO.TCATBALF.PS",
+    "transaction_category": "AWS.M2.CARDDEMO.TRANCATG.PS",
+    "transaction_type": "AWS.M2.CARDDEMO.TRANTYPE.PS",
+}
+
+# Records whose EBCDIC unload decodes differently from the ASCII sample (data differences, not codec defects):
+# account 49 has ACCT-ADDR-ZIP 'ZEROAPR' vs 'A000000000'; DEFAULT/07/0001 has DIS-INT-RATE 15.00 vs 0.00.
+KNOWN_EBCDIC_DIFFS: dict[str, list[str]] = {
+    "account": ["49"],
+    "disclosure_group": ["DEFAULT|07|1"],
+}
 
 DATASETS: dict[str, Dataset] = {
     d.name: d

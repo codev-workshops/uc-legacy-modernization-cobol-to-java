@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "export D (card, CVEXPORT.cpy)",
+  "type": "object",
+  "properties": {
+    "EXPORT-REC-TYPE": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(1)",
+      "x-cobol-offset": 0
+    },
+    "EXPORT-TIMESTAMP": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 1
+    },
+    "EXPORT-SEQUENCE-NUM": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(9)",
+      "x-cobol-offset": 27
+    },
+    "EXPORT-BRANCH-ID": {
+      "type": "string",
+      "maxLength": 4,
+      "x-cobol-pic": "X(4)",
+      "x-cobol-offset": 31
+    },
+    "EXPORT-REGION-CODE": {
+      "type": "string",
+      "maxLength": 5,
+      "x-cobol-pic": "X(5)",
+      "x-cobol-offset": 35
+    },
+    "EXP-CARD-NUM": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 40
+    },
+    "EXP-CARD-ACCT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 99999999999,
+      "x-cobol-pic": "9(11)",
+      "x-cobol-offset": 56
+    },
+    "EXP-CARD-CVV-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999,
+      "x-cobol-pic": "9(03)",
+      "x-cobol-offset": 64
+    },
+    "EXP-CARD-EMBOSSED-NAME": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 66
+    },
+    "EXP-CARD-EXPIRAION-DATE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 116
+    },
+    "EXP-CARD-ACTIVE-STATUS": {
+      "type": "string",
+      "maxLength": 1,
+      "x-cobol-pic": "X(01)",
+      "x-cobol-offset": 126
+    }
+  },
+  "required": [
+    "EXP-CARD-ACCT-ID",
+    "EXP-CARD-ACTIVE-STATUS",
+    "EXP-CARD-CVV-CD",
+    "EXP-CARD-EMBOSSED-NAME",
+    "EXP-CARD-EXPIRAION-DATE",
+    "EXP-CARD-NUM",
+    "EXPORT-BRANCH-ID",
+    "EXPORT-REC-TYPE",
+    "EXPORT-REGION-CODE",
+    "EXPORT-SEQUENCE-NUM",
+    "EXPORT-TIMESTAMP"
+  ],
+  "additionalProperties": false
+}

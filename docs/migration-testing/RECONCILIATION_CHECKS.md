@@ -156,11 +156,26 @@ Inputs:
 
 | Check ID | Rule | Status |
 |---|---|---|
-| `CBEXPORT.count-by-type` | Export records per type (C, A, X, T, D) = source file counts | Spec |
-| `CBEXPORT.control-totals` | Σ account balances and Σ TRAN-AMT in the export = source | Spec |
-| `CBIMPORT.round-trip` | Import of an export reproduces each source file exactly (record compare by key) | Spec |
-| `CBIMPORT.errors` | ERROUT records = export records with unknown type; 0 for a clean export | Spec |
+The export (`AWS.M2.CARDDEMO.EXPORT.DATA.PS`, CVEXPORT.cpy) is EBCDIC with COMP and COMP-3 fields, decoded by `export.py`. Source files for the parity checks are the ASCII masters; transactions are compared with DALYTRAN (the TRANSACT content on the sample data).
+
+| Check ID | Rule | Status | Baseline |
+|---|---|---|---|
+| `CBEXPORT.export.domain.EXPORT-REC-TYPE` | Every record type is C, A, X, T or D | Automated | pass |
+| `CBEXPORT.export.unique-key` / `.sequence-ascending` | EXPORT-SEQUENCE-NUM (COMP) unique and strictly ascending (gaps allowed, finding F-8) | Automated | pass |
+| `CBEXPORT.count-by-type.{C,A,X,T,D}` | Export records per type = source file counts | Automated | 50, 50, 50, 300, 50 |
+| `CBEXPORT.sum.TRAN-AMT` | Σ EXP-TRAN-AMT (COMP-3) = Σ source amounts | Automated | 104801.54 |
+| `CBEXPORT.{customer,account,card_xref,card,transaction}.parity` | Each exported record equals its source record field by field; only the snapshot differences in `KNOWN_SNAPSHOT_DIFFS` are allowed (finding F-7) | Automated | customer 1, 50; account 1, 49, 50; others none |
+| `CBIMPORT.round-trip` | Decoding then re-encoding reproduces every export record byte for byte (packed, binary and zoned) | Automated | 500/500 |
+| `CBIMPORT.errors` | ERROUT records = export records with unknown type; 0 for a clean export | Automated | 0 |
 | `CBIMPORT.card-output` | CARDOUT is opened by the program but has no DD in CBIMPORT.jcl; Java must define the card output explicitly | Spec |
+
+## 8a. EBCDIC unload parity (all master files)
+
+| Check ID | Rule | Status | Baseline |
+|---|---|---|---|
+| `EBCDIC.<dataset>.parity` | The cp037 RECFM=FB unload of each of the 9 masters decodes to the same records as the ASCII sample, by key; only `KNOWN_EBCDIC_DIFFS` may differ (finding F-6) | Automated | account 49; disclosure group DEFAULT/07/0001; others none |
+
+Used again at the Phase 5 unload: the VSAM unload taken on the cutover night is decoded with `python -m carddemo_harness decode` and compared with the target database extract.
 
 ## 9. CBPAUP0J: purge expired pending authorizations (CBPAUP0C, IMS)
 

@@ -5,8 +5,9 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import asdict, dataclass
 from decimal import Decimal
+from itertools import pairwise
 
-from .compare import index
+from .compare import compare_records, index
 from .models import InterestResult, PostingResult, d
 
 
@@ -243,6 +244,90 @@ def intcalc_checks(before_accounts: list[dict], tcatbal: list[dict], res: Intere
             len(res.interest_transactions),
         ),
     ]
+
+
+def parity(job, name, expected, actual, key, known_keys=()) -> Check:
+    """Keyed record parity between two renditions of the same data; only ``known_keys`` may differ."""
+    rep = compare_records(expected, actual, list(key))
+    differing = sorted({m.key for m in rep.mismatches} | set(rep.missing) | set(rep.unexpected) | set(rep.duplicates))
+    return Check(
+        f"{job}.{name}.parity",
+        job,
+        f"{name} records match by {'+'.join(key)}",
+        differing == sorted(known_keys),
+        sorted(known_keys),
+        differing,
+    )
+
+
+def ebcdic_checks(ascii_g: dict[str, list[dict]], ebcdic_g: dict[str, list[dict]], keys: dict, known: dict) -> list[Check]:
+    """The EBCDIC (cp037, RECFM=FB) unload of each master must decode to the same records as its ASCII twin."""
+    return [parity("EBCDIC", n, ascii_g[n], ebcdic_g[n], keys[n], known.get(n, ())) for n in ebcdic_g]
+
+
+def export_checks(raws: list[bytes], records: list[dict], reencoded: list[bytes], g: dict[str, list[dict]]) -> list[Check]:
+    """CBEXPORT (multi-record EBCDIC export with COMP/COMP-3 fields) and the CBIMPORT round trip."""
+    from .export import KNOWN_SNAPSHOT_DIFFS, RECORD_TYPES, split_by_type
+
+    job = "CBEXPORT"
+    seq = [r["EXPORT-SEQUENCE-NUM"] for r in records]
+    by = split_by_type(records)
+    masters = {**g, "transaction": [{k.replace("DALYTRAN-", "TRAN-"): v for k, v in t.items()} for t in g["daily_transaction"]]}
+    keys = {
+        "customer": ["CUST-ID"],
+        "account": ["ACCT-ID"],
+        "card_xref": ["XREF-CARD-NUM"],
+        "card": ["CARD-NUM"],
+        "transaction": ["TRAN-ID"],
+    }
+    out = [
+        domain(job, "export", records, "EXPORT-REC-TYPE", set(RECORD_TYPES)),
+        key_unique(job, "export", records, ["EXPORT-SEQUENCE-NUM"]),
+        Check(
+            f"{job}.export.sequence-ascending",
+            job,
+            "EXPORT-SEQUENCE-NUM strictly ascending in file order",
+            all(a < b for a, b in pairwise(seq)),
+            True,
+            all(a < b for a, b in pairwise(seq)),
+        ),
+    ]
+    for t, (_, name, _, _) in RECORD_TYPES.items():
+        out.append(
+            _eq(f"{job}.count-by-type.{t}", job, f"type {t} records = {name} source records", len(masters[name]), len(by[name]))
+        )
+    out.append(
+        _eq(
+            f"{job}.sum.TRAN-AMT",
+            job,
+            "sum of exported TRAN-AMT (COMP-3) = sum of source amounts",
+            total(masters["transaction"], "TRAN-AMT"),
+            total(by["transaction"], "TRAN-AMT"),
+        )
+    )
+    for name, key in keys.items():
+        out.append(parity(job, name, masters[name], by[name], key, KNOWN_SNAPSHOT_DIFFS[name]))
+    bad = [i + 1 for i, (a, b) in enumerate(zip(raws, reencoded, strict=True)) if a != b]
+    out.append(
+        Check(
+            "CBIMPORT.round-trip",
+            "CBIMPORT",
+            "decode then re-encode reproduces every export record byte for byte",
+            not bad,
+            [],
+            bad,
+        )
+    )
+    out.append(
+        _eq(
+            "CBIMPORT.errors",
+            "CBIMPORT",
+            "records with an unknown EXPORT-REC-TYPE (ERROUT)",
+            0,
+            sum(r["EXPORT-REC-TYPE"] not in RECORD_TYPES for r in records),
+        )
+    )
+    return out
 
 
 def summarize(checks: list[Check]) -> dict:

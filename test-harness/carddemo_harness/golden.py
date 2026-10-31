@@ -70,6 +70,19 @@ def write_all(out_dir: Path = GOLDEN_DIR) -> dict[str, Path]:
             "sums": g["control_totals"]["sums"],
             "parse_issues": len(g["parse_issues"]),
         }
+    from .export import build_export_golden
+
+    g = build_export_golden()
+    p = out_dir / "export.json"
+    p.write_text(json.dumps(g, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    written["export"] = p
+    manifest["export"] = {
+        "file": p.name,
+        "records": g["control_totals"]["record_count"],
+        "source_sha256": g["source_sha256"],
+        "sums": g["control_totals"]["sums"],
+        "parse_issues": len(g["parse_issues"]),
+    }
     (out_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     return written
 

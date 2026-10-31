@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .copybook import Field, elementary_fields, parse_copybook
 from .datasets import CPY_DIR, DATA_DIR, Dataset
-from .decoders import DecodeError, decode_field
+from .decoders import DecodeError, decode_field, decode_field_bytes, encode_field_bytes
 
 
 @dataclass
@@ -82,3 +82,54 @@ def encode_record(rec: dict, layout: Field, record_length: int) -> str:
             text = str(v)[: f.length].ljust(f.length)
         buf[f.offset : f.offset + f.length] = list(text)
     return "".join(buf)
+
+
+def _named(fields: list[Field]) -> list[Field]:
+    return [f for f in fields if f.name != "FILLER" and not f.name.endswith("-FILLER")]
+
+
+def parse_record_bytes(
+    raw: bytes,
+    fields: list[Field],
+    codepage: str = "cp037",
+    rec_no: int = 0,
+    issues: list | None = None,
+) -> dict:
+    """Parse one binary record (EBCDIC DISPLAY, COMP-3 and COMP fields) using elementary copybook fields."""
+    rec: dict = {}
+    for f in _named(fields):
+        chunk = raw[f.offset : f.offset + f.length]
+        try:
+            rec[f.name] = decode_field_bytes(f, chunk, codepage)
+        except DecodeError as e:
+            rec[f.name] = chunk.hex()
+            if issues is not None:
+                issues.append(ParseIssue(rec_no, f.name, str(e)))
+    return rec
+
+
+def split_fixed(data: bytes, record_length: int) -> list[bytes]:
+    """Split a RECFM=FB dataset (no line delimiters) into records."""
+    if len(data) % record_length:
+        raise ValueError(f"file length {len(data)} is not a multiple of record length {record_length}")
+    return [data[i : i + record_length] for i in range(0, len(data), record_length)]
+
+
+def parse_binary_dataset(ds: Dataset, path: Path, codepage: str = "cp037") -> ParseResult:
+    """Parse the EBCDIC (mainframe binary) form of a registered dataset."""
+    layout = load_layout(ds)
+    fields = elementary_fields(layout)
+    result = ParseResult(ds.name)
+    for i, raw in enumerate(split_fixed(path.read_bytes(), ds.record_length), 1):
+        result.raw_lengths.add(len(raw))
+        result.records.append(parse_record_bytes(raw, fields, codepage, i, result.issues))
+    return result
+
+
+def encode_record_bytes(rec: dict, fields: list[Field], record_length: int, codepage: str = "cp037") -> bytes:
+    """Inverse of parse_record_bytes: FILLER and absent fields are written as spaces in the code page."""
+    buf = bytearray(" ".encode(codepage) * record_length)
+    for f in _named(fields):
+        if f.name in rec:
+            buf[f.offset : f.offset + f.length] = encode_field_bytes(f, rec[f.name], codepage)
+    return bytes(buf)
