@@ -31,6 +31,449 @@ Companion documents: [MIGRATION_BLUEPRINT.md](MIGRATION_BLUEPRINT.md) | [CUTOVER
 
 **Design note - Payments**: COBIL00C writes the payment as a Ledger transaction (type 02 / category 2) and reduces the Account balance. In the target, Payments is a thin application service that calls Ledger (record transaction) and Account (apply balance change) in a single local DB transaction inside the modular monolith.
 
+### 2.1 Bounded Context Diagrams
+
+The overview below groups every COBOL program with the data its context owns. Arrows are cross-context dependencies: a read or a write of another context's data. The per-context diagrams after it show each context as a box with its entry points, the programs inside it, its owned stores and batch jobs, and the contexts it depends on (upstream) or that depend on it (downstream).
+
+#### Overview: all contexts
+
+```mermaid
+flowchart TB
+  subgraph BC1["BC1 Identity and Access"]
+    BC1_P["<b>Programs</b><br/>COSGN00C<br/>COUSR00C<br/>COUSR01C<br/>COUSR02C<br/>COUSR03C"]
+    BC1_D[("USRSEC KSDS")]
+    BC1_P --> BC1_D
+  end
+  subgraph BC2["BC2 Customer"]
+    BC2_P["<b>Programs</b><br/>COACTUPC (customer part)"]
+    BC2_D[("CUSTDATA KSDS")]
+    BC2_P --> BC2_D
+  end
+  subgraph BC3["BC3 Account"]
+    BC3_P["<b>Programs</b><br/>COACTVWC<br/>COACTUPC<br/>COACCT01"]
+    BC3_D[("ACCTDATA KSDS")]
+    BC3_P --> BC3_D
+  end
+  subgraph BC4["BC4 Card"]
+    BC4_P["<b>Programs</b><br/>COCRDLIC<br/>COCRDSLC<br/>COCRDUPC"]
+    BC4_D[("CARDDATA KSDS + AIX<br/>CARDXREF KSDS + AIX")]
+    BC4_P --> BC4_D
+  end
+  subgraph BC5["BC5 Transaction Ledger"]
+    BC5_P["<b>Programs</b><br/>CBTRN02C<br/>COTRN00C<br/>COTRN01C<br/>COTRN02C<br/>CBTRN01C (dormant)"]
+    BC5_D[("TRANSACT KSDS + AIX<br/>TCATBALF KSDS<br/>DALYREJS GDG")]
+    BC5_P --> BC5_D
+  end
+  subgraph BC6["BC6 Pricing and Interest"]
+    BC6_P["<b>Programs</b><br/>CBACT04C"]
+    BC6_D[("DISCGRP KSDS<br/>SYSTRAN GDG")]
+    BC6_P --> BC6_D
+  end
+  subgraph BC7["BC7 Payments"]
+    BC7_P["<b>Programs</b><br/>COBIL00C"]
+    BC7_D[("(none - writes via Ledger + Account)")]
+    BC7_P --> BC7_D
+  end
+  subgraph BC8["BC8 Reference Data"]
+    BC8_P["<b>Programs</b><br/>COTRTLIC<br/>COTRTUPC<br/>COBTUPDT"]
+    BC8_D[("DB2 TRANSACTION_TYPE<br/>DB2 TRANSACTION_TYPE_CATEGORY<br/>TRANTYPE / TRANCATG KSDS (copies)")]
+    BC8_P --> BC8_D
+  end
+  subgraph BC9["BC9 Statements and Reporting"]
+    BC9_P["<b>Programs</b><br/>CBSTM03A<br/>CBSTM03B<br/>CBTRN03C<br/>CORPT00C"]
+    BC9_D[("TRXFL KSDS (work)<br/>STATEMNT text/HTML/PDF<br/>TRANREPT GDG<br/>TCATBALF.REPT")]
+    BC9_P --> BC9_D
+  end
+  subgraph BC10["BC10 Card Authorization and Fraud"]
+    BC10_P["<b>Programs</b><br/>COPAUA0C<br/>COPAUS0C<br/>COPAUS1C<br/>COPAUS2C<br/>CBPAUP0C"]
+    BC10_D[("IMS DBPAUTP0<br/>DB2 AUTHFRDS<br/>MQ request/reply queues")]
+    BC10_P --> BC10_D
+  end
+  subgraph BC11["BC11 Data Exchange"]
+    BC11_P["<b>Programs</b><br/>CBEXPORT<br/>CBIMPORT"]
+    BC11_D[("EXPORT.DATA KSDS<br/>*.IMPORT files")]
+    BC11_P --> BC11_D
+  end
+  subgraph BC12["BC12 Platform / Operations"]
+    BC12_P["<b>Programs</b><br/>COBSWAIT<br/>CSUTLDTC<br/>CBACT01C-03C<br/>CBCUS01C"]
+    BC12_D[("GDG bases, catalog")]
+    BC12_P --> BC12_D
+  end
+  BC5 -.->|posts balances| BC3
+  BC6 -.->|adds interest| BC3
+  BC7 -.->|reduces balance| BC3
+  BC7 -.->|payment txn| BC5
+  BC6 -.->|interest txns| BC5
+  BC5 -.->|xref lookup| BC4
+  BC3 -.->|xref| BC4
+  BC3 -.->|customer| BC2
+  BC8 -.->|type/category codes| BC5
+  BC9 -.->|reads| BC5
+  BC10 -.->|reads| BC3
+  BC10 -.->|reads| BC4
+  BC10 -.->|reads| BC2
+  BC11 -.->|bulk read| BC3
+  BC1 -.->|principal| BC3
+```
+
+#### BC1 Identity and Access
+
+```mermaid
+flowchart LR
+  IN0[/"3270 CC00 sign-on"/]
+  IN1[/"CU00-CU03 admin"/]
+  subgraph CTX["BC1 Identity and Access"]
+    direction TB
+    P0["COSGN00C"]
+    P1["COUSR00C"]
+    P2["COUSR01C"]
+    P3["COUSR02C"]
+    P4["COUSR03C"]
+    J["<b>Batch jobs</b><br/>DUSRSECJ"]
+    D0[("USRSEC KSDS")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    P3 --> D0
+    P4 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: All online contexts: principal + role"}}
+  IN0 --> CTX
+  IN1 --> CTX
+  DN0 -.->|uses| CTX
+```
+
+#### BC2 Customer
+
+```mermaid
+flowchart LR
+  IN0[/"CAUP screen"/]
+  UP0{{"Upstream: Account"}}
+  subgraph CTX["BC2 Customer"]
+    direction TB
+    P0["COACTUPC (customer part)"]
+    J["<b>Batch jobs</b><br/>CUSTFILE<br/>READCUST"]
+    D0[("CUSTDATA KSDS")]
+    P0 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Authorization"}}
+  DN1{{"Downstream: Reporting"}}
+  DN2{{"Downstream: Data Exchange"}}
+  IN0 --> CTX
+  CTX -.->|uses| UP0
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+  DN2 -.->|uses| CTX
+```
+
+#### BC3 Account
+
+```mermaid
+flowchart LR
+  IN0[/"CAVW, CAUP screens"/]
+  IN1[/"MQ CDRA"/]
+  UP0{{"Upstream: Ledger: posting"}}
+  UP1{{"Upstream: Pricing: interest"}}
+  UP2{{"Upstream: Payments"}}
+  subgraph CTX["BC3 Account"]
+    direction TB
+    P0["COACTVWC"]
+    P1["COACTUPC"]
+    P2["COACCT01"]
+    J["<b>Batch jobs</b><br/>ACCTFILE<br/>READACCT"]
+    D0[("ACCTDATA KSDS")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Card"}}
+  DN1{{"Downstream: Authorization"}}
+  DN2{{"Downstream: Reporting"}}
+  DN3{{"Downstream: Data Exchange"}}
+  IN0 --> CTX
+  IN1 --> CTX
+  CTX -.->|uses| UP0
+  CTX -.->|uses| UP1
+  CTX -.->|uses| UP2
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+  DN2 -.->|uses| CTX
+  DN3 -.->|uses| CTX
+```
+
+#### BC4 Card
+
+```mermaid
+flowchart LR
+  IN0[/"CCLI, CCDL, CCUP screens"/]
+  subgraph CTX["BC4 Card"]
+    direction TB
+    P0["COCRDLIC"]
+    P1["COCRDSLC"]
+    P2["COCRDUPC"]
+    J["<b>Batch jobs</b><br/>CARDFILE<br/>XREFFILE<br/>READCARD<br/>READXREF"]
+    D0[("CARDDATA KSDS + AIX")]
+    D1[("CARDXREF KSDS + AIX")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Account"}}
+  DN1{{"Downstream: Ledger"}}
+  DN2{{"Downstream: Pricing"}}
+  DN3{{"Downstream: Authorization"}}
+  DN4{{"Downstream: Reporting"}}
+  IN0 --> CTX
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+  DN2 -.->|uses| CTX
+  DN3 -.->|uses| CTX
+  DN4 -.->|uses| CTX
+```
+
+#### BC5 Transaction Ledger
+
+```mermaid
+flowchart LR
+  IN0[/"DALYTRAN.PS daily feed"/]
+  IN1[/"CT00-CT02 screens"/]
+  UP0{{"Upstream: Card: xref lookup"}}
+  UP1{{"Upstream: Reference Data: codes"}}
+  subgraph CTX["BC5 Transaction Ledger"]
+    direction TB
+    P0["CBTRN02C"]
+    P1["COTRN00C"]
+    P2["COTRN01C"]
+    P3["COTRN02C"]
+    P4["CBTRN01C (dormant)"]
+    J["<b>Batch jobs</b><br/>POSTTRAN<br/>TRANBKP<br/>COMBTRAN<br/>TRANFILE<br/>TRANIDX"]
+    D0[("TRANSACT KSDS + AIX")]
+    D1[("TCATBALF KSDS")]
+    D2[("DALYREJS GDG")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    P3 --> D0
+    P4 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Account: balance changes"}}
+  DN1{{"Downstream: Pricing"}}
+  DN2{{"Downstream: Reporting"}}
+  IN0 --> CTX
+  IN1 --> CTX
+  CTX -.->|uses| UP0
+  CTX -.->|uses| UP1
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+  DN2 -.->|uses| CTX
+```
+
+#### BC6 Pricing and Interest
+
+```mermaid
+flowchart LR
+  IN0[/"Monthly schedule"/]
+  UP0{{"Upstream: Ledger: category balances"}}
+  UP1{{"Upstream: Card: xref"}}
+  subgraph CTX["BC6 Pricing and Interest"]
+    direction TB
+    P0["CBACT04C"]
+    J["<b>Batch jobs</b><br/>INTCALC<br/>DISCGRP"]
+    D0[("DISCGRP KSDS")]
+    D1[("SYSTRAN GDG")]
+    P0 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Account: interest"}}
+  DN1{{"Downstream: Ledger: interest txns"}}
+  IN0 --> CTX
+  CTX -.->|uses| UP0
+  CTX -.->|uses| UP1
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+```
+
+#### BC7 Payments
+
+```mermaid
+flowchart LR
+  IN0[/"CB00 screen"/]
+  UP0{{"Upstream: Account"}}
+  subgraph CTX["BC7 Payments"]
+    direction TB
+    P0["COBIL00C"]
+    D0[("(none - writes via Ledger + Account)")]
+    P0 --> D0
+  end
+  DN0{{"Downstream: Ledger: payment txn"}}
+  DN1{{"Downstream: Account: balance"}}
+  IN0 --> CTX
+  CTX -.->|uses| UP0
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+```
+
+#### BC8 Reference Data
+
+```mermaid
+flowchart LR
+  IN0[/"CTLI, CTTU screens"/]
+  IN1[/"INPFILE maintenance"/]
+  subgraph CTX["BC8 Reference Data"]
+    direction TB
+    P0["COTRTLIC"]
+    P1["COTRTUPC"]
+    P2["COBTUPDT"]
+    J["<b>Batch jobs</b><br/>MNTTRDB2<br/>TRANEXTR<br/>TRANTYPE<br/>TRANCATG<br/>CREADB2"]
+    D0[("DB2 TRANSACTION_TYPE")]
+    D1[("DB2 TRANSACTION_TYPE_CATEGORY")]
+    D2[("TRANTYPE / TRANCATG KSDS (copies)")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Ledger"}}
+  DN1{{"Downstream: Reporting"}}
+  IN0 --> CTX
+  IN1 --> CTX
+  DN0 -.->|uses| CTX
+  DN1 -.->|uses| CTX
+```
+
+#### BC9 Statements and Reporting
+
+```mermaid
+flowchart LR
+  IN0[/"CR00 screen"/]
+  IN1[/"Statement schedule"/]
+  UP0{{"Upstream: Ledger"}}
+  UP1{{"Upstream: Account"}}
+  UP2{{"Upstream: Customer"}}
+  UP3{{"Upstream: Card"}}
+  UP4{{"Upstream: Reference Data"}}
+  subgraph CTX["BC9 Statements and Reporting"]
+    direction TB
+    P0["CBSTM03A"]
+    P1["CBSTM03B"]
+    P2["CBTRN03C"]
+    P3["CORPT00C"]
+    J["<b>Batch jobs</b><br/>CREASTMT<br/>TXT2PDF1<br/>TRANREPT<br/>PRTCATBL"]
+    D0[("TRXFL KSDS (work)")]
+    D1[("STATEMNT text/HTML/PDF")]
+    D2[("TRANREPT GDG")]
+    D3[("TCATBALF.REPT")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    P3 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Customers / print"}}
+  IN0 --> CTX
+  IN1 --> CTX
+  CTX -.->|uses| UP0
+  CTX -.->|uses| UP1
+  CTX -.->|uses| UP2
+  CTX -.->|uses| UP3
+  CTX -.->|uses| UP4
+  DN0 -.->|uses| CTX
+```
+
+#### BC10 Card Authorization and Fraud
+
+```mermaid
+flowchart LR
+  IN0[/"MQ CP00 trigger"/]
+  IN1[/"CPVS, CPVD screens"/]
+  UP0{{"Upstream: Account"}}
+  UP1{{"Upstream: Customer"}}
+  UP2{{"Upstream: Card"}}
+  subgraph CTX["BC10 Card Authorization and Fraud"]
+    direction TB
+    P0["COPAUA0C"]
+    P1["COPAUS0C"]
+    P2["COPAUS1C"]
+    P3["COPAUS2C"]
+    P4["CBPAUP0C"]
+    J["<b>Batch jobs</b><br/>CBPAUP0J<br/>LOADPADB<br/>UNLDPADB<br/>UNLDGSAM"]
+    D0[("IMS DBPAUTP0")]
+    D1[("DB2 AUTHFRDS")]
+    D2[("MQ request/reply queues")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    P3 --> D0
+    P4 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Card network: decision"}}
+  IN0 --> CTX
+  IN1 --> CTX
+  CTX -.->|uses| UP0
+  CTX -.->|uses| UP1
+  CTX -.->|uses| UP2
+  DN0 -.->|uses| CTX
+```
+
+#### BC11 Data Exchange
+
+```mermaid
+flowchart LR
+  IN0[/"On demand"/]
+  UP0{{"Upstream: Account"}}
+  UP1{{"Upstream: Customer"}}
+  UP2{{"Upstream: Card"}}
+  UP3{{"Upstream: Ledger"}}
+  subgraph CTX["BC11 Data Exchange"]
+    direction TB
+    P0["CBEXPORT"]
+    P1["CBIMPORT"]
+    J["<b>Batch jobs</b><br/>CBEXPORT<br/>CBIMPORT<br/>FTPJCL"]
+    D0[("EXPORT.DATA KSDS")]
+    D1[("*.IMPORT files")]
+    P0 --> D0
+    P1 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: Target branch"}}
+  IN0 --> CTX
+  CTX -.->|uses| UP0
+  CTX -.->|uses| UP1
+  CTX -.->|uses| UP2
+  CTX -.->|uses| UP3
+  DN0 -.->|uses| CTX
+```
+
+#### BC12 Platform / Operations
+
+```mermaid
+flowchart LR
+  IN0[/"Control-M / CA-7"/]
+  subgraph CTX["BC12 Platform / Operations"]
+    direction TB
+    P0["COBSWAIT"]
+    P1["CSUTLDTC"]
+    P2["CBACT01C-03C"]
+    P3["CBCUS01C"]
+    J["<b>Batch jobs</b><br/>CLOSEFIL<br/>OPENFIL<br/>WAITSTEP<br/>DEFGDGB/D"]
+    D0[("GDG bases, catalog")]
+    P0 --> D0
+    P1 --> D0
+    P2 --> D0
+    P3 --> D0
+    J --> D0
+  end
+  DN0{{"Downstream: All batch contexts"}}
+  IN0 --> CTX
+  DN0 -.->|uses| CTX
+```
+
 ## 3. Context Map
 
 ```mermaid
