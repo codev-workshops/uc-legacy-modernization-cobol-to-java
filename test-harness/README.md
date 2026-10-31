@@ -27,7 +27,7 @@ pip install -r requirements.txt
 python3 -m carddemo_harness golden # regenerate golden-files/ after an intentional data/copybook change
 python3 -m carddemo_harness compare account path/to/java-extract.json --ignore ACCT-ADDR-ZIP
 python3 -m carddemo_harness contract account path/to/java-extract.json
-python3 -m carddemo_harness decode export path/to/EXPORT.DATA.PS --out export.json   # EBCDIC/COMP-3 -> JSON
+python3 -m carddemo_harness decode export path/to/EXPORT.DATA.PS > export.json   # EBCDIC/COMP-3 -> JSON
 ```
 
 `compare` and `contract` accept either a JSON array of records or an object with a `records` array, using the field

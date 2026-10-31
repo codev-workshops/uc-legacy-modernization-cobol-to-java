@@ -44,10 +44,9 @@ def main(argv: list[str] | None = None) -> int:
     k = sub.add_parser("contract", help="validate a migrated JSON extract against the copybook contract")
     k.add_argument("dataset", choices=sorted(DATASETS))
     k.add_argument("actual")
-    e = sub.add_parser("decode", help="decode an EBCDIC (cp037, RECFM=FB) unload into canonical JSON")
+    e = sub.add_parser("decode", help="decode an EBCDIC (cp037, RECFM=FB) unload into canonical JSON on stdout")
     e.add_argument("dataset", choices=sorted(DATASETS) + ["export"])
     e.add_argument("binary")
-    e.add_argument("--out", help="write the JSON here instead of stdout")
     a = ap.parse_args(argv)
 
     if a.cmd == "golden":
@@ -89,10 +88,7 @@ def main(argv: list[str] | None = None) -> int:
             indent=2,
             ensure_ascii=False,
         )
-        if a.out:
-            _safe_path(a.out).write_text(out + "\n", encoding="utf-8")
-        else:
-            print(out)
+        print(out)
         for i in res.issues[:50]:
             print(f"record {i.line} {i.field}: {i.message}", file=sys.stderr)
         return 0 if not res.issues else 1

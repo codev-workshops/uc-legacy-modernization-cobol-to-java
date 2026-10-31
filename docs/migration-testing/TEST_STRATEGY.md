@@ -181,7 +181,7 @@ cd test-harness && pip install -r requirements.txt
 ./run_tests.sh                    # 263 tests + 76 reconciliation checks; JUnit XML and JSON in reports/
 python3 -m carddemo_harness compare daily_transaction java-out.json
 python3 -m carddemo_harness contract account java-accounts.json
-python3 -m carddemo_harness decode export unloads/EXPORT.DATA.PS --out unloads/export.json
+python3 -m carddemo_harness decode export unloads/EXPORT.DATA.PS > unloads/export.json
 ```
 
 CI: `.github/workflows/migration-test-harness.yml` runs ruff and `run_tests.sh` on changes to the harness, golden files, copybooks or sample data, and uploads `reports/` as an artifact.

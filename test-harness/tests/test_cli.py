@@ -51,13 +51,14 @@ def test_decode_cli(tmp_path, capsys):
 
     shutil.copy(EBCDIC_DIR / "AWS.M2.CARDDEMO.EXPORT.DATA.PS", tmp_path / "export.bin")
     shutil.copy(EBCDIC_DIR / "AWS.M2.CARDDEMO.CARDDATA.PS", tmp_path / "card.bin")
-    assert main(["decode", "export", "export.bin", "--out", "export.json"]) == 0
-    out = json.loads((tmp_path / "export.json").read_text())
+    assert main(["decode", "export", "export.bin"]) == 0
+    out = json.loads(capsys.readouterr().out)
     assert len(out["records"]) == 500 and out["parse_issues"] == []
-    assert main(["decode", "card", "card.bin", "--out", "card.json"]) == 0
+    assert main(["decode", "card", "card.bin"]) == 0
+    (tmp_path / "card.json").write_text(capsys.readouterr().out)
     assert main(["compare", "card", "card.json"]) == 0
     raw = bytearray((tmp_path / "export.bin").read_bytes())
     raw[52 + 500 * 50 : 59 + 500 * 50] = b"\x40" * 7
     (tmp_path / "bad.bin").write_bytes(bytes(raw))
-    assert main(["decode", "export", "bad.bin", "--out", "bad.json"]) == 1
+    assert main(["decode", "export", "bad.bin"]) == 1
     assert "EXP-ACCT-CURR-BAL" in capsys.readouterr().err
