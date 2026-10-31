@@ -20,18 +20,36 @@ public final class PackedDecimal {
   }
 
   /**
-   * Encodes {@code value} as a signed {@code COMP-3} field, truncating like a COBOL {@code MOVE}.
+   * Encodes an amount as a signed {@code COMP-3} field. A negative zero keeps the {@code D} sign.
    *
-   * @param value the value to store
+   * @param amount the amount to store; must fit the picture
    * @param digits the number of digits declared by the PIC clause ({@code S9(10)V99} is 12)
    * @param scale the number of implied decimal places
    * @return the packed bytes
+   * @throws ArithmeticException if the amount does not fit the picture
+   */
+  public static byte[] encode(SignedAmount amount, int digits, int scale) {
+    return encode(amount.value(), amount.negative(), digits, scale);
+  }
+
+  /**
+   * Encodes a value as {@code PIC S9(digits - scale)V9(scale) COMP-3}.
+   *
+   * @param value the value; must fit the picture
+   * @param digits total digits of the picture
+   * @param scale digits after the implied decimal point
+   * @return the packed bytes
+   * @throws ArithmeticException if the value does not fit the picture
    */
   public static byte[] encode(BigDecimal value, int digits, int scale) {
+    return encode(value, value.signum() < 0, digits, scale);
+  }
+
+  private static byte[] encode(BigDecimal value, boolean negative, int digits, int scale) {
     int length = byteLength(digits);
     int nibbleDigits = length * 2 - 1;
     String text = "0".repeat(nibbleDigits - digits) + Decimals.unscaledDigits(value, digits, scale);
-    int sign = value.signum() < 0 ? NEGATIVE_SIGN : POSITIVE_SIGN;
+    int sign = negative ? NEGATIVE_SIGN : POSITIVE_SIGN;
     byte[] packed = new byte[length];
     for (int i = 0; i < length; i++) {
       int high = text.charAt(i * 2) - '0';

@@ -1,7 +1,6 @@
 package com.carddemo.batch.cbact01c;
 
 import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
 /** Builds a fixed-layout record field by field, checking the final length against the layout. */
@@ -27,7 +26,7 @@ final class RecordBuffer {
   }
 
   /** Appends a signed {@code COMP-3} field. */
-  RecordBuffer packed(BigDecimal value, int digits, int scale) {
+  RecordBuffer packed(SignedAmount value, int digits, int scale) {
     return raw(PackedDecimal.encode(value, digits, scale));
   }
 

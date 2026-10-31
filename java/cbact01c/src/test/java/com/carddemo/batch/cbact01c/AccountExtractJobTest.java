@@ -11,7 +11,6 @@ import com.carddemo.batch.cbact01c.JobOptions.CycleDebitPolicy;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -95,11 +94,11 @@ class AccountExtractJobTest {
     List<AccountArrayRecord.Balance> balances = array.balances();
     assertAll(
         () -> assertEquals(account.currentBalance(), balances.get(0).currentBalance()),
-        () -> assertEquals(new BigDecimal("1005.00"), balances.get(0).currentCycleDebit()),
+        () -> assertEquals(SignedAmount.of("1005.00"), balances.get(0).currentCycleDebit()),
         () -> assertEquals(account.currentBalance(), balances.get(1).currentBalance()),
-        () -> assertEquals(new BigDecimal("1525.00"), balances.get(1).currentCycleDebit()),
+        () -> assertEquals(SignedAmount.of("1525.00"), balances.get(1).currentCycleDebit()),
         () -> assertEquals(SignedAmount.of("-1025.00"), balances.get(2).currentBalance()),
-        () -> assertEquals(new BigDecimal("-2500.00"), balances.get(2).currentCycleDebit()),
+        () -> assertEquals(SignedAmount.of("-2500.00"), balances.get(2).currentCycleDebit()),
         () -> assertEquals(AccountArrayRecord.Balance.INITIAL, balances.get(3)),
         () -> assertEquals(AccountArrayRecord.Balance.INITIAL, balances.get(4)));
     byte[] bytes = array.toBytes();

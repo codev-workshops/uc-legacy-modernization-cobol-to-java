@@ -40,4 +40,17 @@ public record SignedAmount(BigDecimal value, boolean negative) {
   public boolean isZero() {
     return value.signum() == 0;
   }
+
+  /** Amounts are equal when their values compare equal and their signs match; scale is ignored. */
+  @Override
+  public boolean equals(Object other) {
+    return other instanceof SignedAmount that
+        && negative == that.negative
+        && value.compareTo(that.value) == 0;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(value.stripTrailingZeros(), negative);
+  }
 }

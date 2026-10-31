@@ -1,6 +1,5 @@
 package com.carddemo.batch.cbact01c;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -44,9 +43,9 @@ public record AccountArrayRecord(String accountId, List<Balance> balances) {
    * @param currentBalance {@code ARR-ACCT-CURR-BAL PIC S9(10)V99}
    * @param currentCycleDebit {@code ARR-ACCT-CURR-CYC-DEBIT PIC S9(10)V99 COMP-3}
    */
-  public record Balance(SignedAmount currentBalance, BigDecimal currentCycleDebit) {
+  public record Balance(SignedAmount currentBalance, SignedAmount currentCycleDebit) {
 
     /** An entry after {@code INITIALIZE}: both amounts zero. */
-    public static final Balance INITIAL = new Balance(SignedAmount.ZERO, BigDecimal.ZERO);
+    public static final Balance INITIAL = new Balance(SignedAmount.ZERO, SignedAmount.ZERO);
   }
 }

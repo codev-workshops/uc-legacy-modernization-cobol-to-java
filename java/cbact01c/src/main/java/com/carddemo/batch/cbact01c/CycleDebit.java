@@ -1,7 +1,5 @@
 package com.carddemo.batch.cbact01c;
 
-import java.math.BigDecimal;
-
 /**
  * Contents of {@code OUT-ACCT-CURR-CYC-DEBIT PIC S9(10)V99 COMP-3}.
  *
@@ -22,7 +20,7 @@ public sealed interface CycleDebit permits CycleDebit.Value, CycleDebit.LowValue
    *
    * @param amount the packed value
    */
-  record Value(BigDecimal amount) implements CycleDebit {
+  record Value(SignedAmount amount) implements CycleDebit {
     @Override
     public byte[] toBytes() {
       return PackedDecimal.encode(amount, Account.AMOUNT_DIGITS, Account.AMOUNT_SCALE);

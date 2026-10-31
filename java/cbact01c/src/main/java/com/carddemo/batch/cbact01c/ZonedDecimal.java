@@ -52,10 +52,9 @@ public final class ZonedDecimal {
 
   /**
    * Encodes an amount the way a COBOL {@code MOVE} stores it in a signed zoned-decimal field: the
-   * value is aligned on the decimal point, high-order digits that do not fit are truncated, and the
-   * sign is overpunched in its preferred form.
+   * value is aligned on the decimal point and the sign is overpunched in its preferred form.
    *
-   * @param amount the amount to store
+   * @param amount the amount to store; must fit the picture
    * @param digits the total number of digits in the field ({@code S9(10)V99} is 12)
    * @param scale the number of implied decimal places
    * @return the field text, exactly {@code digits} characters long

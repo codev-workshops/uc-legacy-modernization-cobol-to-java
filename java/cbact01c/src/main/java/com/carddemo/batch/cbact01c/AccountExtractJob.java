@@ -6,7 +6,6 @@ import com.carddemo.batch.cbact01c.VariableRecord.BalanceRecord;
 import com.carddemo.batch.cbact01c.VariableRecord.StatusRecord;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -19,15 +18,15 @@ import java.util.Objects;
 public final class AccountExtractJob {
 
   /** Value moved into {@code OUT-ACCT-CURR-CYC-DEBIT} when the account's cycle debit is zero. */
-  static final BigDecimal DEFAULT_CYCLE_DEBIT = new BigDecimal("2525.00");
+  static final SignedAmount DEFAULT_CYCLE_DEBIT = SignedAmount.of("2525.00");
 
   private static final List<Balance> CONSTANT_BALANCES_TAIL =
       List.of(
-          new Balance(SignedAmount.of("-1025.00"), new BigDecimal("-2500.00")),
+          new Balance(SignedAmount.of("-1025.00"), SignedAmount.of("-2500.00")),
           Balance.INITIAL,
           Balance.INITIAL);
-  private static final BigDecimal FIRST_CYCLE_DEBIT = new BigDecimal("1005.00");
-  private static final BigDecimal SECOND_CYCLE_DEBIT = new BigDecimal("1525.00");
+  private static final SignedAmount FIRST_CYCLE_DEBIT = SignedAmount.of("1005.00");
+  private static final SignedAmount SECOND_CYCLE_DEBIT = SignedAmount.of("1525.00");
   private static final String SEPARATOR = "-------------------------------------------------";
 
   private final JobOptions options;
@@ -100,7 +99,7 @@ public final class AccountExtractJob {
     if (account.currentCycleDebit().isZero()) {
       cycleDebit = new CycleDebit.Value(DEFAULT_CYCLE_DEBIT);
     } else if (options.cycleDebitPolicy() == CycleDebitPolicy.COPY_SOURCE) {
-      cycleDebit = new CycleDebit.Value(account.currentCycleDebit().value());
+      cycleDebit = new CycleDebit.Value(account.currentCycleDebit());
     }
     return new AccountOutputRecord(
         account.id(),

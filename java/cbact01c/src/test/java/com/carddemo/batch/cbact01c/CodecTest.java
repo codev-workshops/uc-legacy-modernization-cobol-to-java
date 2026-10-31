@@ -2,6 +2,7 @@ package com.carddemo.batch.cbact01c;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,8 +34,7 @@ class CodecTest {
     "194.00, 00000001940{",
     "-1025.00, 00000010250}",
     "-0.99, 00000000009R",
-    "0, 00000000000{",
-    "12345678901.23, 23456789012C"
+    "0, 00000000000{"
   })
   void encodesZonedDecimalLikeMove(String value, String field) {
     assertEquals(field, ZonedDecimal.encode(SignedAmount.of(value), 12, 2));
@@ -89,5 +89,33 @@ class CodecTest {
     assertArrayEquals(
         HexFormat.of().parseHex("0000000252500C"),
         PackedDecimal.encode(new BigDecimal("2525.00"), 12, 2));
+  }
+
+  @Test
+  void amountsCompareByValueNotScale() {
+    assertEquals(SignedAmount.of("0"), SignedAmount.of("0.00"));
+    assertEquals(SignedAmount.of("2525"), SignedAmount.of("2525.00"));
+    assertEquals(SignedAmount.of("2525").hashCode(), SignedAmount.of("2525.000").hashCode());
+    assertEquals(SignedAmount.ZERO, ZonedDecimal.decode("00000000000{", 2));
+    assertNotEquals(SignedAmount.ZERO, ZonedDecimal.decode("00000000000}", 2));
+  }
+
+  @Test
+  void rejectsValuesThatDoNotFitThePicture() {
+    SignedAmount tooBig = SignedAmount.of("10000000000.00");
+    SignedAmount tooPrecise = SignedAmount.of("1.005");
+    assertThrows(ArithmeticException.class, () -> ZonedDecimal.encode(tooBig, 12, 2));
+    assertThrows(ArithmeticException.class, () -> ZonedDecimal.encode(tooPrecise, 12, 2));
+    assertThrows(ArithmeticException.class, () -> PackedDecimal.encode(tooBig, 12, 2));
+    assertThrows(ArithmeticException.class, () -> PackedDecimal.encode(tooPrecise, 12, 2));
+    assertEquals("00000000100{", ZonedDecimal.encode(SignedAmount.of("10.0000"), 12, 2));
+  }
+
+  @Test
+  void packedNegativeZeroKeepsItsSign() {
+    SignedAmount negativeZero = ZonedDecimal.decode("00000000000}", 2);
+    assertEquals(
+        "0000000000000D",
+        HexFormat.of().withUpperCase().formatHex(PackedDecimal.encode(negativeZero, 12, 2)));
   }
 }
