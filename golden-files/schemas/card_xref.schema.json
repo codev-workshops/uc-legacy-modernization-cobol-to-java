@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "card_xref (CVACT03Y.cpy)",
+  "type": "object",
+  "properties": {
+    "XREF-CARD-NUM": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 0
+    },
+    "XREF-CUST-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 16
+    },
+    "XREF-ACCT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 99999999999,
+      "x-cobol-pic": "9(11)",
+      "x-cobol-offset": 25
+    }
+  },
+  "required": [
+    "XREF-ACCT-ID",
+    "XREF-CARD-NUM",
+    "XREF-CUST-ID"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,419 @@
+{
+  "summary": {
+    "total": 51,
+    "passed": 51,
+    "failed": []
+  },
+  "checks": [
+    {
+      "check_id": "MASTER.card.fk.CARD-ACCT-ID",
+      "job": "MASTER",
+      "description": "every card.CARD-ACCT-ID exists in account.ACCT-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.card_xref.fk.XREF-CARD-NUM",
+      "job": "MASTER",
+      "description": "every card_xref.XREF-CARD-NUM exists in card.CARD-NUM",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.card_xref.fk.XREF-ACCT-ID",
+      "job": "MASTER",
+      "description": "every card_xref.XREF-ACCT-ID exists in account.ACCT-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.card_xref.fk.XREF-CUST-ID",
+      "job": "MASTER",
+      "description": "every card_xref.XREF-CUST-ID exists in customer.CUST-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.category_balance.fk.TRANCAT-ACCT-ID",
+      "job": "MASTER",
+      "description": "every category_balance.TRANCAT-ACCT-ID exists in account.ACCT-ID",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.transaction_category.fk.TRAN-TYPE-CD",
+      "job": "MASTER",
+      "description": "every transaction_category.TRAN-TYPE-CD exists in transaction_type.TRAN-TYPE",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.account.domain.ACCT-ACTIVE-STATUS",
+      "job": "MASTER",
+      "description": "ACCT-ACTIVE-STATUS within allowed values",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.card.domain.CARD-ACTIVE-STATUS",
+      "job": "MASTER",
+      "description": "CARD-ACTIVE-STATUS within allowed values",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.daily_transaction.domain.DALYTRAN-TYPE-CD",
+      "job": "MASTER",
+      "description": "DALYTRAN-TYPE-CD within allowed values",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "MASTER.daily_transaction.fk.type-category",
+      "job": "MASTER",
+      "description": "daily type/category exists in TRANCATG",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "ACCTFILE.account.count",
+      "job": "ACCTFILE",
+      "description": "account record count",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "ACCTFILE.account.unique-key",
+      "job": "ACCTFILE",
+      "description": "account key ACCT-ID is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "ACCTFILE.account.sum.ACCT-CURR-BAL",
+      "job": "ACCTFILE",
+      "description": "sum of ACCT-CURR-BAL",
+      "passed": true,
+      "expected": "12269.00",
+      "actual": "12269.00"
+    },
+    {
+      "check_id": "ACCTFILE.account.sum.ACCT-CREDIT-LIMIT",
+      "job": "ACCTFILE",
+      "description": "sum of ACCT-CREDIT-LIMIT",
+      "passed": true,
+      "expected": "233711.00",
+      "actual": "233711.00"
+    },
+    {
+      "check_id": "ACCTFILE.account.sum.ACCT-CASH-CREDIT-LIMIT",
+      "job": "ACCTFILE",
+      "description": "sum of ACCT-CASH-CREDIT-LIMIT",
+      "passed": true,
+      "expected": "122148.00",
+      "actual": "122148.00"
+    },
+    {
+      "check_id": "ACCTFILE.account.sum.ACCT-CURR-CYC-CREDIT",
+      "job": "ACCTFILE",
+      "description": "sum of ACCT-CURR-CYC-CREDIT",
+      "passed": true,
+      "expected": "0.00",
+      "actual": "0.00"
+    },
+    {
+      "check_id": "ACCTFILE.account.sum.ACCT-CURR-CYC-DEBIT",
+      "job": "ACCTFILE",
+      "description": "sum of ACCT-CURR-CYC-DEBIT",
+      "passed": true,
+      "expected": "0.00",
+      "actual": "0.00"
+    },
+    {
+      "check_id": "CARDFILE.card.count",
+      "job": "CARDFILE",
+      "description": "card record count",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "CARDFILE.card.unique-key",
+      "job": "CARDFILE",
+      "description": "card key CARD-NUM is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "CUSTFILE.customer.count",
+      "job": "CUSTFILE",
+      "description": "customer record count",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "CUSTFILE.customer.unique-key",
+      "job": "CUSTFILE",
+      "description": "customer key CUST-ID is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "XREFFILE.card_xref.count",
+      "job": "XREFFILE",
+      "description": "card_xref record count",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "XREFFILE.card_xref.unique-key",
+      "job": "XREFFILE",
+      "description": "card_xref key XREF-CARD-NUM is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "TRANTYPE.transaction_type.count",
+      "job": "TRANTYPE",
+      "description": "transaction_type record count",
+      "passed": true,
+      "expected": 7,
+      "actual": 7
+    },
+    {
+      "check_id": "TRANTYPE.transaction_type.unique-key",
+      "job": "TRANTYPE",
+      "description": "transaction_type key TRAN-TYPE is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "TRANCATG.transaction_category.count",
+      "job": "TRANCATG",
+      "description": "transaction_category record count",
+      "passed": true,
+      "expected": 18,
+      "actual": 18
+    },
+    {
+      "check_id": "TRANCATG.transaction_category.unique-key",
+      "job": "TRANCATG",
+      "description": "transaction_category key TRAN-TYPE-CD+TRAN-CAT-CD is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "DISCGRP.disclosure_group.count",
+      "job": "DISCGRP",
+      "description": "disclosure_group record count",
+      "passed": true,
+      "expected": 51,
+      "actual": 51
+    },
+    {
+      "check_id": "DISCGRP.disclosure_group.unique-key",
+      "job": "DISCGRP",
+      "description": "disclosure_group key DIS-ACCT-GROUP-ID+DIS-TRAN-TYPE-CD+DIS-TRAN-CAT-CD is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "DISCGRP.disclosure_group.sum.DIS-INT-RATE",
+      "job": "DISCGRP",
+      "description": "sum of DIS-INT-RATE",
+      "passed": true,
+      "expected": "375.00",
+      "actual": "375.00"
+    },
+    {
+      "check_id": "TCATBALF.category_balance.count",
+      "job": "TCATBALF",
+      "description": "category_balance record count",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "TCATBALF.category_balance.unique-key",
+      "job": "TCATBALF",
+      "description": "category_balance key TRANCAT-ACCT-ID+TRANCAT-TYPE-CD+TRANCAT-CD is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "TCATBALF.category_balance.sum.TRAN-CAT-BAL",
+      "job": "TCATBALF",
+      "description": "sum of TRAN-CAT-BAL",
+      "passed": true,
+      "expected": "0.00",
+      "actual": "0.00"
+    },
+    {
+      "check_id": "POSTTRAN.count.in=posted+rejected",
+      "job": "POSTTRAN",
+      "description": "DALYTRAN records = TRANSACT writes + DALYREJS writes",
+      "passed": true,
+      "expected": 300,
+      "actual": 300
+    },
+    {
+      "check_id": "POSTTRAN.amount.in=posted+rejected",
+      "job": "POSTTRAN",
+      "description": "sum DALYTRAN-AMT = posted amount + rejected amount",
+      "passed": true,
+      "expected": "104801.54",
+      "actual": "104801.54"
+    },
+    {
+      "check_id": "POSTTRAN.acct.balance-delta",
+      "job": "POSTTRAN",
+      "description": "delta sum ACCT-CURR-BAL = posted amount",
+      "passed": true,
+      "expected": "77954.70",
+      "actual": "77954.70"
+    },
+    {
+      "check_id": "POSTTRAN.acct.cycle-credit-delta",
+      "job": "POSTTRAN",
+      "description": "delta sum ACCT-CURR-CYC-CREDIT = posted amounts >= 0",
+      "passed": true,
+      "expected": "102353.99",
+      "actual": "102353.99"
+    },
+    {
+      "check_id": "POSTTRAN.acct.cycle-debit-delta",
+      "job": "POSTTRAN",
+      "description": "delta sum ACCT-CURR-CYC-DEBIT = posted amounts < 0",
+      "passed": true,
+      "expected": "-24399.29",
+      "actual": "-24399.29"
+    },
+    {
+      "check_id": "POSTTRAN.tcatbal.balance-delta",
+      "job": "POSTTRAN",
+      "description": "delta sum TRAN-CAT-BAL = posted amount",
+      "passed": true,
+      "expected": "77954.70",
+      "actual": "77954.70"
+    },
+    {
+      "check_id": "POSTTRAN.tcatbal.rows-created",
+      "job": "POSTTRAN",
+      "description": "new TCATBALF rows = new (account, type, category) keys",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "POSTTRAN.acct.count-unchanged",
+      "job": "POSTTRAN",
+      "description": "ACCTFILE record count unchanged",
+      "passed": true,
+      "expected": 50,
+      "actual": 50
+    },
+    {
+      "check_id": "POSTTRAN.reject.reason-codes",
+      "job": "POSTTRAN",
+      "description": "every reject has reason 100/101/102/103/109",
+      "passed": true,
+      "expected": "{100,101,102,103,109}",
+      "actual": {
+        "102": 38
+      }
+    },
+    {
+      "check_id": "POSTTRAN.return-code",
+      "job": "POSTTRAN",
+      "description": "RC=4 when any reject, else 0",
+      "passed": true,
+      "expected": 4,
+      "actual": 4
+    },
+    {
+      "check_id": "POSTTRAN.transact.unique-key",
+      "job": "POSTTRAN",
+      "description": "transact key TRAN-ID is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "INTCALC.acct.balance-delta",
+      "job": "INTCALC",
+      "description": "delta sum ACCT-CURR-BAL = interest of updated accounts",
+      "passed": true,
+      "expected": "1260.39",
+      "actual": "1260.39"
+    },
+    {
+      "check_id": "INTCALC.acct.cycle-reset",
+      "job": "INTCALC",
+      "description": "updated accounts have cycle credit/debit = 0",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "INTCALC.acct.untouched",
+      "job": "INTCALC",
+      "description": "accounts without category balances are unchanged",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "INTCALC.tran.id-format",
+      "job": "INTCALC",
+      "description": "TRAN-ID = PARM-DATE(10) + 6-digit suffix",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "INTCALC.tran.type",
+      "job": "INTCALC",
+      "description": "interest transactions are type 01 / category 05 / source System",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "INTCALC.interest_tran.unique-key",
+      "job": "INTCALC",
+      "description": "interest_tran key TRAN-ID is unique",
+      "passed": true,
+      "expected": [],
+      "actual": []
+    },
+    {
+      "check_id": "INTCALC.tran.count",
+      "job": "INTCALC",
+      "description": "one interest transaction per category balance with a non-zero rate",
+      "passed": true,
+      "expected": "<= 100",
+      "actual": 50
+    }
+  ]
+}

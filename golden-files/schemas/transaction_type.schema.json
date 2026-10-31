@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "transaction_type (CVTRA03Y.cpy)",
+  "type": "object",
+  "properties": {
+    "TRAN-TYPE": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 0
+    },
+    "TRAN-TYPE-DESC": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 2
+    }
+  },
+  "required": [
+    "TRAN-TYPE",
+    "TRAN-TYPE-DESC"
+  ],
+  "additionalProperties": false
+}

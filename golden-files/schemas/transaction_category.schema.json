@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "transaction_category (CVTRA04Y.cpy)",
+  "type": "object",
+  "properties": {
+    "TRAN-TYPE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 0
+    },
+    "TRAN-CAT-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9999,
+      "x-cobol-pic": "9(04)",
+      "x-cobol-offset": 2
+    },
+    "TRAN-CAT-TYPE-DESC": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 6
+    }
+  },
+  "required": [
+    "TRAN-CAT-CD",
+    "TRAN-CAT-TYPE-DESC",
+    "TRAN-TYPE-CD"
+  ],
+  "additionalProperties": false
+}

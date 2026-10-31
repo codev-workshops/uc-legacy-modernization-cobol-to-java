@@ -1,0 +1,68 @@
+{
+  "dataset": "transaction_type",
+  "source_file": "app/data/ASCII/trantype.txt",
+  "source_sha256": "a7e07744af401faf17868861601829f46b2430a06a8b1984a7858025e125fb68",
+  "copybook": "app/cpy/CVTRA03Y.cpy",
+  "vsam_dataset": "AWS.M2.CARDDEMO.TRANTYPE.VSAM.KSDS",
+  "record_length": 60,
+  "key": [
+    "TRAN-TYPE"
+  ],
+  "layout": [
+    {
+      "name": "TRAN-TYPE",
+      "offset": 0,
+      "length": 2,
+      "pic": "X(02)",
+      "usage": "DISPLAY",
+      "kind": "alphanumeric",
+      "scale": 0,
+      "signed": false
+    },
+    {
+      "name": "TRAN-TYPE-DESC",
+      "offset": 2,
+      "length": 50,
+      "pic": "X(50)",
+      "usage": "DISPLAY",
+      "kind": "alphanumeric",
+      "scale": 0,
+      "signed": false
+    }
+  ],
+  "control_totals": {
+    "record_count": 7,
+    "sums": {}
+  },
+  "parse_issues": [],
+  "records": [
+    {
+      "TRAN-TYPE": "01",
+      "TRAN-TYPE-DESC": "Purchase"
+    },
+    {
+      "TRAN-TYPE": "02",
+      "TRAN-TYPE-DESC": "Payment"
+    },
+    {
+      "TRAN-TYPE": "03",
+      "TRAN-TYPE-DESC": "Credit"
+    },
+    {
+      "TRAN-TYPE": "04",
+      "TRAN-TYPE-DESC": "Authorization"
+    },
+    {
+      "TRAN-TYPE": "05",
+      "TRAN-TYPE-DESC": "Refund"
+    },
+    {
+      "TRAN-TYPE": "06",
+      "TRAN-TYPE-DESC": "Reversal"
+    },
+    {
+      "TRAN-TYPE": "07",
+      "TRAN-TYPE-DESC": "Adjustment"
+    }
+  ]
+}

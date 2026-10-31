@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "daily_transaction (CVTRA06Y.cpy)",
+  "type": "object",
+  "properties": {
+    "DALYTRAN-ID": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 0
+    },
+    "DALYTRAN-TYPE-CD": {
+      "type": "string",
+      "maxLength": 2,
+      "x-cobol-pic": "X(02)",
+      "x-cobol-offset": 16
+    },
+    "DALYTRAN-CAT-CD": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 9999,
+      "x-cobol-pic": "9(04)",
+      "x-cobol-offset": 18
+    },
+    "DALYTRAN-SOURCE": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 22
+    },
+    "DALYTRAN-DESC": {
+      "type": "string",
+      "maxLength": 100,
+      "x-cobol-pic": "X(100)",
+      "x-cobol-offset": 32
+    },
+    "DALYTRAN-AMT": {
+      "type": "string",
+      "pattern": "^-?\\d{1,9}\\.\\d{2}$",
+      "x-cobol-pic": "S9(09)V99",
+      "x-cobol-offset": 132
+    },
+    "DALYTRAN-MERCHANT-ID": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "x-cobol-pic": "9(09)",
+      "x-cobol-offset": 143
+    },
+    "DALYTRAN-MERCHANT-NAME": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 152
+    },
+    "DALYTRAN-MERCHANT-CITY": {
+      "type": "string",
+      "maxLength": 50,
+      "x-cobol-pic": "X(50)",
+      "x-cobol-offset": 202
+    },
+    "DALYTRAN-MERCHANT-ZIP": {
+      "type": "string",
+      "maxLength": 10,
+      "x-cobol-pic": "X(10)",
+      "x-cobol-offset": 252
+    },
+    "DALYTRAN-CARD-NUM": {
+      "type": "string",
+      "maxLength": 16,
+      "x-cobol-pic": "X(16)",
+      "x-cobol-offset": 262
+    },
+    "DALYTRAN-ORIG-TS": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 278
+    },
+    "DALYTRAN-PROC-TS": {
+      "type": "string",
+      "maxLength": 26,
+      "x-cobol-pic": "X(26)",
+      "x-cobol-offset": 304
+    }
+  },
+  "required": [
+    "DALYTRAN-AMT",
+    "DALYTRAN-CARD-NUM",
+    "DALYTRAN-CAT-CD",
+    "DALYTRAN-DESC",
+    "DALYTRAN-ID",
+    "DALYTRAN-MERCHANT-CITY",
+    "DALYTRAN-MERCHANT-ID",
+    "DALYTRAN-MERCHANT-NAME",
+    "DALYTRAN-MERCHANT-ZIP",
+    "DALYTRAN-ORIG-TS",
+    "DALYTRAN-PROC-TS",
+    "DALYTRAN-SOURCE",
+    "DALYTRAN-TYPE-CD"
+  ],
+  "additionalProperties": false
+}
