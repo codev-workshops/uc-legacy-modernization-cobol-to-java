@@ -6,3 +6,7 @@ batch-app/markers/*
 /.idea/
 .DS_Store
 **/.DS_Store
+
+# GnuCOBOL local build/run output
+gnucobol/build/
+gnucobol/work/
